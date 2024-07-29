@@ -14,7 +14,7 @@ class install_sample_schema extends \phpbb\db\migration\migration
 {
 	public function effectively_installed()
 	{
-		return $this->db_tools->sql_column_exists($this->table_prefix . 'users', 'user_postreact');
+		return $this->db_tools->sql_table_exists($this->table_prefix . 'sebo_postreact_table');
 	}
 
 	public static function depends_on()
@@ -48,16 +48,33 @@ class install_sample_schema extends \phpbb\db\migration\migration
 				$this->table_prefix . 'sebo_postreact_table'	=> [
 					'COLUMNS'		=> [
 						'postreact_id'			=> ['UINT', null, 'auto_increment'],
-						'postreact_name'			=> ['VCHAR:255', ''],
+						'topic_id'				=> ['UINT', 0],
+						'post_id'				=> ['UINT', 0],
+						'user_id'				=> ['UINT', 0],
+						'icon_id'				=> ['UINT', 0],
+						'react_time'			=> ['UINT:11', 0],
 					],
 					'PRIMARY_KEY'	=> 'postreact_id',
 				],
-			],
-			'add_columns'	=> [
-				$this->table_prefix . 'users'			=> [
-					'user_postreact'				=> ['UINT', 0],
+				$this->table_prefix . 'sebo_postreact_icon'	=> [
+					'COLUMNS'		=> [
+						'id'			=> ['UINT', null, 'auto_increment'],
+						'icon_id'			=> ['UINT', 0],
+						'icon_url'			=> ['VCHAR:200', ''],
+						'icon_width'		=> ['UINT', 0],
+						'icon_height'		=> ['UINT', 0],
+						'icon_alt'			=> ['VCHAR:100', ''],
+						'status'			=> ['UINT:1', 0],
+						'active'			=> ['UINT:1', 0],
+					],
+					'PRIMARY_KEY'	=> 'id',
 				],
 			],
+			//'add_columns'	=> [
+			//	$this->table_prefix . 'users'			=> [
+			//		'user_postreact'				=> ['UINT', 0],
+			//	],
+			//],
 		];
 	}
 
@@ -84,13 +101,14 @@ class install_sample_schema extends \phpbb\db\migration\migration
 	public function revert_schema()
 	{
 		return [
-			'drop_columns'	=> [
-				$this->table_prefix . 'users'			=> [
-					'user_postreact',
-				],
-			],
+			//'drop_columns'	=> [
+			//	$this->table_prefix . 'users'			=> [
+			//		'user_postreact',
+			//	],
+			//],
 			'drop_tables'		=> [
 				$this->table_prefix . 'sebo_postreact_table',
+				$this->table_prefix . 'sebo_postreact_icon',
 			],
 		];
 	}

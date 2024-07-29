@@ -14,7 +14,7 @@ class install_acp_module extends \phpbb\db\migration\migration
 {
 	public function effectively_installed()
 	{
-		return isset($this->config['sebo_postreact_goodbye']);
+		return isset($this->config['sebo_postreact']);
 	}
 
 	public static function depends_on()
@@ -25,7 +25,6 @@ class install_acp_module extends \phpbb\db\migration\migration
 	public function update_data()
 	{
 		return [
-			//['config.add', ['sebo_postreact_goodbye', 0]],
 
 			['module.add', [
 				'acp',

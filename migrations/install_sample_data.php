@@ -14,12 +14,12 @@ class install_sample_data extends \phpbb\db\migration\migration
 {
 	public function effectively_installed()
 	{
-		return $this->config->offsetExists('sebo_postreact_sample_int');
+		return $this->db_tools->sql_table_exists($this->table_prefix . 'sebo_postreact_table');
 	}
 
 	public static function depends_on()
 	{
-		return ['\phpbb\db\migration\data\v320\v320'];
+		return ['\sebo\postreact\migration\install_sample_schema'];
 	}
 
 	/**
@@ -49,34 +49,33 @@ class install_sample_data extends \phpbb\db\migration\migration
 	{
 		return [
 			// Add new config table settings
-			['config.add', ['sebo_postreact_sample_int', 0]],
-			['config.add', ['sebo_postreact_sample_str', '']],
-
-			// Add a new config_text table setting
-			['config_text.add', ['sebo_postreact_sample', '']],
+			['config.add', ['sebo_postreact', 0]],
 
 			// Add new permissions
-			['permission.add', ['a_new_sebo_postreact']], // New admin permission
-			['permission.add', ['m_new_sebo_postreact']], // New moderator permission
-			['permission.add', ['u_new_sebo_postreact']], // New user permission
-
-			// ['permission.add', ['a_copy', true, 'a_existing']], // New admin permission a_copy, copies permission settings from a_existing
+			['permission.add', ['u_new_sebo_postreact']], // New user permission - need only u_
+			['permission.add', ['u_new_sebo_postreact_view']], // New user permission view - need only u_
 
 			// Set our new permissions
-			['permission.permission_set', ['ROLE_ADMIN_FULL', 'a_new_sebo_postreact']], // Give ROLE_ADMIN_FULL a_new_sebo_postreact permission
-			['permission.permission_set', ['ROLE_MOD_FULL', 'm_new_sebo_postreact']], // Give ROLE_MOD_FULL m_new_sebo_postreact permission
-			['permission.permission_set', ['ROLE_USER_FULL', 'u_new_sebo_postreact']], // Give ROLE_USER_FULL u_new_sebo_postreact permission
-			['permission.permission_set', ['ROLE_USER_STANDARD', 'u_new_sebo_postreact']], // Give ROLE_USER_STANDARD u_new_sebo_postreact permission
-			['permission.permission_set', ['REGISTERED', 'u_new_sebo_postreact', 'group']], // Give REGISTERED group u_new_sebo_postreact permission
+			['permission.permission_set', ['ROLE_USER_FULL', 'u_new_sebo_postreact', 1]], // Give ROLE_USER_FULL u_new_sebo_postreact permission
+			['permission.permission_set', ['ROLE_USER_STANDARD', 'u_new_sebo_postreact', 1]], // Give ROLE_USER_STANDARD u_new_sebo_postreact permission
+			['permission.permission_set', ['REGISTERED', 'u_new_sebo_postreact', 'group', 1]], // Give REGISTERED group u_new_sebo_postreact permission Y
+			['permission.permission_set', ['ADMINISTRATORS', 'u_new_sebo_postreact', 'group', 1]],
+			['permission.permission_set', ['GLOBAL_MODERATORS', 'u_new_sebo_postreact', 'group', 1]],
+			['permission.permission_set', ['NEWLY_REGISTERED', 'u_new_sebo_postreact', 'group', false]], // N
+			['permission.permission_set', ['BOTS', 'u_new_sebo_postreact', 'group', false]],
 			['permission.permission_set', ['REGISTERED_COPPA', 'u_new_sebo_postreact', 'group', false]], // Set u_new_sebo_postreact to never for REGISTERED_COPPA
-
-			// Add new permission roles
-			['permission.role_add', ['postreact admin role', 'a_', 'a new role for admins']], // New role "postreact admin role"
-			['permission.role_add', ['postreact moderator role', 'm_', 'a new role for moderators']], // New role "postreact moderator role"
-			['permission.role_add', ['postreact user role', 'u_', 'a new role for users']], // New role "postreact user role"
+			// All view
+			['permission.permission_set', ['ROLE_USER_FULL', 'u_new_sebo_postreact_view', 1]],
+			['permission.permission_set', ['ROLE_USER_STANDARD', 'u_new_sebo_postreact_view', 1]],
+			['permission.permission_set', ['REGISTERED', 'u_new_sebo_postreact_view', 'group', 1]],
+			['permission.permission_set', ['ADMINISTRATORS', 'u_new_sebo_postreact_view', 'group', 1]],
+			['permission.permission_set', ['GLOBAL_MODERATORS', 'u_new_sebo_postreact_view', 'group', 1]],
+			['permission.permission_set', ['NEWLY_REGISTERED', 'u_new_sebo_postreact_view', 'group', 1]],
+			['permission.permission_set', ['BOTS', 'u_new_sebo_postreact_view', 'group', 1]],
+			['permission.permission_set', ['REGISTERED_COPPA', 'u_new_sebo_postreact_view', 'group', 1]], 
 
 			// Call a custom callable function to perform more complex operations.
-			['custom', [[$this, 'sample_callable_install']]],
+			['custom', [[$this, 'table_pr_install']]],
 		];
 	}
 
@@ -111,7 +110,12 @@ class install_sample_data extends \phpbb\db\migration\migration
 	public function revert_data()
 	{
 		return [
-			['custom', [[$this, 'sample_callable_uninstall']]],
+			['config.remove', ['sebo_postreact', 0]],
+			
+			['permission.remove', ['u_new_sebo_postreact']], // New user permission
+			['permission.remove', ['u_new_sebo_postreact_view']],
+			
+			['custom', [[$this, 'table_pr_uninstall']]],
 		];
 	}
 
@@ -119,16 +123,171 @@ class install_sample_data extends \phpbb\db\migration\migration
 	 * A custom function for making more complex database changes
 	 * during extension installation. Must be declared as public.
 	 */
-	public function sample_callable_install()
+	public function table_pr_install()
 	{
-		// Run some SQL queries on the database
+		
+		$data = [
+				[
+					'id'            => 1,
+					'icon_id'       => 1,
+					'icon_url'      => 'like.png',
+					'icon_width'    => 32,
+					'icon_height'   => 32,
+					'icon_alt'      => 'Like',
+					'status'        => '1',
+					'active'        => '0',
+				],
+				[
+					'id'            => 2,
+					'icon_id'       => 2,
+					'icon_url'      => 'heart.png',
+					'icon_width'    => 32,
+					'icon_height'   => 32,
+					'icon_alt'      => 'Heart',
+					'status'        => '1',
+					'active'        => '0',
+				],
+				[
+					'id'            => 3,
+					'icon_id'       => 3,
+					'icon_url'      => 'laugh.png',
+					'icon_width'    => 32,
+					'icon_height'   => 32,
+					'icon_alt'      => 'Laught',
+					'status'        => '1',
+					'active'        => '0',
+				],
+				[
+					'id'            => 4,
+					'icon_id'       => 4,
+					'icon_url'      => 'sad.png',
+					'icon_width'    => 32,
+					'icon_height'   => 32,
+					'icon_alt'      => 'Sad',
+					'status'        => '1',
+					'active'        => '0',
+				],
+				[
+					'id'            => 5,
+					'icon_id'       => 5,
+					'icon_url'      => 'angry.png',
+					'icon_width'    => 32,
+					'icon_height'   => 32,
+					'icon_alt'      => 'Angry',
+					'status'        => '1',
+					'active'        => '0',
+				],
+				[
+					'id'            => 6,
+					'icon_id'       => 6,
+					'icon_url'      => 'surprise.png',
+					'icon_width'    => 32,
+					'icon_height'   => 32,
+					'icon_alt'      => 'Suprise',
+					'status'        => '1',
+					'active'        => '0',
+				],
+				[
+					'id'            => 7,
+					'icon_id'       => 7,
+					'icon_url'      => 'sunglasses.png',
+					'icon_width'    => 32,
+					'icon_height'   => 32,
+					'icon_alt'      => 'Cool',
+					'status'        => '1',
+					'active'        => '0',
+				],
+				[
+					'id'            => 8,
+					'icon_id'       => 8,
+					'icon_url'      => 'love.png',
+					'icon_width'    => 32,
+					'icon_height'   => 32,
+					'icon_alt'      => 'Love',
+					'status'        => '0',
+					'active'        => '0',
+				],
+				[
+					'id'            => 9,
+					'icon_id'       => 9,
+					'icon_url'      => 'worker.png',
+					'icon_width'    => 32,
+					'icon_height'   => 32,
+					'icon_alt'      => 'Lavoro',
+					'status'        => '1',
+					'active'        => '0',
+				],
+				[
+					'id'            => 10,
+					'icon_id'       => 10,
+					'icon_url'      => 'lol.png',
+					'icon_width'    => 32,
+					'icon_height'   => 32,
+					'icon_alt'      => 'LOL',
+					'status'        => '1',
+					'active'        => '0',
+				],
+				[
+					'id'            => 11,
+					'icon_id'       => 11,
+					'icon_url'      => 'party.png',
+					'icon_width'    => 32,
+					'icon_height'   => 32,
+					'icon_alt'      => 'Party',
+					'status'        => '1',
+					'active'        => '0',
+				],
+				[
+					'id'            => 12,
+					'icon_id'       => 12,
+					'icon_url'      => 'mechanic.png',
+					'icon_width'    => 32,
+					'icon_height'   => 32,
+					'icon_alt'      => 'Mechanic',
+					'status'        => '1',
+					'active'        => '0',
+				],
+				[
+					'id'            => 13,
+					'icon_id'       => 13,
+					'icon_url'      => 'cry.png',
+					'icon_width'    => 32,
+					'icon_height'   => 32,
+					'icon_alt'      => 'Cry',
+					'status'        => '1',
+					'active'        => '0',
+				],
+				[
+					'id'            => 14,
+					'icon_id'       => 14,
+					'icon_url'      => 'censored.png',
+					'icon_width'    => 32,
+					'icon_height'   => 32,
+					'icon_alt'      => 'Censored',
+					'status'        => '1',
+					'active'        => '0',
+				],
+				[
+					'id'            => 15,
+					'icon_id'       => 15,
+					'icon_url'      => 'waving.webp',
+					'icon_width'    => 32,
+					'icon_height'   => 32,
+					'icon_alt'      => 'Hello!',
+					'status'        => '1',
+					'active'        => '0',
+				],
+		];
+		
+		$this->db->sql_multi_insert($this->table_prefix . 'sebo_postreact_icon', $data);
+
 	}
 
 	/**
 	 * A custom function for making more complex database changes
 	 * during extension un-installation. Must be declared as public.
 	 */
-	public function sample_callable_uninstall()
+	public function table_pr_uninstall()
 	{
 		// Run some SQL queries on the database
 	}
