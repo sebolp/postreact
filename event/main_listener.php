@@ -29,6 +29,7 @@ class main_listener implements EventSubscriberInterface
 			'core.viewtopic_modify_page_title'			=> 'write_db',
 			'core.viewforum_modify_page_title'			=> 'grab_icons',
 			'core.viewforum_modify_topicrow' 			=> 'viewforum_edit',
+			'core.search_modify_tpl_ary'				=> 'search_edit',
 			'core.permissions'							=> 'add_permissions',
 		];
 	}
@@ -95,7 +96,7 @@ class main_listener implements EventSubscriberInterface
 			// do it
 			$result_ico = $this->db->sql_query($sql_ico);
 			$this->data_ico = [];
-
+			
 			if ($result_ico) {
 				while ($my_icons = $this->db->sql_fetchrow($result_ico)) {
 					$this->data_ico[] = $my_icons;
@@ -110,6 +111,14 @@ class main_listener implements EventSubscriberInterface
 	{
 		$postrow = $event['postrow'];
 		$row = $event['row'];
+		// ##
+		// check permissions
+		if($this->auth->acl_get('u_new_sebo_postreact') == '1'){
+			// granted
+		}
+		else if ($this->auth->acl_get('u_new_sebo_postreact_view') == '0'){
+			// return;
+		}
 		
 		// ##
 		//
@@ -147,13 +156,31 @@ class main_listener implements EventSubscriberInterface
 		}
 		
 		// ##
+		// mark your choise
+		$check = [];
+		$user_id_logged = $this->user->data['user_id'];
+		$sql_check = "SELECT `post_id`, `icon_id` FROM `" . $this->table_prefix . "sebo_postreact_table` WHERE `user_id` = '$user_id_logged' AND `post_id` = '$my_pid'";
+		$result_check = $this->db->sql_query($sql_check);
+
+		while ($row_check = $this->db->sql_fetchrow($result_check)) {
+			$check[] = [
+				'post_id' => $row_check['post_id'],
+				'icon_id' => $row_check['icon_id']
+			];
+		}
+		$this->db->sql_freeresult($result_check);
+		
+		// ##
 		// template
 		$event['post_row'] = array_merge($event['post_row'], array(
+				'PERM_W' 		=>$this->auth->acl_get('u_new_sebo_postreact'),
+				'PERM_R'		=>$this->auth->acl_get('u_new_sebo_postreact_view'),
 				'N_REACTIONS' 	=> $total_match_count,
 				'ICONS' 		=> $this->data_ico,
 				'MY_PID' 		=> (int)$my_pid,
 				'MY_TID' 		=> (int)$my_tid,
-				'ICON_COUNTS' 	=> $icon_counts
+				'ICON_COUNTS' 	=> $icon_counts,
+				'ICON_CHECK' 	=> $check
 		));
 		
 	}
@@ -170,31 +197,60 @@ class main_listener implements EventSubscriberInterface
 
 		if ($user_id_logged !== null && $user_id_logged !== 1){
 			if ($my_icon_id !== null && $my_post_id !== null && $my_topic_id !== null && $my_icon_id !== 0 && $my_post_id !== 0 && $my_topic_id !== 0 && is_numeric($my_topic_id) && is_numeric($my_icon_id) && is_numeric($my_post_id)) {
-				$sql = "INSERT INTO `" . $this->table_prefix . "sebo_postreact_table` (`postreact_id`, `topic_id`, `post_id`, `user_id`, `icon_id`, `react_time`) VALUES (NULL, '$my_topic_id', '$my_post_id', '$user_id_logged', '$my_icon_id', '$r_time');";
-				$result = $this->db->sql_query($sql);
-				if($result){
-					echo '	<script>
-								alert("'.$this->user->lang('INSERTED_VALUE').'");
-								window.location.replace("viewtopic.php?p='.$my_post_id.'#p='.$my_post_id.'");
-							</script>';
-					} else {
-					echo '<script>
-							alert("'.$this->user->lang('NOT_INSERTED_VALUE').'");
-							window.location.replace("viewtopic.php?p='.$my_post_id.'#p='.$my_post_id.'");
-						</script>';
-					}
-				$this->db->sql_freeresult($result);
+				
+				// ##
+				// check if reacted
+				$sql_check = "SELECT COUNT(*) as count FROM `" . $this->table_prefix . "sebo_postreact_table` WHERE `user_id` = '$user_id_logged' AND `post_id` = '$my_post_id'";
+				$result_check = $this->db->sql_query($sql_check);
+				$row_check = $this->db->sql_fetchrow($result_check);
+
+				if ($row_check['count'] > 0) {
+					// ##
+					// delete if yes
+					$sql = "DELETE FROM `" . $this->table_prefix . "sebo_postreact_table` WHERE `user_id` = '$user_id_logged' AND `post_id` = '$my_post_id';";
+					$result = $this->db->sql_query($sql);
+					if($result){
+						$message = $this->user->lang('DELETED_VALUE') . '<br /><br />' . $this->user->lang('RETURN_FORUM', '<a href="' . append_sid("viewtopic.php?p={$my_post_id}#p{$my_post_id}") . '">', '</a>');
+						meta_refresh(2, append_sid("viewtopic.php?p={$my_post_id}#p{$my_post_id}"));
+						trigger_error($message);
+						}
+					
+				} else {
+					// ##
+					// react if not
+					$sql = "INSERT INTO `" . $this->table_prefix . "sebo_postreact_table` (`postreact_id`, `topic_id`, `post_id`, `user_id`, `icon_id`, `react_time`) VALUES (NULL, '$my_topic_id', '$my_post_id', '$user_id_logged', '$my_icon_id', '$r_time');";
+					$result = $this->db->sql_query($sql);
+					if($result){
+						
+						$message = $this->user->lang('INSERTED_VALUE') . '<br /><br />' . $this->user->lang('RETURN_FORUM', '<a href="' . append_sid("viewtopic.php?p={$my_post_id}#p{$my_post_id}") . '">', '</a>');
+						meta_refresh(2, append_sid("viewtopic.php?p={$my_post_id}#p{$my_post_id}"));
+						trigger_error($message);
+						
+						} else {
+							$message = $this->user->lang('NOT_INSERTED_VALUE') . '<br /><br />' . $this->user->lang('RETURN_FORUM', '<a href="' . append_sid("viewtopic.php?p={$my_post_id}#p{$my_post_id}") . '">', '</a>');
+							meta_refresh(2, append_sid("viewtopic.php?p={$my_post_id}#p{$my_post_id}"));
+							trigger_error($message);
+						}
+					$this->db->sql_freeresult($result);
+				}
+				$this->db->sql_freeresult($result_check);
 			}
 		} else {
-			echo '<script>
-					alert("'.$this->user->lang('LOGIN_TO_REACT').'");
-					window.location.replace("viewtopic.php?p='.$my_post_id.'#p='.$my_post_id.'");
-				</script>';
+				$message = $this->user->lang('LOGIN_TO_REACT') . '<br /><br />' . $this->user->lang('RETURN_FORUM', '<a href="' . append_sid("viewtopic.php?p={$my_post_id}#p{$my_post_id}") . '">', '</a>');
+				meta_refresh(2, append_sid("viewtopic.php?p={$my_post_id}#p{$my_post_id}"));
+				trigger_error($message);
 		}
 	}
 	
 	public function viewforum_edit($event)
 	{
+		if($this->auth->acl_get('u_new_sebo_postreact') == '1'){
+			// granted
+		}
+		else if ($this->auth->acl_get('u_new_sebo_postreact_view') == '0'){
+			// return;
+		}
+		
 		$topicrow = $event['topicrow'];
 		$row = $event['row'];
 		$topic_id = $row['topic_id'];
@@ -204,19 +260,27 @@ class main_listener implements EventSubscriberInterface
 		if ($sql) {
 			// do it
 			$result = $this->db->sql_query($sql);
-			$this->data = [];
-
+			// if results
 			if ($result) {
 				while ($my_row = $this->db->sql_fetchrow($result)) {
-					$this->data[] = $my_row;
+					// if exists
+					$sql_post_exist = 'SELECT * FROM ' . $this->table_prefix . 'posts WHERE post_id = ' . (int)$my_row['post_id'];
+					$result_post_exist = $this->db->sql_query($sql_post_exist);
+					
+					// Se il risultato esiste, aggiungi la riga all'array
+					if ($result_post_exist && $this->db->sql_fetchrow($result_post_exist)) {
+						$data[] = $my_row;
+					}
+			
+					$this->db->sql_freeresult($result_post_exist);
 				}
-				$this->db->sql_freeresult($result);
-			} 
+			}
+			$this->db->sql_freeresult($result);			
 		}
 		// ##
 		// numb check icon_id
 		$icon_counts = [];
-		foreach ($this->data as $record) {
+		foreach ($data as $record) {
 			$icon_id = $record['icon_id'];
 			if (!isset($icon_counts[$icon_id])) {
 				$icon_counts[$icon_id] = 0;
@@ -245,9 +309,125 @@ class main_listener implements EventSubscriberInterface
 		// ##
 		// template
 		$event['topic_row'] = array_merge($event['topic_row'], [
-			'ICONS' => $icons_with_counts
+			'ICONS' 		=> $icons_with_counts,
+			'PERM_W' 		=> $this->auth->acl_get('u_new_sebo_postreact'),
+			'PERM_R'		=> $this->auth->acl_get('u_new_sebo_postreact_view')
 		]);
 		
+	}
+	
+	public function search_edit($event)
+	{
+		if($this->auth->acl_get('u_new_sebo_postreact') == '1'){
+			// granted
+		}
+		else if ($this->auth->acl_get('u_new_sebo_postreact_view') == '0'){
+			// return;
+		}
+		
+		$tpl_ary = $event['tpl_ary'];
+		$result_topic_id = $event['result_topic_id'];
+		
+		$row = $event['row'];
+		$topic_id = $row['topic_id'];
+		$sql = 'SELECT * FROM ' . $this->table_prefix . 'sebo_postreact_table WHERE topic_id = ' . (int)$topic_id;
+		$data = [];
+
+		if ($sql) {
+			// do it
+			$result = $this->db->sql_query($sql);
+			// if results
+			if ($result) {
+				while ($my_row = $this->db->sql_fetchrow($result)) {
+					// if exists
+					$sql_post_exist = 'SELECT * FROM ' . $this->table_prefix . 'posts WHERE post_id = ' . (int)$my_row['post_id'];
+					$result_post_exist = $this->db->sql_query($sql_post_exist);
+					
+					// Se il risultato esiste, aggiungi la riga all'array
+					if ($result_post_exist && $this->db->sql_fetchrow($result_post_exist)) {
+						$data[] = $my_row;
+					}
+			
+					$this->db->sql_freeresult($result_post_exist);
+				}
+			}
+			$this->db->sql_freeresult($result);			
+		}
+
+		// ##
+		// numb check icon_id
+		$topic_id_count = 0;
+		foreach ($data as $record) {
+			if ($record['topic_id'] == $topic_id) {
+				$topic_id_count++;
+			}
+		}
+
+		// Inizializza il contatore
+		$topic_id_count = 0;
+		// Array per memorizzare i risultati
+		$icons_with_counts = [];
+		// Dati delle icone (questo dovrebbe essere popolato dalla tua tabella sebo_postreact_icon)
+		$this->grab_icons(null);
+		$data_ico = $this->data_ico;
+		
+		// Step 1: make a new array with `icon_id` key
+		$data_ico_assoc = [];
+		foreach ($data_ico as $icon) {
+			$data_ico_assoc[$icon['icon_id']] = $icon;
+		}
+
+		// Step 2: count `icon_id` occurrences for `topic_id`
+		$icon_counts = [];
+		foreach ($data as $rec) {
+			$icon_id = $rec['icon_id'];
+			$topic_id = $rec['topic_id'];
+
+			if (!isset($icon_counts[$topic_id])) {
+				$icon_counts[$topic_id] = [];
+			}
+			if (!isset($icon_counts[$topic_id][$icon_id])) {
+				$icon_counts[$topic_id][$icon_id] = 0;
+			}
+			$icon_counts[$topic_id][$icon_id]++;
+		}
+
+		// Step 3: make new array with icon info and count, ensuring each `icon_id` is unique
+		$new_array = [];
+		foreach ($data as $rec) {
+			$icon_id = $rec['icon_id'];
+			$topic_id = $rec['topic_id'];
+
+			if (isset($data_ico_assoc[$icon_id])) {
+				// Only if the `icon_id` has not already been added to the final array
+				if (!isset($new_array[$icon_id])) {
+					$icon_info = $data_ico_assoc[$icon_id];
+					$count = isset($icon_counts[$topic_id][$icon_id]) ? (string)$icon_counts[$topic_id][$icon_id] : '0';
+
+					$new_array[$icon_id] = [
+						'icon_id' => $icon_info['icon_id'],
+						'icon_url' => $icon_info['icon_url'],
+						'icon_alt' => $icon_info['icon_alt'],
+						'topic_id' => $topic_id,
+						'count' => $count
+					];
+				} else {
+					// Update the count if `icon_id` already exists
+					$new_array[$icon_id]['count'] = (string)max($new_array[$icon_id]['count'], $count);
+				}
+			}
+		}
+
+		// Remove the associative key and reset the numeric index
+		$array_with_counts = array_values($new_array);
+
+		// ##
+		// template		
+		$event['tpl_ary'] = array_merge($event['tpl_ary'], [
+			'ICONS' 		=> $array_with_counts,
+			'PERM_W' 		=> $this->auth->acl_get('u_new_sebo_postreact'),
+			'PERM_R'		=> $this->auth->acl_get('u_new_sebo_postreact_view')
+		]);
 	}
 	
 	/**
@@ -269,9 +449,8 @@ class main_listener implements EventSubscriberInterface
 	{
 		$permissions = $event['permissions'];
 
-		$permissions['a_new_sebo_postreact'] = ['lang' => 'ACL_A_NEW_SEBO_POSTREACT', 'cat' => 'misc'];
-		$permissions['m_new_sebo_postreact'] = ['lang' => 'ACL_M_NEW_SEBO_POSTREACT', 'cat' => 'post_actions'];
 		$permissions['u_new_sebo_postreact'] = ['lang' => 'ACL_U_NEW_SEBO_POSTREACT', 'cat' => 'post'];
+		$permissions['u_new_sebo_postreact_view'] = ['lang' => 'ACL_U_NEW_SEBO_POSTREACT_VIEW', 'cat' => 'post'];
 
 		$event['permissions'] = $permissions;
 	}
