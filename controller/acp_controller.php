@@ -35,6 +35,11 @@ class acp_controller
 
 	/** @var string Custom form action */
 	protected $u_action;
+	
+	protected $table_prefix;
+	
+	/** @var \phpbb\db\driver\driver_interface */
+	protected $db;
 
 	/**
 	 * Constructor.
@@ -46,7 +51,16 @@ class acp_controller
 	 * @param \phpbb\template\template	$template	Template object
 	 * @param \phpbb\user				$user		User object
 	 */
-	public function __construct(\phpbb\config\config $config, \phpbb\language\language $language, \phpbb\log\log $log, \phpbb\request\request $request, \phpbb\template\template $template, \phpbb\user $user)
+	public function __construct(
+		\phpbb\config\config $config, 
+		\phpbb\language\language $language, 
+		\phpbb\log\log $log, 
+		\phpbb\request\request $request, 
+		\phpbb\template\template $template, 
+		\phpbb\user $user,
+		$table_prefix,
+		\phpbb\db\driver\driver_interface $db
+		)
 	{
 		$this->config	= $config;
 		$this->language	= $language;
@@ -54,6 +68,8 @@ class acp_controller
 		$this->request	= $request;
 		$this->template	= $template;
 		$this->user		= $user;
+		$this->table_prefix = $table_prefix;
+		$this->db		= $db;
 	}
 
 	/**
@@ -65,6 +81,45 @@ class acp_controller
 	{
 		// Add our common language file
 		$this->language->add_lang('common', 'sebo/postreact');
+		$this->language->add_lang('permissions_postreact', 'sebo/postreact');
+		
+		// ##
+		// check if adding icon
+		$add_pr = $this->request->variable('addpr', 0, false);
+		$sid_pr = $this->request->variable('user_sid', \phpbb\request\request_interface::COOKIE);
+		if ($add_pr === 1){
+			$sql_last = "SELECT icon_id FROM `" . $this->table_prefix . "sebo_postreact_icon` ORDER BY `" . $this->table_prefix . "sebo_postreact_icon`.`icon_id` DESC LIMIT 1;";
+			$result_last = $this->db->sql_query($sql_last);
+			$last_id = $this->db->sql_fetchrow($result_last);
+			
+			$new_id = $last_id['icon_id'] + 1;
+			$sql_insert = "INSERT INTO `" . $this->table_prefix . "sebo_postreact_icon` "
+				. "(`id`, `icon_id`, `icon_url`, `icon_width`, `icon_height`, `icon_alt`, `status`) "
+				. "VALUES "
+				. "(NULL, '".$new_id."', 'ext/sebo/postreact/styles/all/img/', '32', '32', '', '0');";
+			$result_insert = $this->db->sql_query($sql_insert);
+			$this->db->sql_freeresult($result_insert);
+		}
+		
+		// ##
+		// grab icons
+		// take the line corresponds to post_id
+		$sql_ico = 'SELECT * FROM ' . $this->table_prefix . 'sebo_postreact_icon';
+		$data_ico = [];
+
+		if ($sql_ico) {
+			// do it
+			$result_ico = $this->db->sql_query($sql_ico);
+			$this->data_ico = [];
+
+			if ($result_ico) {
+				while ($my_icons = $this->db->sql_fetchrow($result_ico)) {
+					$this->data_ico[] = $my_icons;
+				}
+				$this->db->sql_freeresult($result_ico);
+			}
+			$this->data_ico;
+		}
 
 		// Create a form key for preventing CSRF attacks
 		add_form_key('sebo_postreact_acp');
@@ -82,53 +137,91 @@ class acp_controller
 			}
 
 			// If no errors, process the form data
-			if (empty($errors))
-			{
-				// Set the options the user configured
-				$this->config->set('sebo_postreact_goodbye', $this->request->variable('sebo_postreact_goodbye', 0));
+			if (empty($errors)) {
+				// Initialize an empty array to hold the icon data
+				$update_data = [];
 
-				// Add option settings change action to the admin log
-				$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_ACP_POSTREACT_SETTINGS');
+				$icon_ids = $this->request->variable('icon_ids', [0]);
+				// if not array, convert it
+				if (!is_array($icon_ids)) {
+					$icon_ids = explode(',', $icon_ids);
+				}
 
-				// Option settings have been updated and logged
-				// Confirm this to the user and provide link back to previous page
-				trigger_error($this->language->lang('ACP_POSTREACT_SETTING_SAVED') . adm_back_link($this->u_action));
+				foreach ($icon_ids as $icon_id) {
+					// grab variables
+					$update_data[$icon_id] = [
+						'url' => $this->request->variable('icon_url_' . $icon_id, ''),
+						'icon_alt' => $this->request->variable('icon_alt_' . $icon_id, ''),
+						'icon_width' => $this->request->variable('icon_width_' . $icon_id, ''),
+						'icon_height' => $this->request->variable('icon_height_' . $icon_id, ''),
+						'status' => $this->request->variable('status_' . $icon_id, '') === 'on' ? 1 : 0,
+					];
+				}
+
+				// create query
+				$sql = "UPDATE `" . $this->table_prefix . "sebo_postreact_icon` SET "
+					. "`icon_url` = CASE `icon_id` ";
+
+						foreach ($update_data as $icon_id => $data) {
+							$sql .= "WHEN '" . $icon_id . "' THEN 'ext/sebo/postreact/styles/all/img/" . $data['url'] . "' ";
+						}
+
+					$sql .= "END, "
+						. "`icon_alt` = CASE `icon_id` ";
+
+						foreach ($update_data as $icon_id => $data) {
+							$sql .= "WHEN '" . $icon_id . "' THEN '" . $data['icon_alt'] . "' ";
+						}
+
+					$sql .= "END, "
+						. "`icon_width` = CASE `icon_id` ";
+
+						foreach ($update_data as $icon_id => $data) {
+							$sql .= "WHEN '" . $icon_id . "' THEN '" . $data['icon_width'] . "' ";
+						}
+
+					$sql .= "END, "
+						. "`icon_height` = CASE `icon_id` ";
+
+						foreach ($update_data as $icon_id => $data) {
+							$sql .= "WHEN '" . $icon_id . "' THEN '" . $data['icon_height'] . "' ";
+						}
+
+					$sql .= "END, "
+						. "`status` = CASE `icon_id` ";
+
+						foreach ($update_data as $icon_id => $data) {
+							$sql .= "WHEN '" . $icon_id . "' THEN '" . $data['status'] . "' ";
+						}
+
+					$sql .= "END "
+						. "WHERE `icon_id` IN (" . implode(',', array_keys($update_data)) . ")";
+
+				$result = $this->db->sql_query($sql);
+				if ($result) {
+					// Conferma il successo
+					trigger_error($this->language->lang('ACP_POSTREACT_SETTING_SAVED') . adm_back_link($this->u_action));
+				} else {
+					// Segnala il fallimento
+					trigger_error($this->language->lang('ACP_POSTREACT_SETTING_NOT_SAVED') . adm_back_link($this->u_action));
+				}
+
+				$this->db->sql_freeresult($result);
+					
 			}
 		}
 		
 		$s_errors = !empty($errors);
 
-		// ##
-		// grab icons again
-		$sql_ico = 'SELECT * FROM ' . $this->table_prefix . 'sebo_postreact_icon';
-		$data_ico = [];
-
-		if ($sql_ico) {
-			// do it
-			$result_ico = $this->db->sql_query($sql_ico);
-			$this->data_ico = [];
-
-			if ($result_ico) {
-				while ($my_icons = $this->db->sql_fetchrow($result_ico)) {
-					$this->data_ico[] = $my_icons;
-				}
-				$this->db->sql_freeresult($result_ico);
-			}
-			$this->data_ico;
-		}
-		
-		var_dump($this->data_ico;);
-
 		// Set output variables for display in the template
 		$this->template->assign_vars([
 			'ICONS' 		=> $this->data_ico,
-			'CAZZO'			=> 'csdsadasd';
+			'SID'			=> $sid_pr,
+			'ARROW' 		=> '<i class="fa icon fa-chevron-right fa-fw" aria-hidden="true"></i>',
 			'S_ERROR'		=> $s_errors,
 			'ERROR_MSG'		=> $s_errors ? implode('<br />', $errors) : '',
 
 			'U_ACTION'		=> $this->u_action,
-
-			'SEBO_POSTREACT_GOODBYE'	=> (bool) $this->config['sebo_postreact_goodbye'],
 		]);
 	}
 
