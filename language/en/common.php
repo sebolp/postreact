@@ -36,12 +36,10 @@ if (empty($lang) || !is_array($lang))
 
 $lang = array_merge($lang, [
 
-	'NOT_INSERTED_VALUE'	=> 'OOPS! Something wrong!',
+	'NOT_INSERTED_VALUE'	=> 'OOPS! Reaction not added!',
 	'INSERTED_VALUE'	=> 'Reaction added!',
+	'DELETED_VALUE'		=> 'Reaction deleted!',
 	'LOGIN_TO_REACT'	=> 'Login to react!',
-
-	'ACP_POSTREACT_GOODBYE'			=> 'Should say goodbye?',
-	'ACP_POSTREACT_SETTING_SAVED'	=> 'Settings have been saved successfully!',
 
 	'SEBO_POSTREACT_NOTIFICATION'	=> 'PostReaction notification',
 
