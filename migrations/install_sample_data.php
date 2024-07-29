@@ -130,7 +130,7 @@ class install_sample_data extends \phpbb\db\migration\migration
 				[
 					'id'            => 1,
 					'icon_id'       => 1,
-					'icon_url'      => 'like.png',
+					'icon_url'      => 'ext/sebo/postreact/styles/all/img/like.png',
 					'icon_width'    => 32,
 					'icon_height'   => 32,
 					'icon_alt'      => 'Like',
@@ -140,7 +140,7 @@ class install_sample_data extends \phpbb\db\migration\migration
 				[
 					'id'            => 2,
 					'icon_id'       => 2,
-					'icon_url'      => 'heart.png',
+					'icon_url'      => 'ext/sebo/postreact/styles/all/img/heart.png',
 					'icon_width'    => 32,
 					'icon_height'   => 32,
 					'icon_alt'      => 'Heart',
@@ -150,7 +150,7 @@ class install_sample_data extends \phpbb\db\migration\migration
 				[
 					'id'            => 3,
 					'icon_id'       => 3,
-					'icon_url'      => 'laugh.png',
+					'icon_url'      => 'ext/sebo/postreact/styles/all/img/laugh.png',
 					'icon_width'    => 32,
 					'icon_height'   => 32,
 					'icon_alt'      => 'Laught',
@@ -160,7 +160,7 @@ class install_sample_data extends \phpbb\db\migration\migration
 				[
 					'id'            => 4,
 					'icon_id'       => 4,
-					'icon_url'      => 'sad.png',
+					'icon_url'      => 'ext/sebo/postreact/styles/all/img/sad.png',
 					'icon_width'    => 32,
 					'icon_height'   => 32,
 					'icon_alt'      => 'Sad',
@@ -170,7 +170,7 @@ class install_sample_data extends \phpbb\db\migration\migration
 				[
 					'id'            => 5,
 					'icon_id'       => 5,
-					'icon_url'      => 'angry.png',
+					'icon_url'      => 'ext/sebo/postreact/styles/all/img/angry.png',
 					'icon_width'    => 32,
 					'icon_height'   => 32,
 					'icon_alt'      => 'Angry',
@@ -180,7 +180,7 @@ class install_sample_data extends \phpbb\db\migration\migration
 				[
 					'id'            => 6,
 					'icon_id'       => 6,
-					'icon_url'      => 'surprise.png',
+					'icon_url'      => 'ext/sebo/postreact/styles/all/img/surprise.png',
 					'icon_width'    => 32,
 					'icon_height'   => 32,
 					'icon_alt'      => 'Suprise',
@@ -190,7 +190,7 @@ class install_sample_data extends \phpbb\db\migration\migration
 				[
 					'id'            => 7,
 					'icon_id'       => 7,
-					'icon_url'      => 'sunglasses.png',
+					'icon_url'      => 'ext/sebo/postreact/styles/all/img/sunglasses.png',
 					'icon_width'    => 32,
 					'icon_height'   => 32,
 					'icon_alt'      => 'Cool',
@@ -200,7 +200,7 @@ class install_sample_data extends \phpbb\db\migration\migration
 				[
 					'id'            => 8,
 					'icon_id'       => 8,
-					'icon_url'      => 'love.png',
+					'icon_url'      => 'ext/sebo/postreact/styles/all/img/love.png',
 					'icon_width'    => 32,
 					'icon_height'   => 32,
 					'icon_alt'      => 'Love',
@@ -210,7 +210,7 @@ class install_sample_data extends \phpbb\db\migration\migration
 				[
 					'id'            => 9,
 					'icon_id'       => 9,
-					'icon_url'      => 'worker.png',
+					'icon_url'      => 'ext/sebo/postreact/styles/all/img/worker.png',
 					'icon_width'    => 32,
 					'icon_height'   => 32,
 					'icon_alt'      => 'Lavoro',
@@ -220,7 +220,7 @@ class install_sample_data extends \phpbb\db\migration\migration
 				[
 					'id'            => 10,
 					'icon_id'       => 10,
-					'icon_url'      => 'lol.png',
+					'icon_url'      => 'ext/sebo/postreact/styles/all/img/lol.png',
 					'icon_width'    => 32,
 					'icon_height'   => 32,
 					'icon_alt'      => 'LOL',
@@ -230,7 +230,7 @@ class install_sample_data extends \phpbb\db\migration\migration
 				[
 					'id'            => 11,
 					'icon_id'       => 11,
-					'icon_url'      => 'party.png',
+					'icon_url'      => 'ext/sebo/postreact/styles/all/img/party.png',
 					'icon_width'    => 32,
 					'icon_height'   => 32,
 					'icon_alt'      => 'Party',
@@ -240,7 +240,7 @@ class install_sample_data extends \phpbb\db\migration\migration
 				[
 					'id'            => 12,
 					'icon_id'       => 12,
-					'icon_url'      => 'mechanic.png',
+					'icon_url'      => 'ext/sebo/postreact/styles/all/img/mechanic.png',
 					'icon_width'    => 32,
 					'icon_height'   => 32,
 					'icon_alt'      => 'Mechanic',
@@ -250,7 +250,7 @@ class install_sample_data extends \phpbb\db\migration\migration
 				[
 					'id'            => 13,
 					'icon_id'       => 13,
-					'icon_url'      => 'cry.png',
+					'icon_url'      => 'ext/sebo/postreact/styles/all/img/cry.png',
 					'icon_width'    => 32,
 					'icon_height'   => 32,
 					'icon_alt'      => 'Cry',
@@ -260,7 +260,7 @@ class install_sample_data extends \phpbb\db\migration\migration
 				[
 					'id'            => 14,
 					'icon_id'       => 14,
-					'icon_url'      => 'censored.png',
+					'icon_url'      => 'ext/sebo/postreact/styles/all/img/censored.png',
 					'icon_width'    => 32,
 					'icon_height'   => 32,
 					'icon_alt'      => 'Censored',
@@ -270,7 +270,7 @@ class install_sample_data extends \phpbb\db\migration\migration
 				[
 					'id'            => 15,
 					'icon_id'       => 15,
-					'icon_url'      => 'waving.webp',
+					'icon_url'      => 'ext/sebo/postreact/styles/all/img/waving.webp',
 					'icon_width'    => 32,
 					'icon_height'   => 32,
 					'icon_alt'      => 'Hello!',
