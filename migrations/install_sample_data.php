@@ -14,12 +14,12 @@ class install_sample_data extends \phpbb\db\migration\migration
 {
 	public function effectively_installed()
 	{
-		return $this->db_tools->sql_table_exists($this->table_prefix . 'sebo_postreact_table');
+		return $this->db_tools->sql_table_exists($this->table_prefix . 'sebo_postreact_icon');
 	}
 
 	public static function depends_on()
 	{
-		return ['\sebo\postreact\migration\install_sample_schema'];
+		return array('\sebo\postreact\migrations\install_sample_schema');
 	}
 
 	/**

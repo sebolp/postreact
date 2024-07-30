@@ -17,11 +17,6 @@ class install_acp_module extends \phpbb\db\migration\migration
 		return isset($this->config['sebo_postreact']);
 	}
 
-	public static function depends_on()
-	{
-		return ['\phpbb\db\migration\data\v320\v320'];
-	}
-
 	public function update_data()
 	{
 		return [

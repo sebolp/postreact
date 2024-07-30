@@ -17,11 +17,6 @@ class install_sample_schema extends \phpbb\db\migration\migration
 		return $this->db_tools->sql_table_exists($this->table_prefix . 'sebo_postreact_table');
 	}
 
-	public static function depends_on()
-	{
-		return ['\phpbb\db\migration\data\v320\v320'];
-	}
-
 	/**
 	 * Update database schema.
 	 *
