@@ -56,8 +56,8 @@ $lang = array_merge($lang, [
 	
 	'MEMORANDUM'			=> 'Watchout',
 	
-	'PP_ME'					=> 'Buy me a beer for creating this extension',
-	'PP_ME_EXT'				=> '<label>Make a donation for this extension:</label><br><span>This extension is completely free. It is a project that I spend my time on for the enjoyment and use of the phpBB community. If you enjoy using this extension, or if it has benefited your forum, please consider <a href="https://www.paypal.com/donate/?hosted_button_id=GS3T9MFDJJGT4" target="_blank" rel="noreferrer noopener">buying me a beer</a>. It would be greatly appreciated.</span>',
+	'PP_ME_PR'				=> 'Buy me a beer for creating this extension',
+	'PP_ME_EXT_PR'			=> '<label>Make a donation for this extension:</label><br><span>This extension is completely free. It is a project that I spend my time on for the enjoyment and use of the phpBB community. If you enjoy using this extension, or if it has benefited your forum, please consider <a href="https://www.paypal.com/donate/?hosted_button_id=GS3T9MFDJJGT4" target="_blank" rel="noreferrer noopener">buying me a beer</a>. It would be greatly appreciated. Thank you for downloading PostReaction!</span>',
 	
 	'ACP_POSTREACT_SETTING_SAVED'		=> 'Settings saved.',
 	'ACP_POSTREACT_SETTING_NOT_SAVED'	=> 'OOPSSS! something wrong.',

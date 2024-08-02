@@ -145,15 +145,63 @@ class main_listener implements EventSubscriberInterface
 		$total_match_count = count($this->data);
 		
 		// ##
-		// count icon_id
+		// count icon_id and users_ids
 		$icon_counts = [];
+		$user_ids_list = [];
 		foreach ($this->data as $record) {
 			$icon_id = $record['icon_id'];
+			$user_id = $record['user_id'];
+			$post_id = $record['post_id'];
 			if (!isset($icon_counts[$icon_id])) {
 				$icon_counts[$icon_id] = 0;
+				$user_ids_list[$icon_id] = [];
 			}
 			$icon_counts[$icon_id]++;
+			// Create an associative array for each entry with user_id and post_id
+			$user_ids_list[$icon_id][] = [
+				'user_id' => $user_id,
+				'post_id' => $post_id
+			];
 		}
+		
+		// ##
+		// search users_table information from user_id
+		$user_data_detailed = [];
+		foreach ($user_ids_list as $icon_id => $entries) {
+		foreach ($entries as $entry) {
+			$user_id = $entry['user_id'];
+			if (!isset($user_data_detailed[$user_id])) {
+					$query = "SELECT group_id, username, user_colour FROM " . $this->table_prefix . "users WHERE user_id = '$user_id'";
+					$result = $this->db->sql_query($query);
+					if ($result->num_rows > 0) {
+						$row = $result->fetch_assoc();
+						$user_data_detailed[$user_id] = [
+							'group_id' => $row['group_id'],
+							'username' => $row['username'],
+							'user_colour' => $row['user_colour'],
+						];
+					}
+					$this->db->sql_freeresult($result);
+				}
+			}
+		}
+
+		// merge username, colour and group to user_id
+		$user_ids_with_details = [];
+		foreach ($user_ids_list as $icon_id => $entries) {
+			foreach ($entries as $entry) {
+				$user_id = $entry['user_id'];
+				if (isset($user_data_detailed[$user_id])) {
+					$user_ids_with_details[$icon_id][] = [
+						'user_id' => $user_id,
+						'username' => $user_data_detailed[$user_id]['username'],
+						'group_id' => $user_data_detailed[$user_id]['group_id'],
+						'user_colour' => $user_data_detailed[$user_id]['user_colour'],
+						'post_id' => $entry['post_id'],  // Include post_id
+					];
+				}
+			}
+		}		
 		
 		// ##
 		// mark your choise
@@ -180,7 +228,8 @@ class main_listener implements EventSubscriberInterface
 				'MY_PID' 		=> (int)$my_pid,
 				'MY_TID' 		=> (int)$my_tid,
 				'ICON_COUNTS' 	=> $icon_counts,
-				'ICON_CHECK' 	=> $check
+				'ICON_CHECK' 	=> $check,
+				'REACTORS'		=> $user_ids_with_details
 		));
 		
 	}

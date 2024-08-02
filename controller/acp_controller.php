@@ -94,9 +94,9 @@ class acp_controller
 			
 			$new_id = $last_id['icon_id'] + 1;
 			$sql_insert = "INSERT INTO `" . $this->table_prefix . "sebo_postreact_icon` "
-				. "(`id`, `icon_id`, `icon_url`, `icon_width`, `icon_height`, `icon_alt`, `status`) "
+				. "(`id`, `icon_id`, `icon_url`, `icon_width`, `icon_height`, `icon_alt`, `status`, `active`) "
 				. "VALUES "
-				. "(NULL, '".$new_id."', 'ext/sebo/postreact/styles/all/img/', '32', '32', '', '0');";
+				. "(NULL, '".$new_id."', 'ext/sebo/postreact/styles/all/img/', '32', '32', '', '0', '0');";
 			$result_insert = $this->db->sql_query($sql_insert);
 			$this->db->sql_freeresult($result_insert);
 		}
@@ -155,6 +155,7 @@ class acp_controller
 						'icon_width' => $this->request->variable('icon_width_' . $icon_id, ''),
 						'icon_height' => $this->request->variable('icon_height_' . $icon_id, ''),
 						'status' => $this->request->variable('status_' . $icon_id, '') === 'on' ? 1 : 0,
+						'active' => $this->request->variable('icon_height_' . $icon_id, ''),
 					];
 				}
 
@@ -192,6 +193,13 @@ class acp_controller
 
 						foreach ($update_data as $icon_id => $data) {
 							$sql .= "WHEN '" . $icon_id . "' THEN '" . $data['status'] . "' ";
+						}
+						
+					$sql .= "END, "
+						. "`active` = CASE `icon_id` ";
+
+						foreach ($update_data as $icon_id => $data) {
+							$sql .= "WHEN '" . $icon_id . "' THEN '" . $data['active'] . "' ";
 						}
 
 					$sql .= "END "

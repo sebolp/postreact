@@ -1,0 +1,39 @@
+<!-- INCLUDECSS @sebo_postreact/write.css -->
+<!-- INCLUDECSS @sebo_postreact/main.css -->
+<!-- INCLUDECSS @sebo_postreact/open_bubble.css -->
+{%if postrow.PERM_W == '1' %}
+<div class="container_pr">
+    <details class="popup-container_pr">
+        <summary>
+            <img src="ext/sebo/postreact/styles/all/img/base.png" width="26" height="24" title="{{ postrow.POST_ICON_IMG_ALT }}" alt="Link Image" class="link-image_pr {% if postrow.S_FIRST_ROW %}smile_base_1{% else %}smile_base_2_pr{% endif %}">
+        </summary>
+        <div class="popup_pr">
+            <div class="arrow_pr"></div>
+            <div class="popup-content_pr">
+{% for icon in postrow.ICONS %}
+    {% if icon.status == '1' %}
+	
+	    {% for check in postrow.ICON_CHECK %}
+            {% if check.post_id == postrow.MY_PID and check.icon_id == icon.icon_id %}
+                <div class="already_reacted_pr">
+            {% endif %}
+        {% endfor %}
+	
+        <a href="viewtopic.php?t={{ postrow.MY_TID }}&iid={{ icon.icon_id }}&pid={{ postrow.MY_PID }}&tid={{ postrow.MY_TID }}#p{{ postrow.MY_PID }}">
+            <img src="{{ icon.icon_url }}" title="{{ icon.icon_alt }}" alt="{{ icon.icon_alt }}" width="{{ icon.icon_width }}" height="{{ icon.icon_height }}">
+        </a>
+        {% for check in postrow.ICON_CHECK %}
+            {% if check.post_id == postrow.MY_PID and check.icon_id == icon.icon_id %}
+                </div>
+            {% endif %}
+        {% endfor %}
+    
+	{% endif %}
+{% endfor %}
+            </div>
+        </div>
+    </details>
+</div>
+{% endif %}
+
+

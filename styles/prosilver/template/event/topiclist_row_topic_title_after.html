@@ -1,0 +1,19 @@
+<!-- INCLUDECSS @sebo_postreact/main.css -->
+{% if topicrow.PERM_R == '1' %}
+<div class="f_post_react_display">
+    {% for icon in topicrow.ICONS %}
+        {% if icon.count > 0 %}
+            <img src="{{ icon.icon_url }}" title="{{ icon.count }} {{ icon.icon_alt }}" alt="{{ icon.icon_alt }}" width="12px" height="12px">
+        {% endif %}
+    {% endfor %}
+</div>
+{% endif %} 
+{% if searchresults.PERM_R == '1' %}
+<div class="f_post_react_display">
+    {% for icon in searchresults.ICONS %}
+        {% if icon.count > 0 %}
+            <img src="{{ icon.icon_url }}" title="{{ icon.count }} {{ icon.icon_alt }}" alt="{{ icon.icon_alt }}" width="12px" height="12px">
+        {% endif %}
+    {% endfor %}
+</div>
+{% endif %}

@@ -1,0 +1,109 @@
+<style>
+	.post_react_display {
+		float: right;
+	}
+	#post_react_display {
+		display: flex;
+		flex-direction: row-reverse;
+	}
+	.img_post_react_display {
+		float: right;
+		position: relative;
+		margin-right: -8px;
+		transition: margin-right 0.5s ease;
+	}
+	.img_post_react_display:first-child {
+		margin-right: 0;
+	}
+	.post_react_display:hover .img_post_react_display {
+		margin-right: 8px;
+	}
+	.bubble_post_react_display {
+		position: absolute;
+		top: 0;
+		right: 0;
+		background-color: red;
+		border: 1px solid #ffffff;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 2;
+		width: 12px;
+		height: 12px;
+		border-radius: 50%;
+		color: white;
+		font-size: 8px;	
+	}
+	.bubble_post_react_display_b {
+		position: absolute;
+		top: 0;
+		right: 0;
+		background-color: red;
+		border: 1px solid #ffffff;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 2;
+		width: 16px;
+		height: 14px;
+		border-radius: 50%;
+		color: white;
+		font-size: 8px;	
+	}
+	.bubble_post_react_display_bb {
+		position: absolute;
+		top: 0;
+		right: 0;
+		background-color: red;
+		border: 1px solid #ffffff;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 2;
+		width: 18px;
+		height: 14px;
+		border-radius: 50%;
+		color: white;
+		font-size: 8px;	
+	}
+	.already_reacted_pr {
+		position: relative;
+        display: inline-block;
+		background-color: rgb(8 197 8 / 72%);
+        border: 1px solid #ffffff;
+		border-radius: 10px;
+	}
+	/* viewforum */
+	.f_post_react_display {
+	    display: inline-block;
+		position: relative;
+		left: 15px;
+	}
+	.f_post_react_display img{
+	    margin-right: -7px;
+		transition: margin-right 0.5s ease;
+	}
+	.f_post_react_display:hover img{
+	    margin-right: 1px;
+		transition: margin-right 0.5s ease;
+	}
+	/* responsive */
+	@media (max-width: 870px) {
+		.f_post_react_display {
+			display: none;
+		}	
+	}
+	@media (max-width: 700px) {
+		.f_post_react_display {
+			display: block;
+			position: sticky;
+			float: right;
+			right: 20px;
+		}	
+	}
+	@media (max-width: 380px) {
+		.f_post_react_display {
+			display: none;
+		}	
+	}
+</style>

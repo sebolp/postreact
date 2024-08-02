@@ -1,0 +1,112 @@
+{% include 'overall_header.html' %}
+
+<!-- INCLUDECSS @sebo_postreact/acp_css.css -->
+
+<h1>{{ lang('ACP_POSTREACT_TITLE') }}</h1>
+
+{% if S_ERROR %}
+	<div class="errorbox">
+		<h3>{{ lang('WARNING') }}</h3>
+		<p>{{ ERROR_MSG }}</p>
+	</div>
+{% endif %}
+
+<form id="sebo_postreact_acp" name="sebo_postreact_acp" method="post" action="{{ U_ACTION }}">
+
+	<fieldset>
+	<legend>{{ lang('PP_ME_PR') }}</legend>
+		<dl>
+			<dt>
+			{{ lang('PP_ME_EXT_PR') }}
+			</dt>
+			<dd><img src="../ext/sebo/postreact/adm/style/wink_beer.png" width="32px" height="32px"> <a href="https://www.paypal.com/donate/?hosted_button_id=GS3T9MFDJJGT4" target="_blank" rel="noreferrer noopener"><img src="https://www.paypalobjects.com/webstatic/en_US/i/btn/png/silver-pill-paypal-26px.png" alt="Donate using PayPal" style="cursor: pointer; margin-top: 15px;"></a></dd>
+		</dl>
+	</fieldset>
+	
+	<fieldset>
+		<legend>{{ lang('MEMORANDUM') }}</legend>
+		<dl>
+			<i class="fa fa-exclamation-triangle fa-2x" style="color:orange;vertical-align:middle;" aria-hidden="true"></i><strong> {{ lang('MEM_EXPLAIN') }} </strong><br><br>
+			<ul>
+				<li>{{ lang('PERM') }} {{ ARROW }} {{ lang('USER-GROUP') }} {{ ARROW }} {{ lang('ADVANCED') }} {{ ARROW }} {{ lang('MESSAGES') }} {{ ARROW }} <strong>{{ lang('ACL_U_NEW_SEBO_POSTREACT') }}</strong></li>
+				<li>{{ lang('PERM') }} {{ ARROW }} {{ lang('USER-GROUP') }} {{ ARROW }} {{ lang('ADVANCED') }} {{ ARROW }} {{ lang('MESSAGES') }} {{ ARROW }} <strong>{{ lang('ACL_U_NEW_SEBO_POSTREACT_VIEW') }}</strong></li>
+			</ul>
+		</dl>
+	</fieldset>
+	<fieldset>
+		<legend>{{ lang('SETTINGS') }}</legend>
+		<dl>
+			<dt>
+				<a class="btn btn-danger" href="index.php{{ SID }}&i=-sebo-postreact-acp-main_module&addpr=1">
+				<i class="fa fa-trash-o fa-lg"></i> {{ lang('ADD_PR') }}</a>
+			</dt>
+			<dd>
+				{{ lang('HOW_TO') }}
+				<br>
+				<a href="https://www.iconarchive.com/show/noto-emoji-smileys-icons-by-google.1.html" target="_blank">
+					{{ lang('FREE_IP_EX') }} <i class="fa fa-external-link-square" aria-hidden="true"></i>
+				</a>
+			</dd>
+		</dl>
+		<dl>
+	{% for icon in ICONS %}
+        <div class="icon-container" id="first_c_one">
+            <div class="separator">
+                <div>
+					<img src="../{{ icon.icon_url }}" title="{{ icon.icon_alt }}" alt="{{ icon.icon_alt }}" width="{{ icon.icon_width }}" height="{{ icon.icon_height }}">
+                </div>
+                
+                <div>
+					{% set modified_icon_url = icon.icon_url|slice(34) %}
+                    <label for="icon_url_{{ icon.icon_id }}">{{ lang('ICON_URL') ~ lang('COLON') }}</label>
+                    <input type="text" id="icon_url_{{ icon.icon_id }}" name="icon_url_{{ icon.icon_id }}" value="{{ modified_icon_url }}">
+                </div>
+                
+                <div>
+                    <label for="icon_alt_{{ icon.icon_id }}">{{ lang('ICON_ALT') ~ lang('COLON') }}</label>
+                    <input type="text" id="icon_alt_{{ icon.icon_id }}" name="icon_alt_{{ icon.icon_id }}" size="5" value="{{ icon.icon_alt }}">
+                </div>
+                
+                <div>
+                    <label for="icon_width_{{ icon.icon_id }}">{{ lang('ICON_WIDTH') ~ lang('COLON') }}</label>
+                    <input type="text" id="icon_width_{{ icon.icon_id }}" name="icon_width_{{ icon.icon_id }}" size="2" value="{{ icon.icon_width }}">
+                </div>
+                
+                <div>
+                    <label for="icon_height_{{ icon.icon_id }}">{{ lang('ICON_HEIGHT') ~ lang('COLON') }}</label>
+                    <input type="text" id="icon_height_{{ icon.icon_id }}" name="icon_height_{{ icon.icon_id }}" size="2" value="{{ icon.icon_height }}">
+                </div>
+            </div>
+                
+            <div>
+                <label class="switch" title="{{ lang('ENABLE_DISABLE') }}">
+                    <input type="checkbox" id="status_{{ icon.icon_id }}" name="status_{{ icon.icon_id }}" {% if icon.status == '1' %}checked{% else %} {% endif %}>
+                    <span class="slider round"></span>
+                </label>
+            </div>
+			
+			<div>
+				<i class="fa fa-lock fa-2x" aria-hidden="true"></i>
+			</div>
+
+            <div>
+                <span class="fa-stack fa-lg">
+                    <i class="fa fa fa-trash fa-stack-1x" title="Still not available"></i>
+                    <i class="fa fa-ban fa-stack-2x text-danger" title="Still not available"></i>
+                </span>
+            </div>
+        </div>
+        <!-- Aggiungi un campo nascosto per passare gli ID delle icone -->
+        <input type="hidden" name="icon_ids[]" value="{{ icon.icon_id }}">
+    {% endfor %}
+	</dl>
+	</fieldset>
+
+	<fieldset class="submit-buttons">
+		<input class="button1" type="submit" id="submit" name="submit" value="{{ lang('SUBMIT') }}" />&nbsp;
+		{{ S_FORM_TOKEN }}
+	</fieldset>
+
+</form>
+
+{% include 'overall_footer.html' %}

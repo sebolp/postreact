@@ -1,0 +1,35 @@
+services:
+    sebo.postreact.controller.acp:
+        class: sebo\postreact\controller\acp_controller
+        arguments:
+            - '@config'
+            - '@language'
+            - '@log'
+            - '@request'
+            - '@template'
+            - '@user'
+            - '%core.table_prefix%'
+            - '@dbal.conn'
+
+    sebo.postreact.listener:
+        class: sebo\postreact\event\main_listener
+        arguments:
+            - '@language'
+            - '@dbal.conn'
+            - '@user'
+            - '@request'
+            - '@template'
+            - '%core.table_prefix%'
+            - '@auth'
+            
+        tags:
+            - { name: event.listener }
+
+    sebo.postreact.notification.type.sample:
+        class: sebo\postreact\notification\type\sample
+        shared: false # service MUST not be shared for this to work!
+        parent: notification.type.base
+        calls:
+            - [set_controller_helper, ['@controller.helper']]
+        tags:
+            - { name: notification.type }

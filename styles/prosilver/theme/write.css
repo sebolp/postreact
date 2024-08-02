@@ -1,0 +1,15 @@
+<style>
+	.smile_base_1 {
+		float: right;
+		display: inline-block;
+		margin-top:-24px;
+	}
+	.smile_base_2_pr {
+		float: right;
+		display: inline-block;
+		margin-top:-20px;
+	}
+	.post-buttons {
+		right: 26px !important;
+	}
+</style>
