@@ -4,7 +4,6 @@
 		cursor: pointer;
 	}
 
-	/* Stile del popup */
 	.popup_pr {
 		max-width: 455px;
 		display: none;
@@ -21,18 +20,15 @@
 		z-index: 1000;
 	}
 
-	/* Mostra il popup quando <details> è aperto */
 	.popup-container_pr[open] .popup_pr {
 		display: block;
 	}
 
-	/* Nascondi il bordo di default del summary */
 	.popup-container_pr summary {
 		border: none;
 		outline: none;
 	}
 
-	/* Stile della freccia */
 	.arrow_pr {
 		width: 0;
 		height: 0;
@@ -57,6 +53,11 @@
 
 	.popup-content_pr img {
 		margin: 5px;
+	}
+	
+	/* have to edit to overtake the bubble */
+	.dropdown-contents{
+		z-index: 4 !important;
 	}
 
 	@media (max-width: 700px) {

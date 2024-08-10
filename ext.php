@@ -30,14 +30,15 @@ class ext extends \phpbb\extension\base
 	public function enable_step($old_state)
 	{
 		if ($old_state === false)
-		{
-			$this->container->get('notification_manager')
-				->enable_notifications('sebo.postreact.notification.type.sample');
+        {
+            /** @var \phpbb\notification\manager $notification_manager */
+            $notification_manager = $this->container->get('notification_manager');
 
-			return 'notification';
-		}
+            $notification_manager->enable_notifications('sebo.postreact.notification.type.postreact_notification');
+            return 'notification';
+        }
 
-		return parent::enable_step($old_state);
+        return parent::enable_step($old_state);
 	}
 
 	/**
@@ -52,14 +53,16 @@ class ext extends \phpbb\extension\base
 	public function disable_step($old_state)
 	{
 		if ($old_state === false)
-		{
-			$this->container->get('notification_manager')
-				->disable_notifications('sebo.postreact.notification.type.sample');
+        {
+            /** @var \phpbb\notification\manager $notification_manager */
+            $notification_manager = $this->container->get('notification_manager');
 
-			return 'notification';
-		}
+            $notification_manager->disable_notifications('sebo.postreact.notification.type.postreact_notification');
 
-		return parent::disable_step($old_state);
+            return 'notification';
+        }
+
+        return parent::disable_step($old_state);
 	}
 
 	/**
@@ -74,13 +77,15 @@ class ext extends \phpbb\extension\base
 	public function purge_step($old_state)
 	{
 		if ($old_state === false)
-		{
-			$this->container->get('notification_manager')
-				->purge_notifications('sebo.postreact.notification.type.sample');
+        {
+            /** @var \phpbb\notification\manager $notification_manager */
+            $notification_manager = $this->container->get('notification_manager');
 
-			return 'notification';
-		}
+            $notification_manager->purge_notifications('sebo.postreact.notification.type.postreact_notification');
 
-		return parent::purge_step($old_state);
+            return 'notification';
+        }
+
+        return parent::purge_step($old_state);
 	}
 }

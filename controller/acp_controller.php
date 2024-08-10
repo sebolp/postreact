@@ -15,14 +15,8 @@ namespace sebo\postreact\controller;
  */
 class acp_controller
 {
-	/** @var \phpbb\config\config */
-	protected $config;
-
 	/** @var \phpbb\language\language */
 	protected $language;
-
-	/** @var \phpbb\log\log */
-	protected $log;
 
 	/** @var \phpbb\request\request */
 	protected $request;
@@ -44,7 +38,6 @@ class acp_controller
 	/**
 	 * Constructor.
 	 *
-	 * @param \phpbb\config\config		$config		Config object
 	 * @param \phpbb\language\language	$language	Language object
 	 * @param \phpbb\log\log			$log		Log object
 	 * @param \phpbb\request\request	$request	Request object
@@ -52,9 +45,7 @@ class acp_controller
 	 * @param \phpbb\user				$user		User object
 	 */
 	public function __construct(
-		\phpbb\config\config $config, 
 		\phpbb\language\language $language, 
-		\phpbb\log\log $log, 
 		\phpbb\request\request $request, 
 		\phpbb\template\template $template, 
 		\phpbb\user $user,
@@ -62,9 +53,7 @@ class acp_controller
 		\phpbb\db\driver\driver_interface $db
 		)
 	{
-		$this->config	= $config;
 		$this->language	= $language;
-		$this->log		= $log;
 		$this->request	= $request;
 		$this->template	= $template;
 		$this->user		= $user;

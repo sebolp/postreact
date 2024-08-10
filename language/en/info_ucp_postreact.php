@@ -35,5 +35,5 @@ if (empty($lang) || !is_array($lang))
 //
 
 $lang = array_merge($lang, [
-	'NOTIFICATION_TYPE_POSTREACT'	=> 'Use PostReaction notifications',
+	'NOTIFICATION_TYPE_POSTREACT'	=> 'Someone reacted to your post',
 ]);

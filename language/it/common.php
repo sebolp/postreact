@@ -41,6 +41,6 @@ $lang = array_merge($lang, [
 	'DELETED_VALUE'	=> 'Reazione cancellata!',
 	'LOGIN_TO_REACT'	=> 'Effettua il login per reagire!',
 
-	'SEBO_POSTREACT_NOTIFICATION'	=> 'PostReaction notification',
+	'SEBO_POSTREACT_NOTIFICATION'	=> '<img src="%s" style="width:32px !important;height:32px !important;"><strong>Hai ricevuto una reazione</strong> da %s nell\'argomento "%s"',
 
 ]);

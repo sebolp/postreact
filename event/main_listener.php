@@ -48,6 +48,8 @@ class main_listener implements EventSubscriberInterface
 	protected $table_prefix;
 	/** @var auth */
 	protected $auth;
+	/** @var \phpbb\notification\manager */
+    protected $notification_manager;
 
 	/**
 	 * Constructor
@@ -59,7 +61,8 @@ class main_listener implements EventSubscriberInterface
 			\phpbb\request\request $request, 
 			\phpbb\template\template $template,
 			$table_prefix,
-			\phpbb\auth\auth $auth
+			\phpbb\auth\auth $auth,
+			\phpbb\notification\manager $notification_manager
 			)
 	{
 		$this->language = $language;
@@ -69,6 +72,7 @@ class main_listener implements EventSubscriberInterface
 		$this->template	= $template;
 		$this->table_prefix = $table_prefix;
 		$this->auth = $auth;
+		$this->notification_manager   = $notification_manager;
 	}
 
 	/**
@@ -252,6 +256,10 @@ class main_listener implements EventSubscriberInterface
 				$sql_check = "SELECT COUNT(*) as count FROM `" . $this->table_prefix . "sebo_postreact_table` WHERE `user_id` = '$user_id_logged' AND `post_id` = '$my_post_id'";
 				$result_check = $this->db->sql_query($sql_check);
 				$row_check = $this->db->sql_fetchrow($result_check);
+				
+				// increment the notification_id
+				// $this->config->increment('sebo_postreact_notification_id', 1);
+				// jump to 286
 
 				if ($row_check['count'] > 0) {
 					// ##
@@ -259,6 +267,26 @@ class main_listener implements EventSubscriberInterface
 					$sql = "DELETE FROM `" . $this->table_prefix . "sebo_postreact_table` WHERE `user_id` = '$user_id_logged' AND `post_id` = '$my_post_id';";
 					$result = $this->db->sql_query($sql);
 					if($result){
+					
+						//##
+						// NOTIFICATION SYS DELETE
+						// check posts info
+						$sql_pname = "SELECT 
+										p.poster_id AS poster_id_clean, p.post_subject AS post_post_title, p.post_id, 
+										u.username_clean AS poster_name_clean, u.user_id, u.user_colour AS poster_user_colour 
+										FROM `" . $this->table_prefix . "posts` p 
+										JOIN " . $this->table_prefix . "users u ON p.poster_id = u.user_id 
+										WHERE p.post_id = $my_post_id;";
+						$result_pname = $this->db->sql_query($sql_pname);
+						$row_pname = $this->db->sql_fetchrow($result_pname);
+						
+						// DEL =(notification_type+item_id+parent_id(reactor)+user_id(reactor))
+						$PR_DEL_item_id = $my_post_id;
+						$this->notification_manager->delete_notifications('sebo.postreact.notification.type.postreact_notification', $PR_DEL_item_id, $user_id_logged, $user_id_logged);
+							
+						$this->db->sql_freeresult($result_pname);
+						//
+							
 						$message = $this->user->lang('DELETED_VALUE') . '<br /><br />' . $this->user->lang('RETURN_FORUM', '<a href="' . append_sid("viewtopic.php?p={$my_post_id}#p{$my_post_id}") . '">', '</a>');
 						meta_refresh(2, append_sid("viewtopic.php?p={$my_post_id}#p{$my_post_id}"));
 						trigger_error($message);
@@ -270,12 +298,47 @@ class main_listener implements EventSubscriberInterface
 					$sql = "INSERT INTO `" . $this->table_prefix . "sebo_postreact_table` (`postreact_id`, `topic_id`, `post_id`, `user_id`, `icon_id`, `react_time`) VALUES (NULL, '$my_topic_id', '$my_post_id', '$user_id_logged', '$my_icon_id', '$r_time');";
 					$result = $this->db->sql_query($sql);
 					if($result){
+
+						// ##
+						// NOTIFICATION SYS INSERT
 						
+						// check posts info
+						$sql_pname = "SELECT 
+										p.poster_id AS poster_id_clean, p.post_subject AS post_post_title, p.post_id, 
+										u.username_clean AS poster_name_clean, u.user_id, u.user_colour AS poster_user_colour 
+										FROM `" . $this->table_prefix . "posts` p 
+										JOIN " . $this->table_prefix . "users u ON p.poster_id = u.user_id 
+										WHERE p.post_id = $my_post_id;";
+						$result_pname = $this->db->sql_query($sql_pname);
+						$row_pname = $this->db->sql_fetchrow($result_pname);
+						
+						$sql_ico_pr = 'SELECT * FROM ' . $this->table_prefix . 'sebo_postreact_icon WHERE icon_id = '.$my_icon_id.';';
+						$result_ico_pr = $this->db->sql_query($sql_ico_pr);
+						$row_ico_pr = $this->db->sql_fetchrow($result_ico_pr);
+						
+						//item_id = poster_id + post_id + reactor_id
+						$this->notification_manager->add_notifications('sebo.postreact.notification.type.postreact_notification', [
+							'PR_N_item_id'   	=> $my_post_id,
+							'PR_N_username'   	=> $row_pname['poster_name_clean'],
+							'PR_N_user_colour' 	=> $row_pname['poster_user_colour'],
+							'PR_N_post_title' 	=> $row_pname['post_post_title'],
+							'PR_N_user_id' 		=> $row_pname['poster_id_clean'],
+							'PR_N_sender_id' 	=> $user_id_logged,
+							'PR_N_post_id' 		=> $my_post_id,
+							'PR_N_topic_id' 	=> $my_topic_id,
+							'PR_N_icon'			=> $row_ico_pr['icon_url']
+						]);
+						
+						$this->db->sql_freeresult($result_pname);
+						//
+
 						$message = $this->user->lang('INSERTED_VALUE') . '<br /><br />' . $this->user->lang('RETURN_FORUM', '<a href="' . append_sid("viewtopic.php?p={$my_post_id}#p{$my_post_id}") . '">', '</a>');
 						meta_refresh(2, append_sid("viewtopic.php?p={$my_post_id}#p{$my_post_id}"));
 						trigger_error($message);
 						
+						
 						} else {
+							// something wrong = not inserted
 							$message = $this->user->lang('NOT_INSERTED_VALUE') . '<br /><br />' . $this->user->lang('RETURN_FORUM', '<a href="' . append_sid("viewtopic.php?p={$my_post_id}#p{$my_post_id}") . '">', '</a>');
 							meta_refresh(2, append_sid("viewtopic.php?p={$my_post_id}#p{$my_post_id}"));
 							trigger_error($message);

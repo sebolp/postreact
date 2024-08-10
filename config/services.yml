@@ -2,9 +2,7 @@ services:
     sebo.postreact.controller.acp:
         class: sebo\postreact\controller\acp_controller
         arguments:
-            - '@config'
             - '@language'
-            - '@log'
             - '@request'
             - '@template'
             - '@user'
@@ -21,15 +19,17 @@ services:
             - '@template'
             - '%core.table_prefix%'
             - '@auth'
+            - '@notification_manager'
             
         tags:
             - { name: event.listener }
 
-    sebo.postreact.notification.type.sample:
-        class: sebo\postreact\notification\type\sample
-        shared: false # service MUST not be shared for this to work!
+    sebo.postreact.notification.type.postreact_notification:
+        class: sebo\postreact\notification\type\postreact_notification
+        shared: false
         parent: notification.type.base
         calls:
             - [set_controller_helper, ['@controller.helper']]
+            - ['set_user_loader', ['@user_loader']]
         tags:
             - { name: notification.type }

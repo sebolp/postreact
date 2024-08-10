@@ -12,14 +12,10 @@ namespace sebo\postreact\migrations;
 
 class install_sample_data extends \phpbb\db\migration\migration
 {
-	public function effectively_installed()
-	{
-		return $this->db_tools->sql_table_exists($this->table_prefix . 'sebo_postreact_icon');
-	}
 
 	public static function depends_on()
 	{
-		return array('\sebo\postreact\migrations\install_sample_schema');
+		return ['\sebo\postreact\migrations\install_sample_schema'];
 	}
 
 	/**
@@ -112,10 +108,8 @@ class install_sample_data extends \phpbb\db\migration\migration
 		return [
 			['config.remove', ['sebo_postreact', 0]],
 			
-			['permission.remove', ['u_new_sebo_postreact']], // New user permission
+			['permission.remove', ['u_new_sebo_postreact']],
 			['permission.remove', ['u_new_sebo_postreact_view']],
-			
-			['custom', [[$this, 'table_pr_uninstall']]],
 		];
 	}
 
@@ -210,17 +204,17 @@ class install_sample_data extends \phpbb\db\migration\migration
 				[
 					'id'            => 9,
 					'icon_id'       => 9,
-					'icon_url'      => 'ext/sebo/postreact/styles/all/img/worker.png',
+					'icon_url'      => 'ext/sebo/postreact/styles/all/img/skype/worker.png',
 					'icon_width'    => 32,
 					'icon_height'   => 32,
-					'icon_alt'      => 'Lavoro',
+					'icon_alt'      => 'Worker',
 					'status'        => '1',
 					'active'        => '0',
 				],
 				[
 					'id'            => 10,
 					'icon_id'       => 10,
-					'icon_url'      => 'ext/sebo/postreact/styles/all/img/lol.png',
+					'icon_url'      => 'ext/sebo/postreact/styles/all/img/skype/lol.png',
 					'icon_width'    => 32,
 					'icon_height'   => 32,
 					'icon_alt'      => 'LOL',
@@ -230,7 +224,7 @@ class install_sample_data extends \phpbb\db\migration\migration
 				[
 					'id'            => 11,
 					'icon_id'       => 11,
-					'icon_url'      => 'ext/sebo/postreact/styles/all/img/party.png',
+					'icon_url'      => 'ext/sebo/postreact/styles/all/img/skype/party.png',
 					'icon_width'    => 32,
 					'icon_height'   => 32,
 					'icon_alt'      => 'Party',
@@ -240,7 +234,7 @@ class install_sample_data extends \phpbb\db\migration\migration
 				[
 					'id'            => 12,
 					'icon_id'       => 12,
-					'icon_url'      => 'ext/sebo/postreact/styles/all/img/mechanic.png',
+					'icon_url'      => 'ext/sebo/postreact/styles/all/img/skype/mechanic.png',
 					'icon_width'    => 32,
 					'icon_height'   => 32,
 					'icon_alt'      => 'Mechanic',
@@ -250,7 +244,7 @@ class install_sample_data extends \phpbb\db\migration\migration
 				[
 					'id'            => 13,
 					'icon_id'       => 13,
-					'icon_url'      => 'ext/sebo/postreact/styles/all/img/cry.png',
+					'icon_url'      => 'ext/sebo/postreact/styles/all/img/skype/cry.png',
 					'icon_width'    => 32,
 					'icon_height'   => 32,
 					'icon_alt'      => 'Cry',
@@ -260,7 +254,7 @@ class install_sample_data extends \phpbb\db\migration\migration
 				[
 					'id'            => 14,
 					'icon_id'       => 14,
-					'icon_url'      => 'ext/sebo/postreact/styles/all/img/censored.png',
+					'icon_url'      => 'ext/sebo/postreact/styles/all/img/skype/censored.png',
 					'icon_width'    => 32,
 					'icon_height'   => 32,
 					'icon_alt'      => 'Censored',
@@ -270,7 +264,7 @@ class install_sample_data extends \phpbb\db\migration\migration
 				[
 					'id'            => 15,
 					'icon_id'       => 15,
-					'icon_url'      => 'ext/sebo/postreact/styles/all/img/waving.webp',
+					'icon_url'      => 'ext/sebo/postreact/styles/all/img/telegram/waving.webp',
 					'icon_width'    => 32,
 					'icon_height'   => 32,
 					'icon_alt'      => 'Hello!',

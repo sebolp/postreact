@@ -16,6 +16,11 @@ class install_sample_schema extends \phpbb\db\migration\migration
 	{
 		return $this->db_tools->sql_table_exists($this->table_prefix . 'sebo_postreact_table');
 	}
+	
+	static public function depends_on()
+	{
+		return ['\phpbb\db\migration\data\v320\v320'];
+	}
 
 	/**
 	 * Update database schema.
@@ -65,11 +70,6 @@ class install_sample_schema extends \phpbb\db\migration\migration
 					'PRIMARY_KEY'	=> 'id',
 				],
 			],
-			//'add_columns'	=> [
-			//	$this->table_prefix . 'users'			=> [
-			//		'user_postreact'				=> ['UINT', 0],
-			//	],
-			//],
 		];
 	}
 
@@ -96,11 +96,6 @@ class install_sample_schema extends \phpbb\db\migration\migration
 	public function revert_schema()
 	{
 		return [
-			//'drop_columns'	=> [
-			//	$this->table_prefix . 'users'			=> [
-			//		'user_postreact',
-			//	],
-			//],
 			'drop_tables'		=> [
 				$this->table_prefix . 'sebo_postreact_table',
 				$this->table_prefix . 'sebo_postreact_icon',
