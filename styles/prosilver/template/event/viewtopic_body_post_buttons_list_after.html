@@ -10,26 +10,34 @@
         <div class="popup_pr">
             <div class="arrow_pr"></div>
             <div class="popup-content_pr">
-{% for icon in postrow.ICONS %}
-    {% if icon.status == '1' %}
-	
-	    {% for check in postrow.ICON_CHECK %}
-            {% if check.post_id == postrow.MY_PID and check.icon_id == icon.icon_id %}
-                <div class="already_reacted_pr">
-            {% endif %}
-        {% endfor %}
-	
-        <a href="viewtopic.php?t={{ postrow.MY_TID }}&iid={{ icon.icon_id }}&pid={{ postrow.MY_PID }}&tid={{ postrow.MY_TID }}#p{{ postrow.MY_PID }}">
-            <img src="{{ icon.icon_url }}" title="{{ icon.icon_alt }}" alt="{{ icon.icon_alt }}" width="{{ icon.icon_width }}" height="{{ icon.icon_height }}">
-        </a>
-        {% for check in postrow.ICON_CHECK %}
-            {% if check.post_id == postrow.MY_PID and check.icon_id == icon.icon_id %}
+             {% set reacted = false %}
+                {% for icon in postrow.ICONS %}
+                    {% if icon.status == '1' %}
+                    
+                        {% for check in postrow.ICON_CHECK %}
+                            {% if check.post_id == postrow.MY_PID and check.icon_id == icon.icon_id %}
+                                {% set reacted = true %}
+                                <div class="already_reacted_pr">
+                            {% endif %}
+                        {% endfor %}
+                    
+                        <a href="viewtopic.php?t={{ postrow.MY_TID }}&iid={{ icon.icon_id }}&pid={{ postrow.MY_PID }}&tid={{ postrow.MY_TID }}#p{{ postrow.MY_PID }}">
+                            <img src="{{ icon.icon_url }}" title="{{ icon.icon_alt }}" alt="{{ icon.icon_alt }}" width="{{ icon.icon_width }}" height="{{ icon.icon_height }}">
+                        </a>
+                        {% for check in postrow.ICON_CHECK %}
+                            {% if check.post_id == postrow.MY_PID and check.icon_id == icon.icon_id %}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    
+                    {% endif %}
+                {% endfor %}
+                
+                {% if reacted %}
+                <div class="already_reacted_pr_txt">
+                    <span>{{ lang('ALREADY_REACTED') }}</span>
                 </div>
-            {% endif %}
-        {% endfor %}
-    
-	{% endif %}
-{% endfor %}
+                {% endif %}
             </div>
         </div>
     </details>

@@ -1,4 +1,3 @@
-<style>
 	.post_react_display {
 		float: right;
 	}
@@ -73,6 +72,16 @@
         border: 1px solid #ffffff;
 		border-radius: 10px;
 	}
+	.already_reacted_pr_txt {
+		position: relative;
+        display: inline-block;
+		background-color: rgb(8 197 8 / 72%);
+        border: 1px solid #ffffff;
+		border-radius: 10px;
+		padding: 5px 10px 5px 10px;
+		left: 50%;
+		transform: translateX(-50%);
+	}
 	/* viewforum */
 	.f_post_react_display {
 	    display: inline-block;
@@ -106,4 +115,25 @@
 			display: none;
 		}	
 	}
-</style>
+	/* postrow_page */
+	.alert_close {
+		display: block;
+		position: absolute;
+		top: 15px;
+		right: 2%;
+		width: 11px;
+		height: 16px;
+		overflow: hidden;
+		text-decoration: none !important;
+		background: transparent url("../../../../../../adm/images/alert_close.png") 0 0 no-repeat;
+		cursor: pointer;
+		z-index: 80000;
+	}
+	@media (max-width: 999px) {
+	.alert_close {
+		right: 4%;
+	}
+	@media (max-width: 399px) {
+	.alert_close {
+		right: 8%;
+	}

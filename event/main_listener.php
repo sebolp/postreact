@@ -50,6 +50,8 @@ class main_listener implements EventSubscriberInterface
 	protected $auth;
 	/** @var \phpbb\notification\manager */
     protected $notification_manager;
+	/** @var php_ext */
+	protected $php_ext;
 
 	/**
 	 * Constructor
@@ -62,7 +64,8 @@ class main_listener implements EventSubscriberInterface
 			\phpbb\template\template $template,
 			$table_prefix,
 			\phpbb\auth\auth $auth,
-			\phpbb\notification\manager $notification_manager
+			\phpbb\notification\manager $notification_manager,
+			$php_ext
 			)
 	{
 		$this->language = $language;
@@ -73,6 +76,7 @@ class main_listener implements EventSubscriberInterface
 		$this->table_prefix = $table_prefix;
 		$this->auth = $auth;
 		$this->notification_manager   = $notification_manager;
+		$this->php_ext = $php_ext;
 	}
 
 	/**
@@ -88,7 +92,7 @@ class main_listener implements EventSubscriberInterface
 		$event['lang_set_ext'] = $lang_set_ext;
 	}
 	
-	public function grab_icons($event)
+	public function grab_icons()
 	{
 		// ##
 		// grab icons
@@ -96,19 +100,15 @@ class main_listener implements EventSubscriberInterface
 		$sql_ico = 'SELECT * FROM ' . $this->table_prefix . 'sebo_postreact_icon';
 		$data_ico = [];
 
-		if ($sql_ico) {
-			// do it
-			$result_ico = $this->db->sql_query($sql_ico);
-			$this->data_ico = [];
+		$result_ico = $this->db->sql_query($sql_ico);
 			
-			if ($result_ico) {
-				while ($my_icons = $this->db->sql_fetchrow($result_ico)) {
-					$this->data_ico[] = $my_icons;
-				}
-				$this->db->sql_freeresult($result_ico);
+		if ($result_ico) {
+			while ($my_icons = $this->db->sql_fetchrow($result_ico)) {
+				$data_ico[] = $my_icons;
 			}
-			$this->data_ico;
+			$this->db->sql_freeresult($result_ico);
 		}
+		return $data_ico;
 	}
 
 	public function assign_to_template($event)
@@ -117,12 +117,12 @@ class main_listener implements EventSubscriberInterface
 		$row = $event['row'];
 		// ##
 		// check permissions
-		if($this->auth->acl_get('u_new_sebo_postreact') == '1'){
+		//if($this->auth->acl_get('u_new_sebo_postreact') == '1'){
 			// granted
-		}
-		else if ($this->auth->acl_get('u_new_sebo_postreact_view') == '0'){
+		//}
+		//else if ($this->auth->acl_get('u_new_sebo_postreact_view') == '0'){
 			// return;
-		}
+		//}
 		
 		// ##
 		//
@@ -211,7 +211,7 @@ class main_listener implements EventSubscriberInterface
 		// mark your choise
 		$check = [];
 		$user_id_logged = $this->user->data['user_id'];
-		$sql_check = "SELECT `post_id`, `icon_id` FROM `" . $this->table_prefix . "sebo_postreact_table` WHERE `user_id` = '$user_id_logged' AND `post_id` = '$my_pid'";
+		$sql_check = "SELECT post_id, icon_id FROM " . $this->table_prefix . "sebo_postreact_table WHERE user_id = '$user_id_logged' AND post_id = '$my_pid'";
 		$result_check = $this->db->sql_query($sql_check);
 
 		while ($row_check = $this->db->sql_fetchrow($result_check)) {
@@ -221,6 +221,7 @@ class main_listener implements EventSubscriberInterface
 			];
 		}
 		$this->db->sql_freeresult($result_check);
+						
 		
 		// ##
 		// template
@@ -228,12 +229,12 @@ class main_listener implements EventSubscriberInterface
 				'PERM_W' 		=>$this->auth->acl_get('u_new_sebo_postreact'),
 				'PERM_R'		=>$this->auth->acl_get('u_new_sebo_postreact_view'),
 				'N_REACTIONS' 	=> $total_match_count,
-				'ICONS' 		=> $this->data_ico,
+				'ICONS' 		=> $this->grab_icons(),
 				'MY_PID' 		=> (int)$my_pid,
 				'MY_TID' 		=> (int)$my_tid,
 				'ICON_COUNTS' 	=> $icon_counts,
 				'ICON_CHECK' 	=> $check,
-				'REACTORS'		=> $user_ids_with_details
+				'REACTORS'		=> $user_ids_with_details,
 		));
 		
 	}
@@ -253,19 +254,16 @@ class main_listener implements EventSubscriberInterface
 				
 				// ##
 				// check if reacted
-				$sql_check = "SELECT COUNT(*) as count FROM `" . $this->table_prefix . "sebo_postreact_table` WHERE `user_id` = '$user_id_logged' AND `post_id` = '$my_post_id'";
+				$sql_check = "SELECT COUNT(*) as count FROM " . $this->table_prefix . "sebo_postreact_table WHERE user_id = '$user_id_logged' AND post_id = '$my_post_id'";
 				$result_check = $this->db->sql_query($sql_check);
 				$row_check = $this->db->sql_fetchrow($result_check);
 				
-				// increment the notification_id
-				// $this->config->increment('sebo_postreact_notification_id', 1);
-				// jump to 286
-
 				if ($row_check['count'] > 0) {
 					// ##
 					// delete if yes
-					$sql = "DELETE FROM `" . $this->table_prefix . "sebo_postreact_table` WHERE `user_id` = '$user_id_logged' AND `post_id` = '$my_post_id';";
+					$sql = "DELETE FROM " . $this->table_prefix . "sebo_postreact_table WHERE user_id = '$user_id_logged' AND post_id = '$my_post_id';";
 					$result = $this->db->sql_query($sql);
+
 					if($result){
 					
 						//##
@@ -274,7 +272,7 @@ class main_listener implements EventSubscriberInterface
 						$sql_pname = "SELECT 
 										p.poster_id AS poster_id_clean, p.post_subject AS post_post_title, p.post_id, 
 										u.username_clean AS poster_name_clean, u.user_id, u.user_colour AS poster_user_colour 
-										FROM `" . $this->table_prefix . "posts` p 
+										FROM " . $this->table_prefix . "posts p 
 										JOIN " . $this->table_prefix . "users u ON p.poster_id = u.user_id 
 										WHERE p.post_id = $my_post_id;";
 						$result_pname = $this->db->sql_query($sql_pname);
@@ -287,15 +285,15 @@ class main_listener implements EventSubscriberInterface
 						$this->db->sql_freeresult($result_pname);
 						//
 							
-						$message = $this->user->lang('DELETED_VALUE') . '<br /><br />' . $this->user->lang('RETURN_FORUM', '<a href="' . append_sid("viewtopic.php?p={$my_post_id}#p{$my_post_id}") . '">', '</a>');
-						meta_refresh(2, append_sid("viewtopic.php?p={$my_post_id}#p{$my_post_id}"));
+						$message = $this->user->lang('DELETED_VALUE') . '<br /><br />' . $this->user->lang('RETURN_FORUM', '<a href="' . append_sid("viewtopic.{$this->php_ext}?p={$my_post_id}#p{$my_post_id}") . '">', '</a>');
+						meta_refresh(2, append_sid("viewtopic.{$this->php_ext}?p={$my_post_id}#p{$my_post_id}"));
 						trigger_error($message);
 						}
 					
 				} else {
 					// ##
 					// react if not
-					$sql = "INSERT INTO `" . $this->table_prefix . "sebo_postreact_table` (`postreact_id`, `topic_id`, `post_id`, `user_id`, `icon_id`, `react_time`) VALUES (NULL, '$my_topic_id', '$my_post_id', '$user_id_logged', '$my_icon_id', '$r_time');";
+					$sql = "INSERT INTO " . $this->table_prefix . "sebo_postreact_table (postreact_id, topic_id, post_id, user_id, icon_id, react_time) VALUES (NULL, '$my_topic_id', '$my_post_id', '$user_id_logged', '$my_icon_id', '$r_time');";
 					$result = $this->db->sql_query($sql);
 					if($result){
 
@@ -306,7 +304,7 @@ class main_listener implements EventSubscriberInterface
 						$sql_pname = "SELECT 
 										p.poster_id AS poster_id_clean, p.post_subject AS post_post_title, p.post_id, 
 										u.username_clean AS poster_name_clean, u.user_id, u.user_colour AS poster_user_colour 
-										FROM `" . $this->table_prefix . "posts` p 
+										FROM " . $this->table_prefix . "posts p 
 										JOIN " . $this->table_prefix . "users u ON p.poster_id = u.user_id 
 										WHERE p.post_id = $my_post_id;";
 						$result_pname = $this->db->sql_query($sql_pname);
@@ -332,15 +330,15 @@ class main_listener implements EventSubscriberInterface
 						$this->db->sql_freeresult($result_pname);
 						//
 
-						$message = $this->user->lang('INSERTED_VALUE') . '<br /><br />' . $this->user->lang('RETURN_FORUM', '<a href="' . append_sid("viewtopic.php?p={$my_post_id}#p{$my_post_id}") . '">', '</a>');
-						meta_refresh(2, append_sid("viewtopic.php?p={$my_post_id}#p{$my_post_id}"));
+						$message = $this->user->lang('INSERTED_VALUE') . '<br /><br />' . $this->user->lang('RETURN_FORUM', '<a href="' . append_sid("viewtopic.{$this->php_ext}?p={$my_post_id}#p{$my_post_id}") . '">', '</a>');
+						meta_refresh(2, append_sid("viewtopic.{$this->php_ext}?p={$my_post_id}#p{$my_post_id}"));
 						trigger_error($message);
 						
 						
 						} else {
 							// something wrong = not inserted
-							$message = $this->user->lang('NOT_INSERTED_VALUE') . '<br /><br />' . $this->user->lang('RETURN_FORUM', '<a href="' . append_sid("viewtopic.php?p={$my_post_id}#p{$my_post_id}") . '">', '</a>');
-							meta_refresh(2, append_sid("viewtopic.php?p={$my_post_id}#p{$my_post_id}"));
+							$message = $this->user->lang('NOT_INSERTED_VALUE') . '<br /><br />' . $this->user->lang('RETURN_FORUM', '<a href="' . append_sid("viewtopic.{$this->php_ext}?p={$my_post_id}#p{$my_post_id}") . '">', '</a>');
+							meta_refresh(2, append_sid("viewtopic.{$this->php_ext}?p={$my_post_id}#p{$my_post_id}"));
 							trigger_error($message);
 						}
 					$this->db->sql_freeresult($result);
@@ -348,21 +346,14 @@ class main_listener implements EventSubscriberInterface
 				$this->db->sql_freeresult($result_check);
 			}
 		} else {
-				$message = $this->user->lang('LOGIN_TO_REACT') . '<br /><br />' . $this->user->lang('RETURN_FORUM', '<a href="' . append_sid("viewtopic.php?p={$my_post_id}#p{$my_post_id}") . '">', '</a>');
-				meta_refresh(2, append_sid("viewtopic.php?p={$my_post_id}#p{$my_post_id}"));
+				$message = $this->user->lang('LOGIN_TO_REACT') . '<br /><br />' . $this->user->lang('RETURN_FORUM', '<a href="' . append_sid("viewtopic.{$this->php_ext}?p={$my_post_id}#p{$my_post_id}") . '">', '</a>');
+				meta_refresh(2, append_sid("viewtopic.{$this->php_ext}?p={$my_post_id}#p{$my_post_id}"));
 				trigger_error($message);
 		}
 	}
 	
 	public function viewforum_edit($event)
 	{
-		if($this->auth->acl_get('u_new_sebo_postreact') == '1'){
-			// granted
-		}
-		else if ($this->auth->acl_get('u_new_sebo_postreact_view') == '0'){
-			// return;
-		}
-		
 		$topicrow = $event['topicrow'];
 		$row = $event['row'];
 		$topic_id = $row['topic_id'];
@@ -402,7 +393,7 @@ class main_listener implements EventSubscriberInterface
 		// ##
 		// sort by number
 		$icons_with_counts = [];
-		foreach ($this->data_ico as $icon) {
+		foreach ($this->grab_icons() as $icon) {
 			$icon_id = $icon['icon_id'];
 			if (isset($icon_counts[$icon_id])) {
 				$icons_with_counts[] = [
@@ -430,16 +421,6 @@ class main_listener implements EventSubscriberInterface
 	
 	public function search_edit($event)
 	{
-		if($this->auth->acl_get('u_new_sebo_postreact') == '1'){
-			// granted
-		}
-		else if ($this->auth->acl_get('u_new_sebo_postreact_view') == '0'){
-			// return;
-		}
-		
-		$tpl_ary = $event['tpl_ary'];
-		$result_topic_id = $event['result_topic_id'];
-		
 		$row = $event['row'];
 		$topic_id = $row['topic_id'];
 		$sql = 'SELECT * FROM ' . $this->table_prefix . 'sebo_postreact_table WHERE topic_id = ' . (int)$topic_id;
@@ -475,21 +456,17 @@ class main_listener implements EventSubscriberInterface
 			}
 		}
 
-		// Inizializza il contatore
+		// start the counter
 		$topic_id_count = 0;
-		// Array per memorizzare i risultati
-		$icons_with_counts = [];
-		// Dati delle icone (questo dovrebbe essere popolato dalla tua tabella sebo_postreact_icon)
-		$this->grab_icons(null);
-		$data_ico = $this->data_ico;
+		$data_ico = $this->grab_icons();
 		
-		// Step 1: make a new array with `icon_id` key
+		// Step 1: make a new array with icon_id key
 		$data_ico_assoc = [];
 		foreach ($data_ico as $icon) {
 			$data_ico_assoc[$icon['icon_id']] = $icon;
 		}
 
-		// Step 2: count `icon_id` occurrences for `topic_id`
+		// Step 2: count icon_id occurrences for topic_id
 		$icon_counts = [];
 		foreach ($data as $rec) {
 			$icon_id = $rec['icon_id'];
@@ -504,14 +481,14 @@ class main_listener implements EventSubscriberInterface
 			$icon_counts[$topic_id][$icon_id]++;
 		}
 
-		// Step 3: make new array with icon info and count, ensuring each `icon_id` is unique
+		// Step 3: make new array with icon info and count, ensuring each icon_id is unique
 		$new_array = [];
 		foreach ($data as $rec) {
 			$icon_id = $rec['icon_id'];
 			$topic_id = $rec['topic_id'];
 
 			if (isset($data_ico_assoc[$icon_id])) {
-				// Only if the `icon_id` has not already been added to the final array
+				// Only if the icon_id has not already been added to the final array
 				if (!isset($new_array[$icon_id])) {
 					$icon_info = $data_ico_assoc[$icon_id];
 					$count = isset($icon_counts[$topic_id][$icon_id]) ? (string)$icon_counts[$topic_id][$icon_id] : '0';
@@ -524,7 +501,7 @@ class main_listener implements EventSubscriberInterface
 						'count' => $count
 					];
 				} else {
-					// Update the count if `icon_id` already exists
+					// Update the count if icon_id already exists
 					$new_array[$icon_id]['count'] = (string)max($new_array[$icon_id]['count'], $count);
 				}
 			}

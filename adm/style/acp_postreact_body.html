@@ -1,6 +1,15 @@
 {% include 'overall_header.html' %}
 
 <!-- INCLUDECSS @sebo_postreact/acp_css.css -->
+<!-- INCLUDEJS @sebo_postreact/acp_js.js -->
+
+<div id="confirm-delete-reaction" class="popup-confirm-delete">
+    <div class="popup-content-delete">
+        <p>{{ lang('DELETE_WARNING') }}</p>
+        <button id="confirm-delete">{{ lang('DELETE_DELETE') }}</button>
+        <button id="cancel-delete">{{ lang('DELETE_UNDONE') }}</button>
+    </div>
+</div>
 
 <h1>{{ lang('ACP_POSTREACT_TITLE') }}</h1>
 
@@ -19,7 +28,7 @@
 			<dt>
 			{{ lang('PP_ME_EXT_PR') }}
 			</dt>
-			<dd><img src="../ext/sebo/postreact/adm/style/wink_beer.png" width="32px" height="32px"> <a href="https://www.paypal.com/donate/?hosted_button_id=GS3T9MFDJJGT4" target="_blank" rel="noreferrer noopener"><img src="https://www.paypalobjects.com/webstatic/en_US/i/btn/png/silver-pill-paypal-26px.png" alt="Donate using PayPal" style="cursor: pointer; margin-top: 15px;"></a></dd>
+			<dd><img src="../ext/sebo/postreact/adm/style/wink_beer.png" width="32px" height="32px"> <a href="{LINK_DONATE}" target="_blank" rel="noreferrer noopener"><img src="https://www.paypalobjects.com/webstatic/en_US/i/btn/png/silver-pill-paypal-26px.png" alt="{{ lang('PP_ME_EXT_ALT') }}"></a></dd>
 		</dl>
 	</fieldset>
 	
@@ -37,8 +46,8 @@
 		<legend>{{ lang('SETTINGS') }}</legend>
 		<dl>
 			<dt>
-				<a class="btn btn-danger" href="index.php{{ SID }}&i=-sebo-postreact-acp-main_module&addpr=1">
-				<i class="fa fa-trash-o fa-lg"></i> {{ lang('ADD_PR') }}</a>
+				<a class="btn btn-danger" href="{CREATE_PR_URL}">
+				<i class="fa fa-plus-circle fa-lg"></i> {{ lang('ADD_PR') }}</a>
 			</dt>
 			<dd>
 				{{ lang('HOW_TO') }}
@@ -84,19 +93,16 @@
                     <span class="slider round"></span>
                 </label>
             </div>
-			
-			<div>
-				<i class="fa fa-lock fa-2x" aria-hidden="true"></i>
-			</div>
 
             <div>
                 <span class="fa-stack fa-lg">
-                    <i class="fa fa fa-trash fa-stack-1x" title="Still not available"></i>
-                    <i class="fa fa-ban fa-stack-2x text-danger" title="Still not available"></i>
+                    <a href="#" class="delete-reaction" data-url="{DELETE_PR_URL}{{ icon.icon_id }}">
+						<i class="fa fa-trash fa-stack-1x" alt="{{ lang('DELETE') }}"></i>
+					</a>
                 </span>
             </div>
         </div>
-        <!-- Aggiungi un campo nascosto per passare gli ID delle icone -->
+        <!-- Add an hidden text for icon IDs -->
         <input type="hidden" name="icon_ids[]" value="{{ icon.icon_id }}">
     {% endfor %}
 	</dl>

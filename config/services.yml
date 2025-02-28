@@ -8,6 +8,7 @@ services:
             - '@user'
             - '%core.table_prefix%'
             - '@dbal.conn'
+            - '%core.php_ext%'
 
     sebo.postreact.listener:
         class: sebo\postreact\event\main_listener
@@ -20,6 +21,7 @@ services:
             - '%core.table_prefix%'
             - '@auth'
             - '@notification_manager'
+            - '%core.php_ext%'
             
         tags:
             - { name: event.listener }
