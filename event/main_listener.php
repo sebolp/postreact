@@ -360,27 +360,44 @@ class main_listener implements EventSubscriberInterface
 		$sql = 'SELECT * FROM ' . $this->table_prefix . 'sebo_postreact_table WHERE topic_id = ' . (int)$topic_id;
 		$data = [];
 
-		if ($sql) {
-			// do it
-			$result = $this->db->sql_query($sql);
-			// if results
-			if ($result) {
-				while ($my_row = $this->db->sql_fetchrow($result)) {
-					// if exists
-					$sql_post_exist = 'SELECT * FROM ' . $this->table_prefix . 'posts WHERE post_id = ' . (int)$my_row['post_id'];
-					$result_post_exist = $this->db->sql_query($sql_post_exist);
-					
-					// Se il risultato esiste, aggiungi la riga all'array
-					if ($result_post_exist && $this->db->sql_fetchrow($result_post_exist)) {
-						$data[] = $my_row;
-					}
+		// do it
+		$result = $this->db->sql_query($sql);
 			
-					$this->db->sql_freeresult($result_post_exist);
+		// Array starts for data and IDs
+		$filtered_rows = [];
+		$post_ids = [];
+
+		while ($my_row = $this->db->sql_fetchrow($result)) {
+			$post_id = (int)$my_row['post_id'];
+			// save the entire row of the post_ids
+			$filtered_rows[$post_id] = $my_row; 
+			// save only post_id
+			$post_ids[] = $post_id;
+		}
+
+		// if IDs, check
+		if (!empty($post_ids)) {
+			$sql_post_exist = 'SELECT post_id FROM ' . $this->table_prefix . 'posts WHERE post_id IN (' . implode(',', $post_ids) . ')';
+			$result_post_exist = $this->db->sql_query($sql_post_exist);
+
+			$existing_posts = [];
+			while ($row = $this->db->sql_fetchrow($result_post_exist)) {
+				$existing_posts[$row['post_id']] = true;
+			}
+			$this->db->sql_freeresult($result_post_exist);
+
+			// Filter
+			$data = [];
+			foreach ($filtered_rows as $post_id => $row) {
+				if (isset($existing_posts[$post_id])) {
+					// save row
+					$data[] = $row;
 				}
 			}
-			$this->db->sql_freeresult($result);			
 		}
-		// ##
+					
+		$this->db->sql_freeresult($result);			
+		
 		// numb check icon_id
 		$icon_counts = [];
 		foreach ($data as $record) {
@@ -422,29 +439,39 @@ class main_listener implements EventSubscriberInterface
 	public function search_edit($event)
 	{
 		$row = $event['row'];
-		$topic_id = $row['topic_id'];
-		$sql = 'SELECT * FROM ' . $this->table_prefix . 'sebo_postreact_table WHERE topic_id = ' . (int)$topic_id;
+		// sql_escape because of potential inject
+		$topic_id = isset($row['topic_id']) ? (int)$row['topic_id'] : 0;
+		$topic_id_escaped = $this->db->sql_escape($topic_id);
+		$sql = 'SELECT * FROM ' . $this->table_prefix . 'sebo_postreact_table WHERE topic_id = ' . $topic_id_escaped;
+		$result = $this->db->sql_query($sql);
+
+		$filtered_rows = [];
+		$post_ids = [];
+
+		while ($my_row = $this->db->sql_fetchrow($result)) {
+			$post_id = (int)$my_row['post_id'];
+			$filtered_rows[$post_id] = $my_row;
+			$post_ids[] = $post_id;
+		}
+		$this->db->sql_freeresult($result);
+
 		$data = [];
 
-		if ($sql) {
-			// do it
-			$result = $this->db->sql_query($sql);
-			// if results
-			if ($result) {
-				while ($my_row = $this->db->sql_fetchrow($result)) {
-					// if exists
-					$sql_post_exist = 'SELECT * FROM ' . $this->table_prefix . 'posts WHERE post_id = ' . (int)$my_row['post_id'];
-					$result_post_exist = $this->db->sql_query($sql_post_exist);
-					
-					// Se il risultato esiste, aggiungi la riga all'array
-					if ($result_post_exist && $this->db->sql_fetchrow($result_post_exist)) {
-						$data[] = $my_row;
-					}
-			
-					$this->db->sql_freeresult($result_post_exist);
+		if (!empty($post_ids)) {
+			$sql_post_exist = 'SELECT post_id FROM ' . $this->table_prefix . 'posts WHERE post_id IN (' . implode(',', $post_ids) . ')';
+			$result_post_exist = $this->db->sql_query($sql_post_exist);
+
+			$existing_posts = [];
+			while ($row = $this->db->sql_fetchrow($result_post_exist)) {
+				$existing_posts[$row['post_id']] = true;
+			}
+			$this->db->sql_freeresult($result_post_exist);
+
+			foreach ($filtered_rows as $post_id => $row) {
+				if (isset($existing_posts[$post_id])) {
+					$data[] = $row;
 				}
 			}
-			$this->db->sql_freeresult($result);			
 		}
 
 		// ##
@@ -513,11 +540,12 @@ class main_listener implements EventSubscriberInterface
 		// ##
 		// template		
 		$event['tpl_ary'] = array_merge($event['tpl_ary'], [
-			'ICONS' 		=> $array_with_counts,
-			'PERM_W' 		=> $this->auth->acl_get('u_new_sebo_postreact'),
-			'PERM_R'		=> $this->auth->acl_get('u_new_sebo_postreact_view')
+			'ICONS'         => $array_with_counts,
+			'PERM_W'        => $this->auth->acl_get('u_new_sebo_postreact'),
+			'PERM_R'        => $this->auth->acl_get('u_new_sebo_postreact_view')
 		]);
 	}
+
 	
 	/**
 	 * Add permissions to the ACP -> Permissions settings page
