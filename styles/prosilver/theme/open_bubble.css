@@ -40,12 +40,6 @@
 		transform: translateX(-50%);
 	}
 	
-	.smile_base_1 {
-		float: right;
-		display: inline-block;
-		margin-top:-24px;
-	}
-
 	.link-image_pr {
 		cursor: pointer;
 	}

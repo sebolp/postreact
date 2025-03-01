@@ -1,12 +1,14 @@
-	.smile_base_1 {
-		float: right;
-		display: inline-block;
-		margin-top:-24px;
+	.smile_base_1, .smile_base_2_pr {
+		float: none;
+		position: absolute;
+		top: 5px;
+		right: 0;
 	}
-	.smile_base_2_pr {
-		float: right;
-		display: inline-block;
-		margin-top:-20px;
+	@media (max-width: 700px) {
+		.smile_base_1, .smile_base_2_pr {
+			top: 60px;
+			right: 20px;
+		}
 	}
 	.post-buttons {
 		right: 26px !important;
