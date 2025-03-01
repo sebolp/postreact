@@ -3,7 +3,7 @@
  *
  * PostReaction. An extension for the phpBB Forum Software package.
  *
- * @copyright (c) 2024, sebo, https://www.fiatpandaclub.org
+ * @copyright (c) 2025, sebo, https://www.fiatpandaclub.org - Thanks Chris1278!
  * @license GNU General Public License, version 2 (GPL-2.0)
  *
  */
@@ -11,10 +11,10 @@
 namespace sebo\postreact\migrations;
 
 class install_acp_module extends \phpbb\db\migration\migration
-{
-	public function effectively_installed()
+{	
+	public static function depends_on()
 	{
-		return isset($this->config['sebo_postreact']);
+		return ['\sebo\postreact\migrations\install_sample_data'];
 	}
 
 	public function update_data()

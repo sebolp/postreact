@@ -439,7 +439,7 @@ class main_listener implements EventSubscriberInterface
 	public function search_edit($event)
 	{
 		$row = $event['row'];
-		// sql_escape because of potential inject
+		// sql_escape because of potential inject (?)
 		$topic_id = isset($row['topic_id']) ? (int)$row['topic_id'] : 0;
 		$topic_id_escaped = $this->db->sql_escape($topic_id);
 		$sql = 'SELECT * FROM ' . $this->table_prefix . 'sebo_postreact_table WHERE topic_id = ' . $topic_id_escaped;

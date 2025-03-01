@@ -3,7 +3,7 @@
  *
  * PostReaction. An extension for the phpBB Forum Software package.
  *
- * @copyright (c) 2024, sebo, https://www.fiatpandaclub.org
+ * @copyright (c) 2025, sebo, https://www.fiatpandaclub.org - Thanks Chris1278!
  * @license GNU General Public License, version 2 (GPL-2.0)
  *
  */
@@ -12,14 +12,9 @@ namespace sebo\postreact\migrations;
 
 class install_sample_schema extends \phpbb\db\migration\migration
 {
-	public function effectively_installed()
+	public static function depends_on()
 	{
-		return $this->db_tools->sql_table_exists($this->table_prefix . 'sebo_postreact_table');
-	}
-	
-	static public function depends_on()
-	{
-		return ['\phpbb\db\migration\data\v320\v320'];
+		return ['\phpbb\db\migration\data\v330\v330'];
 	}
 
 	/**
