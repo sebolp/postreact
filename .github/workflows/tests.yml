@@ -2,12 +2,12 @@ name: Tests
 
 on:
   push:
-    branches:     # Run tests when commits are pushed to these branches in your repo
+    branches:
       - main
       - master
       - develop
       - dev/*
-  pull_request:   # Run tests when pull requests are made on these branches in your repo
+  pull_request:
     branches:
       - main
       - master
@@ -20,3 +20,6 @@ jobs:
     uses: phpbb-extensions/test-framework/.github/workflows/tests.yml@3.3.x
     with:
       EXTNAME: sebo/postreact
+      PHPBB_BRANCH: '3.3.x'
+      PRIMARY_PHP_VERSION: '7.2'
+      PHP_VERSION_MATRIX: '["7.2", "7.3", "7.4"]'
