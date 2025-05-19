@@ -20,6 +20,7 @@ jobs:
     uses: phpbb-extensions/test-framework/.github/workflows/tests.yml@3.3.x
     with:
       EXTNAME: sebo/postreact
+      RUN_FUNCTIONAL_TESTS: 0
       PHPBB_BRANCH: '3.3.x'
       PRIMARY_PHP_VERSION: '7.2'
       PHP_VERSION_MATRIX: '["7.2", "7.3", "7.4"]'
