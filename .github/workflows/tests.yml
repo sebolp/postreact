@@ -20,4 +20,3 @@ jobs:
     uses: phpbb-extensions/test-framework/.github/workflows/tests.yml@3.3.x
     with:
       EXTNAME: sebo/postreact
-      EXT_PATH: .
