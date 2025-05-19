@@ -228,8 +228,8 @@
 			'PERM_R'		=> $this->auth->acl_get('u_new_sebo_postreact_view'),
 			'N_REACTIONS'   => $total_match_count,
 			'ICONS'		 => $this->grab_icons(),
-			'MY_PID'		=> (int)$my_pid,
-			'MY_TID'		=> (int)$my_tid,
+			'MY_PID'		=> (int) $my_pid,
+			'MY_TID'		=> (int) $my_tid,
 			'ICON_COUNTS'   => $icon_counts,
 			'ICON_CHECK'	=> $check,
 			'REACTORS'	  => $user_ids_with_details,
@@ -321,7 +321,7 @@
 							meta_refresh(2, append_sid("viewtopic.{$this->php_ext}?p={$my_post_id}#p{$my_post_id}"));
 							trigger_error($message);
 							} else
-{
+							{
 							// something wrong = not inserted
 							$message = $this->user->lang('NOT_INSERTED_VALUE') . '<br /><br />' . $this->user->lang('RETURN_FORUM', '<a href="' . append_sid("viewtopic.{$this->php_ext}?p={$my_post_id}#p{$my_post_id}") . '">', '</a>');
 							meta_refresh(2, append_sid("viewtopic.{$this->php_ext}?p={$my_post_id}#p{$my_post_id}"));
@@ -343,7 +343,7 @@
 			$topicrow = $event['topicrow'];
 			$row = $event['row'];
 			$topic_id = $row['topic_id'];
-			$sql = 'SELECT * FROM ' . $this->table_prefix . 'sebo_postreact_table WHERE topic_id = ' . (int)$topic_id;
+			$sql = 'SELECT * FROM ' . $this->table_prefix . 'sebo_postreact_table WHERE topic_id = ' . (int) $topic_id;
 			$data = [];
 			// do it
 			$result = $this->db->sql_query($sql);
@@ -352,7 +352,7 @@
 			$post_ids = [];
 			while ($my_row = $this->db->sql_fetchrow($result))
 			{
-				$post_id = (int)$my_row['post_id'];
+				$post_id = (int) $my_row['post_id'];
 				// save the entire row of the post_ids
 				$filtered_rows[$post_id] = $my_row;
 				// save only post_id
@@ -425,7 +425,7 @@
 		{
 			$row = $event['row'];
 			// sql_escape because of potential inject (?)
-			$topic_id = isset($row['topic_id']) ? (int)$row['topic_id'] : 0;
+			$topic_id = isset($row['topic_id']) ? (int) $row['topic_id'] : 0;
 			$topic_id_escaped = $this->db->sql_escape($topic_id);
 			$sql = 'SELECT * FROM ' . $this->table_prefix . 'sebo_postreact_table WHERE topic_id = ' . $topic_id_escaped;
 			$result = $this->db->sql_query($sql);
@@ -433,7 +433,7 @@
 			$post_ids = [];
 			while ($my_row = $this->db->sql_fetchrow($result))
 			{
-				$post_id = (int)$my_row['post_id'];
+				$post_id = (int) $my_row['post_id'];
 				$filtered_rows[$post_id] = $my_row;
 				$post_ids[] = $post_id;
 			}
@@ -504,7 +504,7 @@
 					if (!isset($new_array[$icon_id]))
 					{
 						$icon_info = $data_ico_assoc[$icon_id];
-						$count = isset($icon_counts[$topic_id][$icon_id]) ? (string)$icon_counts[$topic_id][$icon_id] : '0';
+						$count = isset($icon_counts[$topic_id][$icon_id]) ? (string) $icon_counts[$topic_id][$icon_id] : '0';
 						$new_array[$icon_id] = [
 						'icon_id' => $icon_info['icon_id'],
 						'icon_url' => $icon_info['icon_url'],
@@ -515,7 +515,7 @@
 						} else
 						{
 						// Update the count if icon_id already exists
-						$new_array[$icon_id]['count'] = (string)max($new_array[$icon_id]['count'], $count);
+						$new_array[$icon_id]['count'] = (string) max($new_array[$icon_id]['count'], $count);
 					}
 				}
 			}
@@ -683,4 +683,4 @@
 				}
 			}
 		}
-	}	
+	}
