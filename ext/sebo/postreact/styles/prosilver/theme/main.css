@@ -1,154 +1,154 @@
-	.post_react_display {
-		float: right;
-	}
-	#post_react_display {
-		display: flex;
-		flex-direction: row-reverse;
-		width: 100%;
-		margin: 10px 0;
-		overflow: hidden;
-		justify-content: flex-start;
-	}
-	.img_post_react_display_memberlist {
-		float: left;
-		position: relative;
-		margin-right: 5px;
-	}
-	.img_post_react_display {
-		float: right;
-		position: relative;
-		margin-right: -8px;
-		transition: margin-right 0.5s ease;
-	}
-	.img_post_react_display:first-child {
-		margin-right: 0;
-	}
-	.post_react_display:hover .img_post_react_display {
-		margin-right: 8px;
-	}
-	.bubble_post_react_display {
-		position: absolute;
-		top: 0;
-		right: 0;
-		background-color: red;
-		border: 1px solid #ffffff;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		z-index: 2;
-		width: 12px;
-		height: 12px;
-		border-radius: 50%;
-		color: white;
-		font-size: 8px;	
-	}
-	.bubble_post_react_display_b {
-		position: absolute;
-		top: 0;
-		right: 0;
-		background-color: red;
-		border: 1px solid #ffffff;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		z-index: 2;
-		width: 16px;
-		height: 14px;
-		border-radius: 50%;
-		color: white;
-		font-size: 8px;	
-	}
-	.bubble_post_react_display_bb {
-		position: absolute;
-		top: 0;
-		right: 0;
-		background-color: red;
-		border: 1px solid #ffffff;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		z-index: 2;
-		width: 18px;
-		height: 14px;
-		border-radius: 50%;
-		color: white;
-		font-size: 8px;	
-	}
-	.already_reacted_pr {
-		position: relative;
-        display: inline-block;
-		background-color: rgb(8 197 8 / 72%);
+    .post_react_display {
+        float: right;
+    }
+    #post_react_display {
+        display: flex;
+        flex-direction: row-reverse;
+        width: 100%;
+        margin: 10px 0;
+        overflow: hidden;
+        justify-content: flex-start;
+    }
+    .img_post_react_display_memberlist {
+        float: left;
+        position: relative;
+        margin-right: 5px;
+    }
+    .img_post_react_display {
+        float: right;
+        position: relative;
+        margin-right: -8px;
+        transition: margin-right 0.5s ease;
+    }
+    .img_post_react_display:first-child {
+        margin-right: 0;
+    }
+    .post_react_display:hover .img_post_react_display {
+        margin-right: 8px;
+    }
+    .bubble_post_react_display {
+        position: absolute;
+        top: 0;
+        right: 0;
+        background-color: red;
         border: 1px solid #ffffff;
-		border-radius: 10px;
-	}
-	.already_reacted_pr_txt {
-		position: relative;
-        display: inline-block;
-		background-color: rgb(8 197 8 / 72%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        color: white;
+        font-size: 8px;
+    }
+    .bubble_post_react_display_b {
+        position: absolute;
+        top: 0;
+        right: 0;
+        background-color: red;
         border: 1px solid #ffffff;
-		border-radius: 10px;
-		padding: 5px 10px 5px 10px;
-		left: 50%;
-		transform: translateX(-50%);
-	}
-	/* viewforum */
-	.f_post_react_display {
-	    display: inline-block;
-		position: relative;
-		left: 15px;
-	}
-	.f_post_react_display img{
-	    margin-right: -7px;
-		transition: margin-right 0.5s ease;
-	}
-	.f_post_react_display:hover img{
-	    margin-right: 1px;
-		transition: margin-right 0.5s ease;
-	}
-	/* responsive */
-	@media (max-width: 870px) {
-		.f_post_react_display {
-			display: none;
-		}	
-	}
-	@media (max-width: 700px) {
-		.f_post_react_display {
-			display: block;
-			position: sticky;
-			float: right;
-			right: 20px;
-		}	
-	}
-	@media (max-width: 380px) {
-		.f_post_react_display {
-			display: none;
-		}	
-	}
-	/* postrow_page */
-	.alert_close {
-		display: block;
-		position: absolute;
-		top: 15px;
-		right: 2%;
-		width: 16px;
-		height: 16px;
-		overflow: hidden;
-		text-decoration: none !important;
-		background: transparent url("../../../../../../adm/images/alert_close.png") 0 0 no-repeat;
-		cursor: pointer;
-		z-index: 80000;
-	}
-	@media (max-width: 999px) {
-	.alert_close {
-		right: 4%;
-	}
-	}
-	@media (max-width: 399px) {
-	.alert_close {
-		right: 8%;
-	}
-	}
-	#darken {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2;
+        width: 16px;
+        height: 14px;
+        border-radius: 50%;
+        color: white;
+        font-size: 8px;
+    }
+    .bubble_post_react_display_bb {
+        position: absolute;
+        top: 0;
+        right: 0;
+        background-color: red;
+        border: 1px solid #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2;
+        width: 18px;
+        height: 14px;
+        border-radius: 50%;
+        color: white;
+        font-size: 8px;
+    }
+    .already_reacted_pr {
+        position: relative;
+        display: inline-block;
+        background-color: rgb(8 197 8 / 72%);
+        border: 1px solid #ffffff;
+        border-radius: 10px;
+    }
+    .already_reacted_pr_txt {
+        position: relative;
+        display: inline-block;
+        background-color: rgb(8 197 8 / 72%);
+        border: 1px solid #ffffff;
+        border-radius: 10px;
+        padding: 5px 10px 5px 10px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    /* viewforum */
+    .f_post_react_display {
+        display: inline-block;
+        position: relative;
+        left: 15px;
+    }
+    .f_post_react_display img{
+        margin-right: -7px;
+        transition: margin-right 0.5s ease;
+    }
+    .f_post_react_display:hover img{
+        margin-right: 1px;
+        transition: margin-right 0.5s ease;
+    }
+    /* responsive */
+    @media (max-width: 870px) {
+        .f_post_react_display {
+            display: none;
+        }
+    }
+    @media (max-width: 700px) {
+        .f_post_react_display {
+            display: block;
+            position: sticky;
+            float: right;
+            right: 20px;
+        }
+    }
+    @media (max-width: 380px) {
+        .f_post_react_display {
+            display: none;
+        }
+    }
+    /* postrow_page */
+    .alert_close {
+        display: block;
+        position: absolute;
+        top: 15px;
+        right: 2%;
+        width: 16px;
+        height: 16px;
+        overflow: hidden;
+        text-decoration: none !important;
+        background: transparent url("../../../../../../adm/images/alert_close.png") 0 0 no-repeat;
+        cursor: pointer;
+        z-index: 80000;
+    }
+    @media (max-width: 999px) {
+    .alert_close {
+        right: 4%;
+    }
+    }
+    @media (max-width: 399px) {
+    .alert_close {
+        right: 8%;
+    }
+    }
+    #darken {
     display: none;
     position: fixed;
     left: 0;
@@ -159,9 +159,9 @@
     opacity: 0.5;
     z-index: 45;
     }
-    
+
     .phpbb_confirm {
-    display: none; 
+    display: none;
     position: fixed;
     top: 50%;
     left: 50%;
@@ -176,31 +176,31 @@
     overflow-y: auto;
     overflow-x: hidden;
     }
-    
+
     .phpbb_confirm .alert_close:hover {
     background-position: 0 -16px;
     }
-    
+
     .alert_text h3 {
     margin-top: 0;
     }
-    
+
     .post_react_explain_container {
     display: flex;
     align-items: center;
     width: 98%;
     padding: 5px;
     border-radius: 5px;
-	}
-	.post_react_explain_container:hover {
+    }
+    .post_react_explain_container:hover {
     background-color: #F6F4D0;
     }
-    
+
     .post_react_explain {
-    flex: 0 1 auto; 
-    margin-right: 10px; 
+    flex: 0 1 auto;
+    margin-right: 10px;
     }
-    
+
     .post_react_list {
-    flex: 1 1 auto; 
+    flex: 1 1 auto;
     }

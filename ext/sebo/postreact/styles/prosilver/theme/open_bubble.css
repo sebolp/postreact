@@ -1,65 +1,65 @@
-	.popup-container_pr summary {
-		list-style: none;
-		cursor: pointer;
-	}
+    .popup-container_pr summary {
+        list-style: none;
+        cursor: pointer;
+    }
 
-	.popup_pr {
-		max-width: 455px;
-		display: none;
-		position: absolute;
-		background: white;
-		border: 1px solid #ccc;
-		padding: 10px;
-		margin-top: 15px;
-		left: 98%;
-		width: 80%;
-		transform: translateX(-50%);
-		border-radius: 10px;
-		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-		z-index: 1000;
-	}
+    .popup_pr {
+        max-width: 455px;
+        display: none;
+        position: absolute;
+        background: white;
+        border: 1px solid #ccc;
+        padding: 10px;
+        margin-top: 15px;
+        left: 98%;
+        width: 80%;
+        transform: translateX(-50%);
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+    }
 
-	.popup-container_pr[open] .popup_pr {
-		display: block;
-	}
+    .popup-container_pr[open] .popup_pr {
+        display: block;
+    }
 
-	.popup-container_pr summary {
-		border: none;
-		outline: none;
-	}
+    .popup-container_pr summary {
+        border: none;
+        outline: none;
+    }
 
-	.arrow_pr {
-		width: 0;
-		height: 0;
-		border-left: 15px solid transparent;
-		border-right: 15px solid transparent;
-		border-bottom: 10px solid #ccc;
-		position: absolute;
-		top: -10px;
-		left: 50%;
-		transform: translateX(-50%);
-	}
-	
-	.link-image_pr {
-		cursor: pointer;
-	}
+    .arrow_pr {
+        width: 0;
+        height: 0;
+        border-left: 15px solid transparent;
+        border-right: 15px solid transparent;
+        border-bottom: 10px solid #ccc;
+        position: absolute;
+        top: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
 
-	.popup-content_pr img {
-		margin: 5px;
-	}
-	
-	/* have to edit to overtake the bubble */
-	.dropdown-contents{
-		z-index: 4 !important;
-	}
+    .link-image_pr {
+        cursor: pointer;
+    }
 
-	@media (max-width: 700px) {
-		.arrow_pr {
-			left: 95%
-		}
-		.popup_pr {
-			right: 10px;
-			transform: none;
-			left: auto;
-		}
-	}
+    .popup-content_pr img {
+        margin: 5px;
+    }
+
+    /* have to edit to overtake the bubble */
+    .dropdown-contents{
+        z-index: 4 !important;
+    }
+
+    @media (max-width: 700px) {
+        .arrow_pr {
+            left: 95%
+        }
+        .popup_pr {
+            right: 10px;
+            transform: none;
+            left: auto;
+        }
+    }
