@@ -11,7 +11,7 @@
     <exclude-pattern>./vendor</exclude-pattern>
 
     <!-- Applicare lo standard phpBB -->
-    <rule ref="vendor/senky/phpbb-coding-standard/ruleset.xml"/>
+    <rule ref="../vendor/senky/phpbb-coding-standard/ruleset.xml"/>
 
     <!-- Impedire l'uso degli spazi per l'indentazione -->
     <rule ref="Generic.WhiteSpace.DisallowSpaceIndent"/>
