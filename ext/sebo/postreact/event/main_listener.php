@@ -8,12 +8,12 @@
 		*
 	*/
 	namespace sebo\postreact\event;
-	
+
 	/**
 		* @ignore
 	*/
 	use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-	
+
 	/**
 		* PostReaction Event listener.
 	*/
@@ -65,7 +65,7 @@
 		\phpbb\auth\auth $auth,
 		\phpbb\notification\manager $notification_manager,
 		$php_ext
-		) 
+		)
 		{
 			$this->language = $language;
 			$this->db	   = $db;
@@ -97,7 +97,7 @@
 			$sql_ico = 'SELECT * FROM ' . $this->table_prefix . 'sebo_postreact_icon';
 			$data_ico = [];
 			$result_ico = $this->db->sql_query($sql_ico);
-			if ($result_ico) 
+			if ($result_ico)
 			{
 				while ($my_icons = $this->db->sql_fetchrow($result_ico))
 				{
@@ -124,7 +124,7 @@
 			$my_pid = $row['post_id'];
 			$my_tid = $row['topic_id'];
 			// take the line corresponds to post_id
-			$sql = 'SELECT * FROM ' . $this->table_prefix . 'sebo_postreact_table WHERE post_id = ' . (int)$my_pid;
+			$sql = 'SELECT * FROM ' . $this->table_prefix . 'sebo_postreact_table WHERE post_id = ' . (int) $my_pid;
 			$data = [];
 			if ($sql)
 			{
@@ -132,9 +132,9 @@
 				$result = $this->db->sql_query($sql);
 				$this->data = [];
 				if ($result)
-{
+				{
 					while ($my_row = $this->db->sql_fetchrow($result))
-{
+					{
 						$this->data[] = $my_row;
 					}
 					$this->db->sql_freeresult($result);
@@ -147,12 +147,12 @@
 			$icon_counts = [];
 			$user_ids_list = [];
 			foreach ($this->data as $record)
-{
+			{
 				$icon_id = $record['icon_id'];
 				$user_id = $record['user_id'];
 				$post_id = $record['post_id'];
 				if (!isset($icon_counts[$icon_id]))
-{
+				{
 					$icon_counts[$icon_id] = 0;
 					$user_ids_list[$icon_id] = [];
 				}
@@ -167,16 +167,16 @@
 			// search users_table information from user_id
 			$user_data_detailed = [];
 			foreach ($user_ids_list as $icon_id => $entries)
-{
+			{
 				foreach ($entries as $entry)
-{
+				{
 					$user_id = $entry['user_id'];
 					if (!isset($user_data_detailed[$user_id]))
-{
+					{
 						$query = "SELECT group_id, username, user_colour FROM " . $this->table_prefix . "users WHERE user_id = '$user_id'";
 						$result = $this->db->sql_query($query);
 						if ($result->num_rows > 0)
-{
+						{
 							$row = $result->fetch_assoc();
 							$user_data_detailed[$user_id] = [
 							'group_id' => $row['group_id'],
@@ -191,12 +191,12 @@
 			// merge username, colour and group to user_id
 			$user_ids_with_details = [];
 			foreach ($user_ids_list as $icon_id => $entries)
-{
+			{
 				foreach ($entries as $entry)
-{
+				{
 					$user_id = $entry['user_id'];
 					if (isset($user_data_detailed[$user_id]))
-{
+					{
 						$user_ids_with_details[$icon_id][] = [
 						'user_id' => $user_id,
 						'username' => $user_data_detailed[$user_id]['username'],
@@ -214,7 +214,7 @@
 			$sql_check = "SELECT post_id, icon_id FROM " . $this->table_prefix . "sebo_postreact_table WHERE user_id = '$user_id_logged' AND post_id = '$my_pid'";
 			$result_check = $this->db->sql_query($sql_check);
 			while ($row_check = $this->db->sql_fetchrow($result_check))
-{
+			{
 				$check[] = [
 				'post_id' => $row_check['post_id'],
 				'icon_id' => $row_check['icon_id']
@@ -245,22 +245,22 @@
 			$my_icon_id = $this->request->variable('iid', 0, false);
 			$r_time = time();
 			if ($user_id_logged !== null && $user_id_logged !== 1)
-{
+			{
 				if ($my_icon_id !== null && $my_post_id !== null && $my_topic_id !== null && $my_icon_id !== 0 && $my_post_id !== 0 && $my_topic_id !== 0 && is_numeric($my_topic_id) && is_numeric($my_icon_id) && is_numeric($my_post_id))
-{
+				{
 					// ##
 					// check if reacted
 					$sql_check = "SELECT COUNT(*) as count FROM " . $this->table_prefix . "sebo_postreact_table WHERE user_id = '$user_id_logged' AND post_id = '$my_post_id'";
 					$result_check = $this->db->sql_query($sql_check);
 					$row_check = $this->db->sql_fetchrow($result_check);
 					if ($row_check['count'] > 0)
-{
+					{
 						// ##
 						// delete if yes
 						$sql = "DELETE FROM " . $this->table_prefix . "sebo_postreact_table WHERE user_id = '$user_id_logged' AND post_id = '$my_post_id';";
 						$result = $this->db->sql_query($sql);
 						if ($result)
-{
+						{
 							//##
 							// NOTIFICATION SYS DELETE
 							// check posts info
@@ -282,13 +282,13 @@
 							trigger_error($message);
 						}
 						} else
-{
+						{
 						// ##
 						// react if not
 						$sql = "INSERT INTO " . $this->table_prefix . "sebo_postreact_table (postreact_id, topic_id, post_id, user_id, icon_id, react_time) VALUES (NULL, '$my_topic_id', '$my_post_id', '$user_id_logged', '$my_icon_id', '$r_time');";
 						$result = $this->db->sql_query($sql);
 						if ($result)
-{
+						{
 							// ##
 							// NOTIFICATION SYS INSERT
 							// check posts info
@@ -332,7 +332,7 @@
 					$this->db->sql_freeresult($result_check);
 				}
 				} else
-{
+				{
 				$message = $this->user->lang('LOGIN_TO_REACT') . '<br /><br />' . $this->user->lang('RETURN_FORUM', '<a href="' . append_sid("viewtopic.{$this->php_ext}?p={$my_post_id}#p{$my_post_id}") . '">', '</a>');
 				meta_refresh(2, append_sid("viewtopic.{$this->php_ext}?p={$my_post_id}#p{$my_post_id}"));
 				trigger_error($message);
@@ -351,7 +351,7 @@
 			$filtered_rows = [];
 			$post_ids = [];
 			while ($my_row = $this->db->sql_fetchrow($result))
-{
+			{
 				$post_id = (int)$my_row['post_id'];
 				// save the entire row of the post_ids
 				$filtered_rows[$post_id] = $my_row;
@@ -360,21 +360,21 @@
 			}
 			// if IDs, check
 			if (!empty($post_ids))
-{
+			{
 				$sql_post_exist = 'SELECT post_id FROM ' . $this->table_prefix . 'posts WHERE post_id IN (' . implode(',', $post_ids) . ')';
 				$result_post_exist = $this->db->sql_query($sql_post_exist);
 				$existing_posts = [];
 				while ($row = $this->db->sql_fetchrow($result_post_exist))
-{
+				{
 					$existing_posts[$row['post_id']] = true;
 				}
 				$this->db->sql_freeresult($result_post_exist);
 				// Filter
 				$data = [];
 				foreach ($filtered_rows as $post_id => $row)
-{
+				{
 					if (isset($existing_posts[$post_id]))
-{
+					{
 						// save row
 						$data[] = $row;
 					}
@@ -384,10 +384,10 @@
 			// numb check icon_id
 			$icon_counts = [];
 			foreach ($data as $record)
-{
+			{
 				$icon_id = $record['icon_id'];
 				if (!isset($icon_counts[$icon_id]))
-{
+				{
 					$icon_counts[$icon_id] = 0;
 				}
 				$icon_counts[$icon_id]++;
@@ -396,10 +396,10 @@
 			// sort by number
 			$icons_with_counts = [];
 			foreach ($this->grab_icons() as $icon)
-{
+			{
 				$icon_id = $icon['icon_id'];
 				if (isset($icon_counts[$icon_id]))
-{
+				{
 					$icons_with_counts[] = [
 					'icon_url' => $icon['icon_url'],
 					'icon_alt' => $icon['icon_alt'],
@@ -410,7 +410,7 @@
 			}
 			// sort for count DESC
 			usort($icons_with_counts, function ($a, $b)
-{
+			{
 				return $b['count'] - $a['count'];
 			});
 			// ##
@@ -432,7 +432,7 @@
 			$filtered_rows = [];
 			$post_ids = [];
 			while ($my_row = $this->db->sql_fetchrow($result))
-{
+			{
 				$post_id = (int)$my_row['post_id'];
 				$filtered_rows[$post_id] = $my_row;
 				$post_ids[] = $post_id;
@@ -440,19 +440,19 @@
 			$this->db->sql_freeresult($result);
 			$data = [];
 			if (!empty($post_ids))
-{
+			{
 				$sql_post_exist = 'SELECT post_id FROM ' . $this->table_prefix . 'posts WHERE post_id IN (' . implode(',', $post_ids) . ')';
 				$result_post_exist = $this->db->sql_query($sql_post_exist);
 				$existing_posts = [];
 				while ($row = $this->db->sql_fetchrow($result_post_exist))
-{
+				{
 					$existing_posts[$row['post_id']] = true;
 				}
 				$this->db->sql_freeresult($result_post_exist);
 				foreach ($filtered_rows as $post_id => $row)
-{
+				{
 					if (isset($existing_posts[$post_id]))
-{
+					{
 						$data[] = $row;
 					}
 				}
@@ -461,9 +461,9 @@
 			// numb check icon_id
 			$topic_id_count = 0;
 			foreach ($data as $record)
-{
+			{
 				if ($record['topic_id'] == $topic_id)
-{
+				{
 					$topic_id_count++;
 				}
 			}
@@ -473,21 +473,21 @@
 			// Step 1: make a new array with icon_id key
 			$data_ico_assoc = [];
 			foreach ($data_ico as $icon)
-{
+			{
 				$data_ico_assoc[$icon['icon_id']] = $icon;
 			}
 			// Step 2: count icon_id occurrences for topic_id
 			$icon_counts = [];
 			foreach ($data as $rec)
-{
+			{
 				$icon_id = $rec['icon_id'];
 				$topic_id = $rec['topic_id'];
 				if (!isset($icon_counts[$topic_id]))
-{
+				{
 					$icon_counts[$topic_id] = [];
 				}
 				if (!isset($icon_counts[$topic_id][$icon_id]))
-{
+				{
 					$icon_counts[$topic_id][$icon_id] = 0;
 				}
 				$icon_counts[$topic_id][$icon_id]++;
@@ -495,14 +495,14 @@
 			// Step 3: make new array with icon info and count, ensuring each icon_id is unique
 			$new_array = [];
 			foreach ($data as $rec)
-{
+			{
 				$icon_id = $rec['icon_id'];
 				$topic_id = $rec['topic_id'];
 				if (isset($data_ico_assoc[$icon_id]))
-{
+				{
 					// Only if the icon_id has not already been added to the final array
 					if (!isset($new_array[$icon_id]))
-{
+					{
 						$icon_info = $data_ico_assoc[$icon_id];
 						$count = isset($icon_counts[$topic_id][$icon_id]) ? (string)$icon_counts[$topic_id][$icon_id] : '0';
 						$new_array[$icon_id] = [
@@ -513,7 +513,7 @@
 						'count' => $count
 						];
 						} else
-{
+						{
 						// Update the count if icon_id already exists
 						$new_array[$icon_id]['count'] = (string)max($new_array[$icon_id]['count'], $count);
 					}
@@ -567,14 +567,14 @@
 			$icon_counts = [];
 			$icon_ids = [];
 			while ($row = $this->db->sql_fetchrow($result))
-{
+			{
 				$icon_counts[$row['icon_id']] = $row['icon_count'];
 				$icon_ids[] = (int) $row['icon_id'];
 			}
 			$this->db->sql_freeresult($result);
 			$icons = [];
 			if (!empty($icon_ids))
-{
+			{
 				// start list for IN (...)
 				$icon_ids_list = implode(',', $icon_ids);
 				// Query for active icons (status = 1)
@@ -583,10 +583,10 @@
 				WHERE icon_id IN (' . $icon_ids_list . ') AND status = 1';
 				$result = $this->db->sql_query($sql);
 				while ($row = $this->db->sql_fetchrow($result))
-{
+				{
 					$id = (int) $row['icon_id'];
 					if (isset($icon_counts[$id]))
-{
+					{
 						$icons[] = [
 						'ICON_ID'	 => $id,
 						'ICON_COUNT'  => $icon_counts[$id],
@@ -613,7 +613,7 @@
 			$received_icon_counts = [];
 			$received_icon_ids = [];
 			while ($row = $this->db->sql_fetchrow($result))
-{
+			{
 				$received_icon_counts[$row['icon_id']] = $row['icon_count'];
 				$received_icon_ids[] = (int) $row['icon_id'];
 			}
@@ -621,17 +621,17 @@
 			// grab
 			$received_icons = [];
 			if (!empty($received_icon_ids))
-{
+			{
 				$icon_ids_list = implode(',', $received_icon_ids);
 				$sql = 'SELECT icon_id, icon_url, icon_width, icon_height, icon_alt
 				FROM ' . $this->table_prefix . 'sebo_postreact_icon
 				WHERE icon_id IN (' . $icon_ids_list . ') AND status = 1';
 				$result = $this->db->sql_query($sql);
 				while ($row = $this->db->sql_fetchrow($result))
-{
+				{
 					$id = (int) $row['icon_id'];
 					if (isset($received_icon_counts[$id]))
-{
+					{
 						$received_icons[] = [
 						'ICON_ID'	 => $id,
 						'ICON_COUNT'  => $received_icon_counts[$id],
@@ -650,12 +650,12 @@
 		public function assign_edit_view_profile($event)
 		{
 			if (!empty($this->profile_data))
-{
+			{
 				// Assign reaction sent
 				if (!empty($this->profile_data['icons']))
-{
+				{
 					foreach ($this->profile_data['icons'] as $icon)
-{
+					{
 						$this->template->assign_block_vars('user_reactions', [
 						'ICON_ID'	 => $icon['ICON_ID'],
 						'ICON_COUNT'  => $icon['ICON_COUNT'],
@@ -668,9 +668,9 @@
 				}
 				// Assign reaction received
 				if (!empty($this->profile_data['icons_received']))
-{
+				{
 					foreach ($this->profile_data['icons_received'] as $icon)
-{
+					{
 						$this->template->assign_block_vars('user_reactions_received', [
 						'ICON_ID'	 => $icon['ICON_ID'],
 						'ICON_COUNT'  => $icon['ICON_COUNT'],
