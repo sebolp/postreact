@@ -8,6 +8,7 @@
  *
  */
 namespace sebo\postreact\controller;
+
 /**
  * PostReaction ACP controller.
  */
@@ -69,7 +70,8 @@ class acp_controller
 		// ##
 		// check if adding icon
 		$add_pr = $this->request->variable('add_pr', 0, false);
-		if ($add_pr === 1){
+		if ($add_pr === 1)
+		{
 			$sql_last = "SELECT icon_id FROM `" . $this->table_prefix . "sebo_postreact_icon` ORDER BY `" . $this->table_prefix . "sebo_postreact_icon`.`icon_id` DESC LIMIT 1;";
 			$result_last = $this->db->sql_query($sql_last);
 			$last_id = $this->db->sql_fetchrow($result_last);
@@ -94,7 +96,8 @@ class acp_controller
 		//##
 		// check if deleting icon
 		$remove_pr = $this->request->variable('remove_pr', 0, false);
-		if ($remove_pr != null){
+		if ($remove_pr != null)
+		{
 			$sql_remove = "DELETE FROM " . $this->table_prefix . "sebo_postreact_icon WHERE icon_id = $remove_pr";
 			$result_remove = $this->db->sql_query($sql_remove);
 		}

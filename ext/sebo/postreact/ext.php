@@ -29,13 +29,13 @@ class ext extends \phpbb\extension\base
 	public function enable_step($old_state)
 	{
 		if ($old_state === false)
-        {
-            /** @var \phpbb\notification\manager $notification_manager */
-            $notification_manager = $this->container->get('notification_manager');
-            $notification_manager->enable_notifications('sebo.postreact.notification.type.postreact_notification');
-            return 'notification';
-        }
-        return parent::enable_step($old_state);
+		{
+			/** @var \phpbb\notification\manager $notification_manager */
+			$notification_manager = $this->container->get('notification_manager');
+			$notification_manager->enable_notifications('sebo.postreact.notification.type.postreact_notification');
+			return 'notification';
+		}
+		return parent::enable_step($old_state);
 	}
 	/**
 	 * Disable notifications for the extension
@@ -49,13 +49,13 @@ class ext extends \phpbb\extension\base
 	public function disable_step($old_state)
 	{
 		if ($old_state === false)
-        {
-            /** @var \phpbb\notification\manager $notification_manager */
-            $notification_manager = $this->container->get('notification_manager');
-            $notification_manager->disable_notifications('sebo.postreact.notification.type.postreact_notification');
-            return 'notification';
-        }
-        return parent::disable_step($old_state);
+		{
+			/** @var \phpbb\notification\manager $notification_manager */
+			$notification_manager = $this->container->get('notification_manager');
+			$notification_manager->disable_notifications('sebo.postreact.notification.type.postreact_notification');
+			return 'notification';
+		}
+		return parent::disable_step($old_state);
 	}
 	/**
 	 * Purge notifications for the extension
@@ -69,12 +69,12 @@ class ext extends \phpbb\extension\base
 	public function purge_step($old_state)
 	{
 		if ($old_state === false)
-        {
-            /** @var \phpbb\notification\manager $notification_manager */
-            $notification_manager = $this->container->get('notification_manager');
-            $notification_manager->purge_notifications('sebo.postreact.notification.type.postreact_notification');
-            return 'notification';
-        }
-        return parent::purge_step($old_state);
+		{
+			/** @var \phpbb\notification\manager $notification_manager */
+			$notification_manager = $this->container->get('notification_manager');
+			$notification_manager->purge_notifications('sebo.postreact.notification.type.postreact_notification');
+			return 'notification';
+		}
+		return parent::purge_step($old_state);
 	}
 }

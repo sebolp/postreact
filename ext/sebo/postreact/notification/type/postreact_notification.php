@@ -123,7 +123,7 @@ class postreact_notification extends \phpbb\notification\type\base
 	{
 		return [$this->get_data('PR_N_sender_id')];
 	}
-	
+
 	public function get_avatar()
 	{
 		return $this->user_loader->get_avatar($this->get_data('PR_N_sender_id'), false, true);
@@ -140,7 +140,7 @@ class postreact_notification extends \phpbb\notification\type\base
 		{
 			$PR_N_username_full = '<strong style="color:#'.$this->get_data('PR_N_user_colour').'">'.$this->get_data('PR_N_username').'</strong>';
 		}
-		else 
+		else
 		{
 			$PR_N_username_full = $this->get_data('PR_N_username');
 		}
