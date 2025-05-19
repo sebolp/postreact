@@ -7,17 +7,14 @@
  * @license GNU General Public License, version 2 (GPL-2.0)
  *
  */
-
 namespace sebo\postreact\migrations;
 
 class install_sample_data extends \phpbb\db\migration\migration
 {
-
 	public static function depends_on()
 	{
 		return ['\sebo\postreact\migrations\install_sample_schema'];
 	}
-
 	/**
 	 * Add, update or delete data stored in the database during extension installation.
 	 *
@@ -46,11 +43,9 @@ class install_sample_data extends \phpbb\db\migration\migration
 		return [
 			// Add new config table settings
 			['config.add', ['sebo_postreact', 0]],
-
 			// Add new permissions
 			['permission.add', ['u_new_sebo_postreact']], // New user permission - need only u_
 			['permission.add', ['u_new_sebo_postreact_view']], // New user permission view - need only u_
-
 			// Set our new permissions
 			['permission.permission_set', ['ROLE_USER_FULL', 'u_new_sebo_postreact', 1]], // Give ROLE_USER_FULL u_new_sebo_postreact permission
 			['permission.permission_set', ['ROLE_USER_STANDARD', 'u_new_sebo_postreact', 1]], // Give ROLE_USER_STANDARD u_new_sebo_postreact permission
@@ -68,13 +63,11 @@ class install_sample_data extends \phpbb\db\migration\migration
 			['permission.permission_set', ['GLOBAL_MODERATORS', 'u_new_sebo_postreact_view', 'group', 1]],
 			['permission.permission_set', ['NEWLY_REGISTERED', 'u_new_sebo_postreact_view', 'group', 1]],
 			['permission.permission_set', ['BOTS', 'u_new_sebo_postreact_view', 'group', 1]],
-			['permission.permission_set', ['REGISTERED_COPPA', 'u_new_sebo_postreact_view', 'group', 1]], 
-
+			['permission.permission_set', ['REGISTERED_COPPA', 'u_new_sebo_postreact_view', 'group', 1]],
 			// Call a custom callable function to perform more complex operations.
 			['custom', [[$this, 'table_pr_install']]],
 		];
 	}
-
 	/**
 	 * Add, update or delete data stored in the database during extension un-installation (purge step).
 	 *
@@ -107,19 +100,16 @@ class install_sample_data extends \phpbb\db\migration\migration
 	{
 		return [
 			['config.remove', ['sebo_postreact', 0]],
-			
 			['permission.remove', ['u_new_sebo_postreact']],
 			['permission.remove', ['u_new_sebo_postreact_view']],
 		];
 	}
-
 	/**
 	 * A custom function for making more complex database changes
 	 * during extension installation. Must be declared as public.
 	 */
 	public function table_pr_install()
 	{
-		
 		$data = [
 				[
 					'id'            => 1,
@@ -272,11 +262,8 @@ class install_sample_data extends \phpbb\db\migration\migration
 					'active'        => '0',
 				],
 		];
-		
 		$this->db->sql_multi_insert($this->table_prefix . 'sebo_postreact_icon', $data);
-
 	}
-
 	/**
 	 * A custom function for making more complex database changes
 	 * during extension un-installation. Must be declared as public.

@@ -17,7 +17,6 @@ class postreact_notification extends \phpbb\notification\type\base
 {
 	/** @var \phpbb\controller\helper */
 	protected $helper;
-	
 	/** @var \phpbb\user_loader */
 	protected $user_loader;
 
@@ -32,9 +31,8 @@ class postreact_notification extends \phpbb\notification\type\base
 	{
 		$this->helper = $helper;
 	}
-	
 	/**
-	* Set user loader.
+	 * Set user loader.
 	 *
 	 * @param \phpbb\user_loader  $user_loader  User loader object
 	 * @return void
@@ -138,10 +136,12 @@ class postreact_notification extends \phpbb\notification\type\base
 	 */
 	public function get_title()
 	{
-		if ($this->get_data('PR_N_user_colour') != null){
+		if ($this->get_data('PR_N_user_colour') != null)
+		{
 			$PR_N_username_full = '<strong style="color:#'.$this->get_data('PR_N_user_colour').'">'.$this->get_data('PR_N_username').'</strong>';
 		}
-		else {
+		else 
+		{
 			$PR_N_username_full = $this->get_data('PR_N_username');
 		}
 		return $this->language->lang('SEBO_POSTREACT_NOTIFICATION', $this->get_data('PR_N_icon'), $PR_N_username_full, $this->get_data('PR_N_post_title'));

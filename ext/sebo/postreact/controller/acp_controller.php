@@ -7,9 +7,7 @@
  * @license GNU General Public License, version 2 (GPL-2.0)
  *
  */
-
 namespace sebo\postreact\controller;
-
 /**
  * PostReaction ACP controller.
  */
@@ -17,27 +15,19 @@ class acp_controller
 {
 	/** @var \phpbb\language\language */
 	protected $language;
-
 	/** @var \phpbb\request\request */
 	protected $request;
-
 	/** @var \phpbb\template\template */
 	protected $template;
-
 	/** @var \phpbb\user */
 	protected $user;
-
 	/** @var string Custom form action */
 	protected $u_action;
-	
 	protected $table_prefix;
-	
 	/** @var \phpbb\db\driver\driver_interface */
 	protected $db;
-	
 	/** @var php_ext */
 	protected $php_ext;
-
 	/**
 	 * Constructor.
 	 *
@@ -48,9 +38,9 @@ class acp_controller
 	 * @param \phpbb\user				$user		User object
 	 */
 	public function __construct(
-		\phpbb\language\language $language, 
-		\phpbb\request\request $request, 
-		\phpbb\template\template $template, 
+		\phpbb\language\language $language,
+		\phpbb\request\request $request,
+		\phpbb\template\template $template,
 		\phpbb\user $user,
 		$table_prefix,
 		\phpbb\db\driver\driver_interface $db,
@@ -65,7 +55,6 @@ class acp_controller
 		$this->db		= $db;
 		$this->php_ext = $php_ext;
 	}
-
 	/**
 	 * Display the options a user can configure for this extension.
 	 *
@@ -77,7 +66,6 @@ class acp_controller
 		$this->language->add_lang('common', 'sebo/postreact');
 		$this->language->add_lang('permissions_postreact', 'sebo/postreact');
 		$sid_pr = $this->request->variable('user_sid', \phpbb\request\request_interface::COOKIE);
-		
 		// ##
 		// check if adding icon
 		$add_pr = $this->request->variable('add_pr', 0, false);
@@ -85,10 +73,8 @@ class acp_controller
 			$sql_last = "SELECT icon_id FROM `" . $this->table_prefix . "sebo_postreact_icon` ORDER BY `" . $this->table_prefix . "sebo_postreact_icon`.`icon_id` DESC LIMIT 1;";
 			$result_last = $this->db->sql_query($sql_last);
 			$last_id = $this->db->sql_fetchrow($result_last);
-			$this->db->sql_freeresult($result_last); 
-			
+			$this->db->sql_freeresult($result_last);
 			$new_id = $last_id['icon_id'] + 1;
-			
 			// Costruisci l'array con i valori da inserire nella tabella
 			$data = array(
 				'icon_id'    => $new_id, // icon_id
@@ -99,17 +85,12 @@ class acp_controller
 				'status'     => 0,  // status
 				'active'     => 0   // active
 			);
-
 			// Costruisci la query di inserimento
-			$sql_insert = 'INSERT INTO ' . $this->table_prefix . 'sebo_postreact_icon ' . 
+			$sql_insert = 'INSERT INTO ' . $this->table_prefix . 'sebo_postreact_icon ' .
 						  $this->db->sql_build_array('INSERT', $data);
-
 			// Esegui la query
 			$this->db->sql_query($sql_insert);
-
-			
 		}
-		
 		//##
 		// check if deleting icon
 		$remove_pr = $this->request->variable('remove_pr', 0, false);
@@ -117,28 +98,24 @@ class acp_controller
 			$sql_remove = "DELETE FROM " . $this->table_prefix . "sebo_postreact_icon WHERE icon_id = $remove_pr";
 			$result_remove = $this->db->sql_query($sql_remove);
 		}
-		
 		// ##
 		// grab icons
 		// take the line corresponds to post_id
 		$sql_ico = 'SELECT * FROM ' . $this->table_prefix . 'sebo_postreact_icon';
 		$data_ico = [];
-		
 		$result_ico = $this->db->sql_query($sql_ico);
-		
-		if ($result_ico) {
-			while ($my_icons = $this->db->sql_fetchrow($result_ico)) {
+		if ($result_ico)
+		{
+			while ($my_icons = $this->db->sql_fetchrow($result_ico))
+			{
 				$data_ico[] = $my_icons;
 			}
 			$this->db->sql_freeresult($result_ico);
 		}
-
 		// Create a form key for preventing CSRF attacks
 		add_form_key('sebo_postreact_acp');
-
 		// Create an array to collect errors that will be output to the user
 		$errors = [];
-
 		// Is the form being submitted to us?
 		if ($this->request->is_set_post('submit'))
 		{
@@ -147,19 +124,19 @@ class acp_controller
 			{
 				$errors[] = $this->language->lang('FORM_INVALID');
 			}
-
 			// If no errors, process the form data
-			if (empty($errors)) {
+			if (empty($errors))
+			{
 				// Initialize an empty array to hold the icon data
 				$update_data = [];
-
 				$icon_ids = $this->request->variable('icon_ids', [0]);
 				// if not array, convert it
-				if (!is_array($icon_ids)) {
+				if (!is_array($icon_ids))
+				{
 					$icon_ids = explode(',', $icon_ids);
 				}
-
-				foreach ($icon_ids as $icon_id) {
+				foreach ($icon_ids as $icon_id)
+				{
 					// grab variables
 					$update_data[$icon_id] = [
 						'url' => $this->request->variable('icon_url_' . $icon_id, ''),
@@ -170,74 +147,62 @@ class acp_controller
 						'active' => $this->request->variable('icon_height_' . $icon_id, ''),
 					];
 				}
-
 				// create query
 				$sql = "UPDATE `" . $this->table_prefix . "sebo_postreact_icon` SET "
 					. "`icon_url` = CASE `icon_id` ";
-
-						foreach ($update_data as $icon_id => $data) {
+						foreach ($update_data as $icon_id => $data)
+						{
 							$sql .= "WHEN '" . $icon_id . "' THEN 'ext/sebo/postreact/styles/all/img/" . $data['url'] . "' ";
 						}
-
 					$sql .= "END, "
 						. "icon_alt = CASE icon_id ";
-
-						foreach ($update_data as $icon_id => $data) {
+						foreach ($update_data as $icon_id => $data)
+						{
 							$sql .= "WHEN '" . $icon_id . "' THEN '" . $data['icon_alt'] . "' ";
 						}
-
 					$sql .= "END, "
 						. "`icon_width` = CASE `icon_id` ";
-
-						foreach ($update_data as $icon_id => $data) {
+						foreach ($update_data as $icon_id => $data)
+						{
 							$sql .= "WHEN '" . $icon_id . "' THEN '" . $data['icon_width'] . "' ";
 						}
-
 					$sql .= "END, "
 						. "`icon_height` = CASE `icon_id` ";
-
-						foreach ($update_data as $icon_id => $data) {
+						foreach ($update_data as $icon_id => $data)
+						{
 							$sql .= "WHEN '" . $icon_id . "' THEN '" . $data['icon_height'] . "' ";
 						}
-
 					$sql .= "END, "
 						. "`status` = CASE `icon_id` ";
-
-						foreach ($update_data as $icon_id => $data) {
+						foreach ($update_data as $icon_id => $data)
+						{
 							$sql .= "WHEN '" . $icon_id . "' THEN '" . $data['status'] . "' ";
 						}
-						
 					$sql .= "END, "
 						. "`active` = CASE `icon_id` ";
-
-						foreach ($update_data as $icon_id => $data) {
+						foreach ($update_data as $icon_id => $data)
+						{
 							$sql .= "WHEN '" . $icon_id . "' THEN '" . $data['active'] . "' ";
 						}
-
 					$sql .= "END "
 						. "WHERE `icon_id` IN (" . implode(',', array_keys($update_data)) . ")";
-
 				$result = $this->db->sql_query($sql);
-				if ($result) {
+				if ($result)
+				{
 					// Conferma il successo
 					trigger_error($this->language->lang('ACP_POSTREACT_SETTING_SAVED') . adm_back_link($this->u_action));
-				} else {
+				} else
+				{
 					// Segnala il fallimento
 					trigger_error($this->language->lang('ACP_POSTREACT_SETTING_NOT_SAVED') . adm_back_link($this->u_action));
 				}
-
 				$this->db->sql_freeresult($result);
-					
 			}
 		}
-		
 		// Create urlS
 		$delete_url = append_sid("index.{$this->php_ext}") . "&i=-sebo-postreact-acp-main_module&remove_pr=";
 		$create_url = append_sid("index.{$this->php_ext}") . "&i=-sebo-postreact-acp-main_module&add_pr=1";
-
-		
 		$s_errors = !empty($errors);
-
 		// Set output variables for display in the template
 		$this->template->assign_vars([
 			'ICONS' 		=> $data_ico,
@@ -247,12 +212,10 @@ class acp_controller
 			'ERROR_MSG'		=> $s_errors ? implode('<br />', $errors) : '',
 			'DELETE_PR_URL'	=> $delete_url,
 			'CREATE_PR_URL' => $create_url,
-
 			'U_ACTION'		=> $this->u_action,
 			'LINK_DONATE'	=> 'https://www.paypal.com/donate/?hosted_button_id=GS3T9MFDJJGT4',
 		]);
 	}
-
 	/**
 	 * Set custom form action.
 	 *

@@ -11,7 +11,7 @@
 namespace sebo\postreact\migrations;
 
 class install_acp_module extends \phpbb\db\migration\migration
-{	
+{
 	public static function depends_on()
 	{
 		return ['\sebo\postreact\migrations\install_sample_data'];

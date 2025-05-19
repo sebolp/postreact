@@ -7,7 +7,6 @@
  * @license GNU General Public License, version 2 (GPL-2.0)
  *
  */
-
 namespace sebo\postreact;
 
 /**
@@ -33,14 +32,11 @@ class ext extends \phpbb\extension\base
         {
             /** @var \phpbb\notification\manager $notification_manager */
             $notification_manager = $this->container->get('notification_manager');
-
             $notification_manager->enable_notifications('sebo.postreact.notification.type.postreact_notification');
             return 'notification';
         }
-
         return parent::enable_step($old_state);
 	}
-
 	/**
 	 * Disable notifications for the extension
 	 *
@@ -56,15 +52,11 @@ class ext extends \phpbb\extension\base
         {
             /** @var \phpbb\notification\manager $notification_manager */
             $notification_manager = $this->container->get('notification_manager');
-
             $notification_manager->disable_notifications('sebo.postreact.notification.type.postreact_notification');
-
             return 'notification';
         }
-
         return parent::disable_step($old_state);
 	}
-
 	/**
 	 * Purge notifications for the extension
 	 *
@@ -80,12 +72,9 @@ class ext extends \phpbb\extension\base
         {
             /** @var \phpbb\notification\manager $notification_manager */
             $notification_manager = $this->container->get('notification_manager');
-
             $notification_manager->purge_notifications('sebo.postreact.notification.type.postreact_notification');
-
             return 'notification';
         }
-
         return parent::purge_step($old_state);
 	}
 }
