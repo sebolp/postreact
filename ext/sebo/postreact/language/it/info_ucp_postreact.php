@@ -10,13 +10,13 @@
  */
 
 if (!defined('IN_PHPBB')) {
-    exit;
+ "`t" * ($matches[0].Length / 4) exit;
 }
 
 if (empty($lang) || !is_array($lang)) {
-    $lang = [];
+ "`t" * ($matches[0].Length / 4) $lang = [];
 }
 
 $lang = array_merge($lang, [
-    'NOTIFICATION_TYPE_POSTREACT'   => 'Qualcuno ha reagito a un tuo post',
+ "`t" * ($matches[0].Length / 4) 'NOTIFICATION_TYPE_POSTREACT'   => 'Qualcuno ha reagito a un tuo post',
 ]);

@@ -19,66 +19,66 @@ namespace sebo\postreact;
  */
 class ext extends \phpbb\extension\base
 {
-    /**
-     * Enable notifications for the extension
-     *
-     * @param   mixed   $old_state  The return value of the previous call
-     *                              of this method, or false on the first call
-     * @return  mixed               Returns false after last step, otherwise
-     *                              temporary state which is passed as an
-     *                              argument to the next step
-     */
-    public function enable_step($old_state)
-    {
-        if ($old_state === false) {
+ "`t" * ($matches[0].Length / 4) /**
+ "`t" * ($matches[0].Length / 4)  * Enable notifications for the extension
+ "`t" * ($matches[0].Length / 4)  *
+ "`t" * ($matches[0].Length / 4)  * @param   mixed   $old_state  The return value of the previous call
+ "`t" * ($matches[0].Length / 4)  *                              of this method, or false on the first call
+ "`t" * ($matches[0].Length / 4)  * @return  mixed               Returns false after last step, otherwise
+ "`t" * ($matches[0].Length / 4)  *                              temporary state which is passed as an
+ "`t" * ($matches[0].Length / 4)  *                              argument to the next step
+ "`t" * ($matches[0].Length / 4)  */
+ "`t" * ($matches[0].Length / 4) public function enable_step($old_state)
+ "`t" * ($matches[0].Length / 4) {
+ "`t" * ($matches[0].Length / 4) if ($old_state === false) {
 /** @var \phpbb\notification\manager $notification_manager */
-            $notification_manager = $this->container->get('notification_manager');
-            $notification_manager->enable_notifications('sebo.postreact.notification.type.postreact_notification');
-            return 'notification';
-        }
+ "`t" * ($matches[0].Length / 4) $notification_manager = $this->container->get('notification_manager');
+ "`t" * ($matches[0].Length / 4) $notification_manager->enable_notifications('sebo.postreact.notification.type.postreact_notification');
+ "`t" * ($matches[0].Length / 4) return 'notification';
+ "`t" * ($matches[0].Length / 4) }
 
-        return parent::enable_step($old_state);
-    }
+ "`t" * ($matches[0].Length / 4) return parent::enable_step($old_state);
+ "`t" * ($matches[0].Length / 4) }
 
-    /**
-     * Disable notifications for the extension
-     *
-     * @param   mixed   $old_state  The return value of the previous call
-     *                              of this method, or false on the first call
-     * @return  mixed               Returns false after last step, otherwise
-     *                              temporary state which is passed as an
-     *                              argument to the next step
-     */
-    public function disable_step($old_state)
-    {
-        if ($old_state === false) {
+ "`t" * ($matches[0].Length / 4) /**
+ "`t" * ($matches[0].Length / 4)  * Disable notifications for the extension
+ "`t" * ($matches[0].Length / 4)  *
+ "`t" * ($matches[0].Length / 4)  * @param   mixed   $old_state  The return value of the previous call
+ "`t" * ($matches[0].Length / 4)  *                              of this method, or false on the first call
+ "`t" * ($matches[0].Length / 4)  * @return  mixed               Returns false after last step, otherwise
+ "`t" * ($matches[0].Length / 4)  *                              temporary state which is passed as an
+ "`t" * ($matches[0].Length / 4)  *                              argument to the next step
+ "`t" * ($matches[0].Length / 4)  */
+ "`t" * ($matches[0].Length / 4) public function disable_step($old_state)
+ "`t" * ($matches[0].Length / 4) {
+ "`t" * ($matches[0].Length / 4) if ($old_state === false) {
 /** @var \phpbb\notification\manager $notification_manager */
-            $notification_manager = $this->container->get('notification_manager');
-            $notification_manager->disable_notifications('sebo.postreact.notification.type.postreact_notification');
-            return 'notification';
-        }
+ "`t" * ($matches[0].Length / 4) $notification_manager = $this->container->get('notification_manager');
+ "`t" * ($matches[0].Length / 4) $notification_manager->disable_notifications('sebo.postreact.notification.type.postreact_notification');
+ "`t" * ($matches[0].Length / 4) return 'notification';
+ "`t" * ($matches[0].Length / 4) }
 
-        return parent::disable_step($old_state);
-    }
+ "`t" * ($matches[0].Length / 4) return parent::disable_step($old_state);
+ "`t" * ($matches[0].Length / 4) }
 
-    /**
-     * Purge notifications for the extension
-     *
-     * @param   mixed   $old_state  The return value of the previous call
-     *                              of this method, or false on the first call
-     * @return  mixed               Returns false after last step, otherwise
-     *                              temporary state which is passed as an
-     *                              argument to the next step
-     */
-    public function purge_step($old_state)
-    {
-        if ($old_state === false) {
+ "`t" * ($matches[0].Length / 4) /**
+ "`t" * ($matches[0].Length / 4)  * Purge notifications for the extension
+ "`t" * ($matches[0].Length / 4)  *
+ "`t" * ($matches[0].Length / 4)  * @param   mixed   $old_state  The return value of the previous call
+ "`t" * ($matches[0].Length / 4)  *                              of this method, or false on the first call
+ "`t" * ($matches[0].Length / 4)  * @return  mixed               Returns false after last step, otherwise
+ "`t" * ($matches[0].Length / 4)  *                              temporary state which is passed as an
+ "`t" * ($matches[0].Length / 4)  *                              argument to the next step
+ "`t" * ($matches[0].Length / 4)  */
+ "`t" * ($matches[0].Length / 4) public function purge_step($old_state)
+ "`t" * ($matches[0].Length / 4) {
+ "`t" * ($matches[0].Length / 4) if ($old_state === false) {
 /** @var \phpbb\notification\manager $notification_manager */
-            $notification_manager = $this->container->get('notification_manager');
-            $notification_manager->purge_notifications('sebo.postreact.notification.type.postreact_notification');
-            return 'notification';
-        }
+ "`t" * ($matches[0].Length / 4) $notification_manager = $this->container->get('notification_manager');
+ "`t" * ($matches[0].Length / 4) $notification_manager->purge_notifications('sebo.postreact.notification.type.postreact_notification');
+ "`t" * ($matches[0].Length / 4) return 'notification';
+ "`t" * ($matches[0].Length / 4) }
 
-        return parent::purge_step($old_state);
-    }
+ "`t" * ($matches[0].Length / 4) return parent::purge_step($old_state);
+ "`t" * ($matches[0].Length / 4) }
 }
