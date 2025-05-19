@@ -29,5 +29,6 @@ $lang = array_merge($lang, [
 	'ALREADY_REACTED'	=> 'Hai gia reagito a questo messaggio. Clicca per cancellare la tua reazione.',
 	'REACTION_SENT_LIST'	=> 'Elenco reazioni inviate dall\'utente',
 	'REACTION_RECEIVED_LIST'	=> 'Elenco reazioni ricevute dall\'utente',
+	'POSTREACT_SUMMARY'			=> 'SUMMARY',
 
 ]);

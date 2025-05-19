@@ -45,5 +45,6 @@ $lang = array_merge($lang, [
 	'ALREADY_REACTED'	=> 'You have already reacted to this post. Click to delete your reaction.',
 	'REACTION_SENT_LIST'	=> 'Total reactions sent by the user',
 	'REACTION_RECEIVED_LIST'	=> 'Total reactions received by the user',
+	'POSTREACT_SUMMARY'			=> 'SUMMARY',
 
 ]);
