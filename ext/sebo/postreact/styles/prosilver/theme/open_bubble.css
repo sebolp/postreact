@@ -1,4 +1,4 @@
-.popup-container_pr summary {
+	.popup-container_pr summary {
 		list-style: none;
 		cursor: pointer;
 	}
@@ -39,7 +39,7 @@
 		left: 50%;
 		transform: translateX(-50%);
 	}
-
+	
 	.link-image_pr {
 		cursor: pointer;
 	}
@@ -47,7 +47,7 @@
 	.popup-content_pr img {
 		margin: 5px;
 	}
-
+	
 	/* have to edit to overtake the bubble */
 	.dropdown-contents{
 		z-index: 4 !important;

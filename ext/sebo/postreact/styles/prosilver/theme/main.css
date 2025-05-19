@@ -1,4 +1,4 @@
-.post_react_display {
+	.post_react_display {
 		float: right;
 	}
 	#post_react_display {
@@ -40,7 +40,7 @@
 		height: 12px;
 		border-radius: 50%;
 		color: white;
-		font-size: 8px;
+		font-size: 8px;	
 	}
 	.bubble_post_react_display_b {
 		position: absolute;
@@ -56,7 +56,7 @@
 		height: 14px;
 		border-radius: 50%;
 		color: white;
-		font-size: 8px;
+		font-size: 8px;	
 	}
 	.bubble_post_react_display_bb {
 		position: absolute;
@@ -72,20 +72,20 @@
 		height: 14px;
 		border-radius: 50%;
 		color: white;
-		font-size: 8px;
+		font-size: 8px;	
 	}
 	.already_reacted_pr {
 		position: relative;
-		display: inline-block;
+        display: inline-block;
 		background-color: rgb(8 197 8 / 72%);
-		border: 1px solid #ffffff;
+        border: 1px solid #ffffff;
 		border-radius: 10px;
 	}
 	.already_reacted_pr_txt {
 		position: relative;
-		display: inline-block;
+        display: inline-block;
 		background-color: rgb(8 197 8 / 72%);
-		border: 1px solid #ffffff;
+        border: 1px solid #ffffff;
 		border-radius: 10px;
 		padding: 5px 10px 5px 10px;
 		left: 50%;
@@ -93,23 +93,23 @@
 	}
 	/* viewforum */
 	.f_post_react_display {
-		display: inline-block;
+	    display: inline-block;
 		position: relative;
 		left: 15px;
 	}
 	.f_post_react_display img{
-		margin-right: -7px;
+	    margin-right: -7px;
 		transition: margin-right 0.5s ease;
 	}
 	.f_post_react_display:hover img{
-		margin-right: 1px;
+	    margin-right: 1px;
 		transition: margin-right 0.5s ease;
 	}
 	/* responsive */
 	@media (max-width: 870px) {
 		.f_post_react_display {
 			display: none;
-		}
+		}	
 	}
 	@media (max-width: 700px) {
 		.f_post_react_display {
@@ -117,12 +117,12 @@
 			position: sticky;
 			float: right;
 			right: 20px;
-		}
+		}	
 	}
 	@media (max-width: 380px) {
 		.f_post_react_display {
 			display: none;
-		}
+		}	
 	}
 	/* postrow_page */
 	.alert_close {
@@ -149,58 +149,58 @@
 	}
 	}
 	#darken {
-	display: none;
-	position: fixed;
-	left: 0;
-	top: 0;
-	width: 100%;
-	height: 100%;
-	background-color: #000000;
-	opacity: 0.5;
-	z-index: 45;
-	}
-
-	.phpbb_confirm {
-	display: none;
-	position: fixed;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-	background-color: #f8f9fa;
-	border: 1px solid #ced4da;
-	border-radius: 4px;
-	padding: 20px;
-	z-index: 46;
-	width: 80%;
-	max-height: 80%;
-	overflow-y: auto;
-	overflow-x: hidden;
-	}
-
-	.phpbb_confirm .alert_close:hover {
-	background-position: 0 -16px;
-	}
-
-	.alert_text h3 {
-	margin-top: 0;
-	}
-
-	.post_react_explain_container {
-	display: flex;
-	align-items: center;
-	width: 98%;
-	padding: 5px;
-	border-radius: 5px;
+    display: none;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000000;
+    opacity: 0.5;
+    z-index: 45;
+    }
+    
+    .phpbb_confirm {
+    display: none; 
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #f8f9fa;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    padding: 20px;
+    z-index: 46;
+    width: 80%;
+    max-height: 80%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    }
+    
+    .phpbb_confirm .alert_close:hover {
+    background-position: 0 -16px;
+    }
+    
+    .alert_text h3 {
+    margin-top: 0;
+    }
+    
+    .post_react_explain_container {
+    display: flex;
+    align-items: center;
+    width: 98%;
+    padding: 5px;
+    border-radius: 5px;
 	}
 	.post_react_explain_container:hover {
-	background-color: #F6F4D0;
-	}
-
-	.post_react_explain {
-	flex: 0 1 auto;
-	margin-right: 10px;
-	}
-
-	.post_react_list {
-	flex: 1 1 auto;
-	}
+    background-color: #F6F4D0;
+    }
+    
+    .post_react_explain {
+    flex: 0 1 auto; 
+    margin-right: 10px; 
+    }
+    
+    .post_react_list {
+    flex: 1 1 auto; 
+    }

@@ -1,5 +1,4 @@
 <?php
-
 /**
  *
  * PostReaction. An extension for the phpBB Forum Software package.
@@ -9,14 +8,16 @@
  *
  */
 
-if (!defined('IN_PHPBB')) {
- '`t' * ($matches[0].Length / 4) exit;
+if (!defined('IN_PHPBB'))
+{
+	exit;
 }
 
-if (empty($lang) || !is_array($lang)) {
- '`t' * ($matches[0].Length / 4) $lang = [];
+if (empty($lang) || !is_array($lang))
+{
+	$lang = [];
 }
 
 $lang = array_merge($lang, [
- '`t' * ($matches[0].Length / 4) 'NOTIFICATION_TYPE_POSTREACT'   => 'Qualcuno ha reagito a un tuo post',
+	'NOTIFICATION_TYPE_POSTREACT'	=> 'Qualcuno ha reagito a un tuo post',
 ]);
