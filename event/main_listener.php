@@ -31,6 +31,8 @@ class main_listener implements EventSubscriberInterface
 			'core.viewforum_modify_topicrow' 			=> 'viewforum_edit',
 			'core.search_modify_tpl_ary'				=> 'search_edit',
 			'core.permissions'							=> 'add_permissions',
+			'core.memberlist_view_profile'				=> 'edit_view_profile',
+			'core.memberlist_modify_view_profile_template_vars' => 'assign_edit_view_profile'
 		];
 	}
 
@@ -52,6 +54,8 @@ class main_listener implements EventSubscriberInterface
     protected $notification_manager;
 	/** @var php_ext */
 	protected $php_ext;
+	
+	protected $profile_data;
 
 	/**
 	 * Constructor
@@ -226,8 +230,8 @@ class main_listener implements EventSubscriberInterface
 		// ##
 		// template
 		$event['post_row'] = array_merge($event['post_row'], array(
-				'PERM_W' 		=>$this->auth->acl_get('u_new_sebo_postreact'),
-				'PERM_R'		=>$this->auth->acl_get('u_new_sebo_postreact_view'),
+				'PERM_W' 		=> $this->auth->acl_get('u_new_sebo_postreact'),
+				'PERM_R'		=> $this->auth->acl_get('u_new_sebo_postreact_view'),
 				'N_REACTIONS' 	=> $total_match_count,
 				'ICONS' 		=> $this->grab_icons(),
 				'MY_PID' 		=> (int)$my_pid,
@@ -571,4 +575,144 @@ class main_listener implements EventSubscriberInterface
 
 		$event['permissions'] = $permissions;
 	}
+	
+	/** 
+	 * Edit profile for reaction count
+	 */
+	public function edit_view_profile($event)
+	{
+		$user_id = (int) $event['member']['user_id'];
+
+		// *
+		// Reactions sent
+		$sql = 'SELECT icon_id, COUNT(*) AS icon_count
+				FROM ' . $this->table_prefix . 'sebo_postreact_table
+				WHERE user_id = ' . $user_id . '
+				GROUP BY icon_id';
+		$result = $this->db->sql_query($sql);
+
+		$icon_counts = [];
+		$icon_ids = [];
+		while ($row = $this->db->sql_fetchrow($result)) {
+			$icon_counts[$row['icon_id']] = $row['icon_count'];
+			$icon_ids[] = (int) $row['icon_id'];
+		}
+		$this->db->sql_freeresult($result);
+
+		$icons = [];
+
+		if (!empty($icon_ids))
+		{
+			// start list for IN (...)
+			$icon_ids_list = implode(',', $icon_ids);
+
+			// Query for active icons (status = 1)
+			$sql = 'SELECT icon_id, icon_url, icon_width, icon_height, icon_alt
+					FROM ' . $this->table_prefix . 'sebo_postreact_icon
+					WHERE icon_id IN (' . $icon_ids_list . ') AND status = 1';
+			$result = $this->db->sql_query($sql);
+
+			while ($row = $this->db->sql_fetchrow($result))
+			{
+				$id = (int) $row['icon_id'];
+				if (isset($icon_counts[$id]))
+				{
+					$icons[] = [
+						'ICON_ID'     => $id,
+						'ICON_COUNT'  => $icon_counts[$id],
+						'ICON_URL'    => $row['icon_url'],
+						'ICON_WIDTH'  => $row['icon_width'],
+						'ICON_HEIGHT' => $row['icon_height'],
+						'ICON_ALT'    => $row['icon_alt'],
+					];
+				}
+			}
+			$this->db->sql_freeresult($result);
+		}
+
+		// assign
+		$this->profile_data['icons'] = $icons;
+		
+		// *
+		// Reactions received
+		$sql = 'SELECT pr.icon_id, COUNT(*) AS icon_count
+				FROM ' . $this->table_prefix . 'sebo_postreact_table pr
+				INNER JOIN ' . $this->table_prefix . 'posts p
+					ON pr.post_id = p.post_id
+				WHERE p.poster_id = ' . $user_id . '
+				GROUP BY pr.icon_id';
+		$result = $this->db->sql_query($sql);
+
+		$received_icon_counts = [];
+		$received_icon_ids = [];
+
+		while ($row = $this->db->sql_fetchrow($result)) {
+			$received_icon_counts[$row['icon_id']] = $row['icon_count'];
+			$received_icon_ids[] = (int) $row['icon_id'];
+		}
+		$this->db->sql_freeresult($result);
+
+		// grab
+		$received_icons = [];
+
+		if (!empty($received_icon_ids)) {
+			$icon_ids_list = implode(',', $received_icon_ids);
+
+			$sql = 'SELECT icon_id, icon_url, icon_width, icon_height, icon_alt
+					FROM ' . $this->table_prefix . 'sebo_postreact_icon
+					WHERE icon_id IN (' . $icon_ids_list . ') AND status = 1';
+			$result = $this->db->sql_query($sql);
+
+			while ($row = $this->db->sql_fetchrow($result)) {
+				$id = (int) $row['icon_id'];
+				if (isset($received_icon_counts[$id])) {
+					$received_icons[] = [
+						'ICON_ID'     => $id,
+						'ICON_COUNT'  => $received_icon_counts[$id],
+						'ICON_URL'    => $row['icon_url'],
+						'ICON_WIDTH'  => $row['icon_width'],
+						'ICON_HEIGHT' => $row['icon_height'],
+						'ICON_ALT'    => $row['icon_alt'],
+					];
+				}
+			}
+			$this->db->sql_freeresult($result);
+		}
+
+		// Assign
+		$this->profile_data['icons_received'] = $received_icons;
+	}
+	public function assign_edit_view_profile($event)
+	{
+		if (!empty($this->profile_data)) {
+			// Assign reaction sent
+			if (!empty($this->profile_data['icons'])) {
+				foreach ($this->profile_data['icons'] as $icon) {
+					$this->template->assign_block_vars('user_reactions', [
+						'ICON_ID'     => $icon['ICON_ID'],
+						'ICON_COUNT'  => $icon['ICON_COUNT'],
+						'ICON_URL'    => $icon['ICON_URL'],
+						'ICON_WIDTH'  => $icon['ICON_WIDTH'],
+						'ICON_HEIGHT' => $icon['ICON_HEIGHT'],
+						'ICON_ALT'    => $icon['ICON_ALT'],
+					]);
+				}
+			}
+
+			// Assign reaction received
+			if (!empty($this->profile_data['icons_received'])) {
+				foreach ($this->profile_data['icons_received'] as $icon) {
+					$this->template->assign_block_vars('user_reactions_received', [
+						'ICON_ID'     => $icon['ICON_ID'],
+						'ICON_COUNT'  => $icon['ICON_COUNT'],
+						'ICON_URL'    => $icon['ICON_URL'],
+						'ICON_WIDTH'  => $icon['ICON_WIDTH'],
+						'ICON_HEIGHT' => $icon['ICON_HEIGHT'],
+						'ICON_ALT'    => $icon['ICON_ALT'],
+					]);
+				}
+			}
+		}
+	}
+
 }

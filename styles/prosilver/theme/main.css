@@ -9,6 +9,11 @@
 		overflow: hidden;
 		justify-content: flex-start;
 	}
+	.img_post_react_display_memberlist {
+		float: left;
+		position: relative;
+		margin-right: 5px;
+	}
 	.img_post_react_display {
 		float: right;
 		position: relative;
