@@ -16,11 +16,11 @@ namespace sebo\postreact\notification\type;
  */
 class postreact_notification extends \phpbb\notification\type\base
 {
- "`t" * ($matches[0].Length / 4) /** @var \phpbb\controller\helper */
- "`t" * ($matches[0].Length / 4) protected $helper;
+ '`t' * ($matches[0].Length / 4) /** @var \phpbb\controller\helper */
+ '`t' * ($matches[0].Length / 4) protected $helper;
 
- "`t" * ($matches[0].Length / 4) /** @var \phpbb\user_loader */
- "`t" * ($matches[0].Length / 4) protected $user_loader;
+ '`t' * ($matches[0].Length / 4) /** @var \phpbb\user_loader */
+ '`t' * ($matches[0].Length / 4) protected $user_loader;
 /**
  "`t" * ($matches[0].Length / 4)  * Set the controller helper
  "`t" * ($matches[0].Length / 4)  *
@@ -28,33 +28,36 @@ class postreact_notification extends \phpbb\notification\type\base
  "`t" * ($matches[0].Length / 4)  *
  "`t" * ($matches[0].Length / 4)  * @return void
  "`t" * ($matches[0].Length / 4)  */
- "`t" * ($matches[0].Length / 4) public function set_controller_helper(\phpbb\controller\helper $helper)
- "`t" * ($matches[0].Length / 4) {
- "`t" * ($matches[0].Length / 4) $this->helper = $helper;
- "`t" * ($matches[0].Length / 4) }
+ '`t' * ($matches[0].Length / 4) public function set_controller_helper(\phpbb\controller\helper $helper)
+ '`t' * ($matches[0].Length / 4)
+ {
+ '`t' * ($matches[0].Length / 4) $this->helper = $helper;
+ '`t' * ($matches[0].Length / 4) }
 
- "`t" * ($matches[0].Length / 4) /**
+ '`t' * ($matches[0].Length / 4) /**
  "`t" * ($matches[0].Length / 4) * Set user loader.
  "`t" * ($matches[0].Length / 4)  *
  "`t" * ($matches[0].Length / 4)  * @param \phpbb\user_loader  $user_loader  User loader object
  "`t" * ($matches[0].Length / 4)  * @return void
  "`t" * ($matches[0].Length / 4)  */
- "`t" * ($matches[0].Length / 4) public function set_user_loader(\phpbb\user_loader $user_loader)
- "`t" * ($matches[0].Length / 4) {
- "`t" * ($matches[0].Length / 4) $this->user_loader = $user_loader;
- "`t" * ($matches[0].Length / 4) }
+ '`t' * ($matches[0].Length / 4) public function set_user_loader(\phpbb\user_loader $user_loader)
+ '`t' * ($matches[0].Length / 4)
+ {
+ '`t' * ($matches[0].Length / 4) $this->user_loader = $user_loader;
+ '`t' * ($matches[0].Length / 4) }
 
- "`t" * ($matches[0].Length / 4) /**
+ '`t' * ($matches[0].Length / 4) /**
  "`t" * ($matches[0].Length / 4)  * Get notification type name
  "`t" * ($matches[0].Length / 4)  *
  "`t" * ($matches[0].Length / 4)  * @return string
  "`t" * ($matches[0].Length / 4)  */
- "`t" * ($matches[0].Length / 4) public function get_type()
- "`t" * ($matches[0].Length / 4) {
- "`t" * ($matches[0].Length / 4) return 'sebo.postreact.notification.type.postreact_notification';
- "`t" * ($matches[0].Length / 4) }
+ '`t' * ($matches[0].Length / 4) public function get_type()
+ '`t' * ($matches[0].Length / 4)
+ {
+ '`t' * ($matches[0].Length / 4) return 'sebo.postreact.notification.type.postreact_notification';
+ '`t' * ($matches[0].Length / 4) }
 
- "`t" * ($matches[0].Length / 4) /**
+ '`t' * ($matches[0].Length / 4) /**
  "`t" * ($matches[0].Length / 4)  * Notification option data (for outputting to the user)
  "`t" * ($matches[0].Length / 4)  *
  "`t" * ($matches[0].Length / 4)  * @var bool|array False if the service should use it's default data
@@ -62,45 +65,48 @@ class postreact_notification extends \phpbb\notification\type\base
  "`t" * ($matches[0].Length / 4)  * lang 4 notification type
  "`t" * ($matches[0].Length / 4)  * group 4 category under wich will be displayed notification
  "`t" * ($matches[0].Length / 4)  */
- "`t" * ($matches[0].Length / 4) public static $notification_option = [
- "`t" * ($matches[0].Length / 4) 'lang'      => 'NOTIFICATION_TYPE_POSTREACT',
- "`t" * ($matches[0].Length / 4) 'group'     => 'NOTIFICATION_GROUP_POSTING',
- "`t" * ($matches[0].Length / 4) ];
+ '`t' * ($matches[0].Length / 4) public static $notification_option = [
+ '`t' * ($matches[0].Length / 4) 'lang'      => 'NOTIFICATION_TYPE_POSTREACT',
+ '`t' * ($matches[0].Length / 4) 'group'     => 'NOTIFICATION_GROUP_POSTING',
+ '`t' * ($matches[0].Length / 4) ];
 /**
  "`t" * ($matches[0].Length / 4)  * Is this type available to the current user (defines whether or not it will be shown in the UCP Edit notification options)
  "`t" * ($matches[0].Length / 4)  *
  "`t" * ($matches[0].Length / 4)  * @return bool True/False whether or not this is available to the user
  "`t" * ($matches[0].Length / 4)  */
- "`t" * ($matches[0].Length / 4) public function is_available()
- "`t" * ($matches[0].Length / 4) {
- "`t" * ($matches[0].Length / 4) return true;
- "`t" * ($matches[0].Length / 4) }
+ '`t' * ($matches[0].Length / 4) public function is_available()
+ '`t' * ($matches[0].Length / 4)
+ {
+ '`t' * ($matches[0].Length / 4) return true;
+ '`t' * ($matches[0].Length / 4) }
 
- "`t" * ($matches[0].Length / 4) /**
+ '`t' * ($matches[0].Length / 4) /**
  "`t" * ($matches[0].Length / 4)  * Get the id of the notification
  "`t" * ($matches[0].Length / 4)  *
  "`t" * ($matches[0].Length / 4)  * @param array $data The type specific data
  "`t" * ($matches[0].Length / 4)  *
  "`t" * ($matches[0].Length / 4)  * @return int Id of the notification
  "`t" * ($matches[0].Length / 4)  */
- "`t" * ($matches[0].Length / 4) public static function get_item_id($data)
- "`t" * ($matches[0].Length / 4) {
- "`t" * ($matches[0].Length / 4) return $data['PR_N_item_id'];
- "`t" * ($matches[0].Length / 4) }
+ '`t' * ($matches[0].Length / 4) public static function get_item_id($data)
+ '`t' * ($matches[0].Length / 4)
+ {
+ '`t' * ($matches[0].Length / 4) return $data['PR_N_item_id'];
+ '`t' * ($matches[0].Length / 4) }
 
- "`t" * ($matches[0].Length / 4) /**
+ '`t' * ($matches[0].Length / 4) /**
  "`t" * ($matches[0].Length / 4)  * Get the id of the parent
  "`t" * ($matches[0].Length / 4)  *
  "`t" * ($matches[0].Length / 4)  * @param array $data The type specific data
  "`t" * ($matches[0].Length / 4)  *
  "`t" * ($matches[0].Length / 4)  * @return int Id of the parent
  "`t" * ($matches[0].Length / 4)  */
- "`t" * ($matches[0].Length / 4) public static function get_item_parent_id($data)
- "`t" * ($matches[0].Length / 4) {
- "`t" * ($matches[0].Length / 4) return $data['PR_N_sender_id'];
- "`t" * ($matches[0].Length / 4) }
+ '`t' * ($matches[0].Length / 4) public static function get_item_parent_id($data)
+ '`t' * ($matches[0].Length / 4)
+ {
+ '`t' * ($matches[0].Length / 4) return $data['PR_N_sender_id'];
+ '`t' * ($matches[0].Length / 4) }
 
- "`t" * ($matches[0].Length / 4) /**
+ '`t' * ($matches[0].Length / 4) /**
  "`t" * ($matches[0].Length / 4)  * Find the users who want to receive notifications
  "`t" * ($matches[0].Length / 4)  *
  "`t" * ($matches[0].Length / 4)  * @param array $data The type specific data
@@ -110,88 +116,96 @@ class postreact_notification extends \phpbb\notification\type\base
  "`t" * ($matches[0].Length / 4)  *
  "`t" * ($matches[0].Length / 4)  * @return array
  "`t" * ($matches[0].Length / 4)  */
- "`t" * ($matches[0].Length / 4) public function find_users_for_notification($data, $options = [])
- "`t" * ($matches[0].Length / 4) {
- "`t" * ($matches[0].Length / 4) return $this->check_user_notification_options([$data['PR_N_user_id']], $options);
- "`t" * ($matches[0].Length / 4) }
+ '`t' * ($matches[0].Length / 4) public function find_users_for_notification($data, $options = [])
+ '`t' * ($matches[0].Length / 4)
+ {
+ '`t' * ($matches[0].Length / 4) return $this->check_user_notification_options([$data['PR_N_user_id']], $options);
+ '`t' * ($matches[0].Length / 4) }
 
- "`t" * ($matches[0].Length / 4) /**
+ '`t' * ($matches[0].Length / 4) /**
  "`t" * ($matches[0].Length / 4)  * Users needed to query before this notification can be displayed
  "`t" * ($matches[0].Length / 4)  *
  "`t" * ($matches[0].Length / 4)  * @return array Array of user_ids
  "`t" * ($matches[0].Length / 4)  */
- "`t" * ($matches[0].Length / 4) public function users_to_query()
- "`t" * ($matches[0].Length / 4) {
- "`t" * ($matches[0].Length / 4) return [$this->get_data('PR_N_sender_id')];
- "`t" * ($matches[0].Length / 4) }
+ '`t' * ($matches[0].Length / 4) public function users_to_query()
+ '`t' * ($matches[0].Length / 4)
+ {
+ '`t' * ($matches[0].Length / 4) return [$this->get_data('PR_N_sender_id')];
+ '`t' * ($matches[0].Length / 4) }
 
- "`t" * ($matches[0].Length / 4) public function get_avatar()
- "`t" * ($matches[0].Length / 4) {
- "`t" * ($matches[0].Length / 4) return $this->user_loader->get_avatar($this->get_data('PR_N_sender_id'), false, true);
- "`t" * ($matches[0].Length / 4) }
+ '`t' * ($matches[0].Length / 4) public function get_avatar()
+ '`t' * ($matches[0].Length / 4)
+ {
+ '`t' * ($matches[0].Length / 4) return $this->user_loader->get_avatar($this->get_data('PR_N_sender_id'), false, true);
+ '`t' * ($matches[0].Length / 4) }
 
- "`t" * ($matches[0].Length / 4) /**
+ '`t' * ($matches[0].Length / 4) /**
  "`t" * ($matches[0].Length / 4)  * Get the HTML formatted title of this notification
  "`t" * ($matches[0].Length / 4)  *
  "`t" * ($matches[0].Length / 4)  * @return string
  "`t" * ($matches[0].Length / 4)  */
- "`t" * ($matches[0].Length / 4) public function get_title()
- "`t" * ($matches[0].Length / 4) {
- "`t" * ($matches[0].Length / 4) if ($this->get_data('PR_N_user_colour') != null) {
- "`t" * ($matches[0].Length / 4) $PR_N_username_full = '<strong style="color:#' . $this->get_data('PR_N_user_colour') . '">' . $this->get_data('PR_N_username') . '</strong>';
- "`t" * ($matches[0].Length / 4) } else {
- "`t" * ($matches[0].Length / 4) $PR_N_username_full = $this->get_data('PR_N_username');
- "`t" * ($matches[0].Length / 4) }
- "`t" * ($matches[0].Length / 4) return $this->language->lang('SEBO_POSTREACT_NOTIFICATION', $this->get_data('PR_N_icon'), $PR_N_username_full, $this->get_data('PR_N_post_title'));
- "`t" * ($matches[0].Length / 4) }
+ '`t' * ($matches[0].Length / 4) public function get_title()
+ '`t' * ($matches[0].Length / 4)
+ {
+ '`t' * ($matches[0].Length / 4) if ($this->get_data('PR_N_user_colour') != null) {
+ '`t' * ($matches[0].Length / 4) $PR_N_username_full = '<strong style="color:#' . $this->get_data('PR_N_user_colour') . '">' . $this->get_data('PR_N_username') . '</strong>';
+ '`t' * ($matches[0].Length / 4) } else {
+ '`t' * ($matches[0].Length / 4) $PR_N_username_full = $this->get_data('PR_N_username');
+ '`t' * ($matches[0].Length / 4) }
+ '`t' * ($matches[0].Length / 4) return $this->language->lang('SEBO_POSTREACT_NOTIFICATION', $this->get_data('PR_N_icon'), $PR_N_username_full, $this->get_data('PR_N_post_title'));
+ '`t' * ($matches[0].Length / 4) }
 
- "`t" * ($matches[0].Length / 4) /**
+ '`t' * ($matches[0].Length / 4) /**
  "`t" * ($matches[0].Length / 4)  * Get the url to this item
  "`t" * ($matches[0].Length / 4)  *
  "`t" * ($matches[0].Length / 4)  * @return string URL
  "`t" * ($matches[0].Length / 4)  */
- "`t" * ($matches[0].Length / 4) public function get_url()
- "`t" * ($matches[0].Length / 4) {
- "`t" * ($matches[0].Length / 4) return append_sid($this->phpbb_root_path . 'viewtopic.' . $this->php_ext, "p={$this->get_data('PR_N_post_id')}#p{$this->get_data('PR_N_post_id')}");
- "`t" * ($matches[0].Length / 4) }
+ '`t' * ($matches[0].Length / 4) public function get_url()
+ '`t' * ($matches[0].Length / 4)
+ {
+ '`t' * ($matches[0].Length / 4) return append_sid($this->phpbb_root_path . 'viewtopic.' . $this->php_ext, "p={$this->get_data('PR_N_post_id')}#p{$this->get_data('PR_N_post_id')}");
+ '`t' * ($matches[0].Length / 4) }
 
- "`t" * ($matches[0].Length / 4) /**
+ '`t' * ($matches[0].Length / 4) /**
  "`t" * ($matches[0].Length / 4)  * Get email template
  "`t" * ($matches[0].Length / 4)  *
  "`t" * ($matches[0].Length / 4)  * @return string|bool
  "`t" * ($matches[0].Length / 4)  */
- "`t" * ($matches[0].Length / 4) public function get_email_template()
- "`t" * ($matches[0].Length / 4) {
- "`t" * ($matches[0].Length / 4) return false;
- "`t" * ($matches[0].Length / 4) }
+ '`t' * ($matches[0].Length / 4) public function get_email_template()
+ '`t' * ($matches[0].Length / 4)
+ {
+ '`t' * ($matches[0].Length / 4) return false;
+ '`t' * ($matches[0].Length / 4) }
 
 
- "`t" * ($matches[0].Length / 4) /**
+ '`t' * ($matches[0].Length / 4) /**
  "`t" * ($matches[0].Length / 4)  * Get email template variables
  "`t" * ($matches[0].Length / 4)  *
  "`t" * ($matches[0].Length / 4)  * @return array
  "`t" * ($matches[0].Length / 4)  */
- "`t" * ($matches[0].Length / 4) public function get_email_template_variables()
- "`t" * ($matches[0].Length / 4) {
- "`t" * ($matches[0].Length / 4) return [];
- "`t" * ($matches[0].Length / 4) }
+ '`t' * ($matches[0].Length / 4) public function get_email_template_variables()
+ '`t' * ($matches[0].Length / 4)
+ {
+ '`t' * ($matches[0].Length / 4) return [];
+ '`t' * ($matches[0].Length / 4) }
 
- "`t" * ($matches[0].Length / 4) /**
+ '`t' * ($matches[0].Length / 4) /**
  "`t" * ($matches[0].Length / 4)  * Function for preparing the data for insertion in an SQL query
  "`t" * ($matches[0].Length / 4)  * (The service handles insertion)
  "`t" * ($matches[0].Length / 4)  *
  "`t" * ($matches[0].Length / 4)  * @param array $data The type specific data
  "`t" * ($matches[0].Length / 4)  * @param array $pre_create_data Data from pre_create_insert_array()
  "`t" * ($matches[0].Length / 4)  */
- "`t" * ($matches[0].Length / 4) public function create_insert_array($data, $pre_create_data = [])
- "`t" * ($matches[0].Length / 4) {
- "`t" * ($matches[0].Length / 4) $this->set_data('PR_N_sender_id', $data['PR_N_sender_id']);
- "`t" * ($matches[0].Length / 4) $this->set_data('PR_N_post_id', $data['PR_N_post_id']);
- "`t" * ($matches[0].Length / 4) $this->set_data('PR_N_topic_id', $data['PR_N_topic_id']);
- "`t" * ($matches[0].Length / 4) $this->set_data('PR_N_username', $data['PR_N_username']);
- "`t" * ($matches[0].Length / 4) $this->set_data('PR_N_post_title', $data['PR_N_post_title']);
- "`t" * ($matches[0].Length / 4) $this->set_data('PR_N_user_colour', $data['PR_N_user_colour']);
- "`t" * ($matches[0].Length / 4) $this->set_data('PR_N_icon', $data['PR_N_icon']);
- "`t" * ($matches[0].Length / 4) parent::create_insert_array($data, $pre_create_data);
- "`t" * ($matches[0].Length / 4) }
+ '`t' * ($matches[0].Length / 4) public function create_insert_array($data, $pre_create_data = [])
+ '`t' * ($matches[0].Length / 4)
+ {
+ '`t' * ($matches[0].Length / 4) $this->set_data('PR_N_sender_id', $data['PR_N_sender_id']);
+ '`t' * ($matches[0].Length / 4) $this->set_data('PR_N_post_id', $data['PR_N_post_id']);
+ '`t' * ($matches[0].Length / 4) $this->set_data('PR_N_topic_id', $data['PR_N_topic_id']);
+ '`t' * ($matches[0].Length / 4) $this->set_data('PR_N_username', $data['PR_N_username']);
+ '`t' * ($matches[0].Length / 4) $this->set_data('PR_N_post_title', $data['PR_N_post_title']);
+ '`t' * ($matches[0].Length / 4) $this->set_data('PR_N_user_colour', $data['PR_N_user_colour']);
+ '`t' * ($matches[0].Length / 4) $this->set_data('PR_N_icon', $data['PR_N_icon']);
+ '`t' * ($matches[0].Length / 4) parent::create_insert_array($data, $pre_create_data);
+ '`t' * ($matches[0].Length / 4) }
 }

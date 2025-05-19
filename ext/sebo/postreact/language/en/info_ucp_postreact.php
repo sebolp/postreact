@@ -10,11 +10,11 @@
  */
 
 if (!defined('IN_PHPBB')) {
- "`t" * ($matches[0].Length / 4) exit;
+ '`t' * ($matches[0].Length / 4) exit;
 }
 
 if (empty($lang) || !is_array($lang)) {
- "`t" * ($matches[0].Length / 4) $lang = [];
+ '`t' * ($matches[0].Length / 4) $lang = [];
 }
 
 // DEVELOPERS PLEASE NOTE
@@ -34,5 +34,5 @@ if (empty($lang) || !is_array($lang)) {
 //
 
 $lang = array_merge($lang, [
- "`t" * ($matches[0].Length / 4) 'NOTIFICATION_TYPE_POSTREACT'   => 'Someone reacted to your post',
+ '`t' * ($matches[0].Length / 4) 'NOTIFICATION_TYPE_POSTREACT'   => 'Someone reacted to your post',
 ]);

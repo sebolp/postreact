@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<ruleset name="phpBB Extensions">
+    <description>phpBB Coding Standards per estensioni</description>
+
+    <!-- Percorsi da analizzare -->
+    <file>.</file>
+
+    <!-- Escludere alcune cartelle -->
+    <exclude-pattern>./build</exclude-pattern>
+    <exclude-pattern>./tests</exclude-pattern>
+    <exclude-pattern>./vendor</exclude-pattern>
+
+    <!-- Applicare lo standard phpBB -->
+    <rule ref="vendor/senky/phpbb-coding-standard/ruleset.xml"/>
+
+    <!-- Impedire l'uso degli spazi per l'indentazione -->
+    <rule ref="Generic.WhiteSpace.DisallowSpaceIndent"/>
+
+    <!-- Posizionare le graffe su una nuova riga (stile BSD Allman) -->
+    <rule ref="Generic.Functions.OpeningFunctionBraceBsdAllman"/>
+
+</ruleset>
