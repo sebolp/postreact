@@ -1,0 +1,30 @@
+<!-- INCLUDECSS @sebo_postreact/main.css -->
+	<div class="panel bg2">
+	<div class="inner">
+
+	<div class="column1">
+    <h3>{{ lang('REACTION_RECEIVED_LIST') }}</h3>
+		<!-- BEGIN user_reactions_received -->
+		<div id="img_post_react_display" class="img_post_react_display_memberlist">
+			<div id="bubble_post_react_display" class="bubble_post_react_display">
+				{user_reactions_received.ICON_COUNT} 
+			</div>
+			<img src="{user_reactions_received.ICON_URL}" title="{user_reactions_received.ICON_ALT}" alt="{user_reactions_received.ICON_ALT}" width="{user_reactions_received.ICON_WIDTH}" height="{user_reactions_received.ICON_HEIGHT}">
+		</div>
+		<!-- END user_reactions_received -->
+	</div>
+
+	<div class="column2">
+		<h3>{{ lang('REACTION_SENT_LIST') }}</h3>
+		<!-- BEGIN user_reactions -->
+		<div id="img_post_react_display" class="img_post_react_display_memberlist">
+			<div id="bubble_post_react_display" class="bubble_post_react_display">
+				{user_reactions.ICON_COUNT} 
+			</div>
+			<img src="{user_reactions.ICON_URL}" title="{user_reactions.ICON_ALT}" alt="{user_reactions.ICON_ALT}" width="{user_reactions.ICON_WIDTH}" height="{user_reactions.ICON_HEIGHT}">
+		</div>			
+		<!-- END user_reactions -->
+	</div>
+
+	</div>
+</div>
