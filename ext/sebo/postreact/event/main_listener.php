@@ -8,12 +8,12 @@
 		*
 	*/
 	namespace sebo\postreact\event;
-	
+
 	/**
 		* @ignore
 	*/
 	use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-	
+
 	/**
 		* PostReaction Event listener.
 	*/
