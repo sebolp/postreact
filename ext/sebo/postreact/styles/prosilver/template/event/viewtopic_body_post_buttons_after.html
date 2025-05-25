@@ -1,0 +1,81 @@
+<!-- INCLUDECSS @sebo_postreact/write.css -->
+<!-- INCLUDECSS @sebo_postreact/main.css -->
+<!-- INCLUDECSS @sebo_postreact/open_bubble.css -->
+{% if postrow.PERM_W == '1' %}
+    <li>
+        <a href="#" class="button button-icon-only react-toggle" title="POSTREACT" data-target="popup-{{ postrow.MY_PID }}">
+            <!-- SVG ICON -->
+            <svg
+   viewBox="0 0 512 512"
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="icona_smile_plus.svg"
+   xml:space="preserve"
+   inkscape:version="1.4 (86a8ad7, 2024-10-11)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg" style="width: 18px;vertical-align: bottom;"><defs
+     id="defs1" /><sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="1.0800781"
+     inkscape:cx="255.53707"
+     inkscape:cy="256"
+     inkscape:window-width="1497"
+     inkscape:window-height="755"
+     inkscape:window-x="1700"
+     inkscape:window-y="141"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg1" /><path
+     d="M464 256A208 208 0 1 0 48 256a208 208 0 1 0 416 0zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zm177.6 62.1C192.8 334.5 218.8 352 256 352s63.2-17.5 78.4-33.9c9-9.7 24.2-10.4 33.9-1.4s10.4 24.2 1.4 33.9c-22 23.8-60 49.4-113.6 49.4s-91.7-25.5-113.6-49.4c-9-9.7-8.4-24.9 1.4-33.9s24.9-8.4 33.9 1.4zM144.4 208a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zm192-32a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"
+     id="path1"
+     style="fill:#8f8f8f;fill-opacity:1;width: 18px" /><path
+     d="m 431.98262,343.1953 c 0,-7.4577 -6.05697,-13.48282 -13.55404,-13.48282 -7.49709,0 -13.55404,6.02512 -13.55404,13.48282 v 60.67269 h -60.99319 c -7.49709,0 -13.55405,6.02514 -13.55405,13.48283 0,7.45767 6.05696,13.48282 13.55405,13.48282 h 60.99319 v 60.67269 c 0,7.45768 6.05695,13.48281 13.55404,13.48281 7.49707,0 13.55404,-6.02513 13.55404,-13.48281 v -60.67269 h 60.99317 c 7.49709,0 13.55405,-6.02515 13.55405,-13.48282 0,-7.45769 -6.05696,-13.48283 -13.55405,-13.48283 h -60.99317 z"
+     id="path1-8"
+     style="fill:#8f8f8f;fill-opacity:1;stroke:#696969;stroke-width:12.622;stroke-dasharray:none;stroke-opacity:1;" /></svg>
+            <span class="sr-only"> </span>
+        </a>
+    
+<div class="container_pr">
+    <div id="popup-{{ postrow.MY_PID }}" class="popup_pr" style="display: none;">
+        <div class="arrow_pr"></div>
+        <div class="popup-content_pr">
+            {% set reacted = false %}
+            {% for icon in postrow.ICONS %}
+                {% if icon.status == '1' %}
+                    {% for check in postrow.ICON_CHECK %}
+                        {% if check.post_id == postrow.MY_PID and check.icon_id == icon.icon_id %}
+                            {% set reacted = true %}
+                            <div class="already_reacted_pr">
+                        {% endif %}
+                    {% endfor %}
+
+                    <a href="viewtopic.php?t={{ postrow.MY_TID }}&iid={{ icon.icon_id }}&pid={{ postrow.MY_PID }}&tid={{ postrow.MY_TID }}#p{{ postrow.MY_PID }}">
+                        <img src="{{ icon.icon_url }}" title="{{ icon.icon_alt }}" alt="{{ icon.icon_alt }}" width="{{ icon.icon_width }}" height="{{ icon.icon_height }}">
+                    </a>
+
+                    {% for check in postrow.ICON_CHECK %}
+                        {% if check.post_id == postrow.MY_PID and check.icon_id == icon.icon_id %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
+
+            {% if reacted %}
+                <div class="already_reacted_pr_txt">
+                    <span>{{ lang('ALREADY_REACTED') }}</span>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+</li>
+{% endif %}

@@ -1,65 +1,72 @@
-	.popup-container_pr summary {
-		list-style: none;
-		cursor: pointer;
-	}
+.popup-container_pr summary {
+	list-style: none;
+	cursor: pointer;
+}
+.react-toggle {
+	position: relative;
+}
 
-	.popup_pr {
-		max-width: 455px;
-		display: none;
-		position: absolute;
-		background: white;
-		border: 1px solid #ccc;
-		padding: 10px;
-		margin-top: 15px;
-		right: -10px;
-		width: 80%;
-		/*transform: translateX(-50%);*/
-		border-radius: 10px;
-		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-		z-index: 1000;
-	}
+.container_pr {
+	position: relative;
+	display: inline-block;
+}
 
-	.popup-container_pr[open] .popup_pr {
-		display: block;
-	}
+.popup_pr {
+	position: absolute;
+	top: 100%;
+	right: 0;
+	margin-top: 18px;
+	width: clamp(160px, 50vw, 410px);
+	background-color: #fff;
+	border: 1px solid #ccc;
+	border-radius: 8px;
+	box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.2);
+	z-index: 999;
+	padding: 10px;
+}
 
-	.popup-container_pr summary {
-		border: none;
-		outline: none;
-	}
+.arrow_pr {
+	position: absolute;
+	top: -6px;
+	right: 10px;
+	width: 0;
+	height: 0;
+	border-left: 6px solid transparent;
+	border-right: 6px solid transparent;
+	border-bottom: 6px solid #fff;
+}
 
+
+
+
+.popup-container_pr[open] .popup_pr {
+	display: block;
+}
+
+.popup-container_pr summary {
+	border: none;
+	outline: none;
+}
+
+.link-image_pr {
+	cursor: pointer;
+}
+
+.popup-content_pr img {
+	margin: 5px;
+}
+
+.dropdown-contents{
+	z-index: 4 !important;
+}
+
+@media (max-width: 700px) {
 	.arrow_pr {
-		width: 0;
-		height: 0;
-		border-left: 15px solid transparent;
-		border-right: 15px solid transparent;
-		border-bottom: 10px solid #ccc;
-		position: absolute;
-		top: -10px;
-		left: 95%;
-		transform: translateX(-50%);
+		left: 95%
 	}
-	
-	.link-image_pr {
-		cursor: pointer;
+	.popup_pr {
+		right: 10px;
+		transform: none;
+		left: auto;
 	}
-
-	.popup-content_pr img {
-		margin: 5px;
-	}
-	
-	/* have to edit to overtake the bubble */
-	.dropdown-contents{
-		z-index: 4 !important;
-	}
-
-	@media (max-width: 700px) {
-		.arrow_pr {
-			left: 95%
-		}
-		.popup_pr {
-			right: 10px;
-			transform: none;
-			left: auto;
-		}
-	}
+}
