@@ -30,6 +30,6 @@ $lang = array_merge($lang, [
 	'REACTION_SENT_LIST'	=> 'Elenco reazioni inviate dall\'utente',
 	'REACTION_RECEIVED_LIST'	=> 'Elenco reazioni ricevute dall\'utente',
 	'POSTREACT_SUMMARY'			=> 'SUMMARY',
-	'REACT_TO_POST'				=> 'Reagisci al messaggio'
+	'REACT_TO_POST'				=> 'Reagisci a questo messaggio'
 
 ]);
