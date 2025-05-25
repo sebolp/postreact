@@ -8,12 +8,12 @@
 		*
 	*/
 	namespace sebo\postreact\event;
-
+	
 	/**
 		* @ignore
 	*/
 	use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-
+	
 	/**
 		* PostReaction Event listener.
 	*/
@@ -281,8 +281,8 @@
 							meta_refresh(2, append_sid("viewtopic.{$this->php_ext}?p={$my_post_id}#p{$my_post_id}"));
 							trigger_error($message);
 						}
-						} else
-						{
+					} else
+					{
 						// ##
 						// react if not
 						$sql = "INSERT INTO " . $this->table_prefix . "sebo_postreact_table (postreact_id, topic_id, post_id, user_id, icon_id, react_time) VALUES (NULL, '$my_topic_id', '$my_post_id', '$user_id_logged', '$my_icon_id', '$r_time');";
@@ -320,8 +320,8 @@
 							$message = $this->user->lang('INSERTED_VALUE') . '<br /><br />' . $this->user->lang('RETURN_FORUM', '<a href="' . append_sid("viewtopic.{$this->php_ext}?p={$my_post_id}#p{$my_post_id}") . '">', '</a>');
 							meta_refresh(2, append_sid("viewtopic.{$this->php_ext}?p={$my_post_id}#p{$my_post_id}"));
 							trigger_error($message);
-							} else
-							{
+						} else
+						{
 							// something wrong = not inserted
 							$message = $this->user->lang('NOT_INSERTED_VALUE') . '<br /><br />' . $this->user->lang('RETURN_FORUM', '<a href="' . append_sid("viewtopic.{$this->php_ext}?p={$my_post_id}#p{$my_post_id}") . '">', '</a>');
 							meta_refresh(2, append_sid("viewtopic.{$this->php_ext}?p={$my_post_id}#p{$my_post_id}"));
@@ -331,8 +331,8 @@
 					}
 					$this->db->sql_freeresult($result_check);
 				}
-				} else
-				{
+			} else
+			{
 				$message = $this->user->lang('LOGIN_TO_REACT') . '<br /><br />' . $this->user->lang('RETURN_FORUM', '<a href="' . append_sid("viewtopic.{$this->php_ext}?p={$my_post_id}#p{$my_post_id}") . '">', '</a>');
 				meta_refresh(2, append_sid("viewtopic.{$this->php_ext}?p={$my_post_id}#p{$my_post_id}"));
 				trigger_error($message);
@@ -427,8 +427,8 @@
 			// sql_escape because of potential inject (?)
 			$topic_id = isset($row['topic_id']) ? (int) $row['topic_id'] : 0;
 			$topic_id_escaped = $this->db->sql_escape($topic_id);
-			$sql = 'SELECT * FROM ' . $this->table_prefix . 'sebo_postreact_table WHERE topic_id = ' . $topic_id_escaped;
-			$result = $this->db->sql_query($sql);
+			$sql = 'SELECT * FROM ' . $this->table_prefix . 'sebo_postreact_table WHERE topic_id = ?';
+			$result = $this->db->sql_query($sql, [$topic_id]);
 			$filtered_rows = [];
 			$post_ids = [];
 			while ($my_row = $this->db->sql_fetchrow($result))
@@ -512,8 +512,8 @@
 						'topic_id' => $topic_id,
 						'count' => $count
 						];
-						} else
-						{
+					} else
+					{
 						// Update the count if icon_id already exists
 						$new_array[$icon_id]['count'] = (string) max($new_array[$icon_id]['count'], $count);
 					}
@@ -561,9 +561,9 @@
 			// Reactions sent
 			$sql = 'SELECT icon_id, COUNT(*) AS icon_count
 			FROM ' . $this->table_prefix . 'sebo_postreact_table
-			WHERE user_id = ' . $user_id . '
+			WHERE user_id = ?
 			GROUP BY icon_id';
-			$result = $this->db->sql_query($sql);
+			$result = $this->db->sql_query($sql, [$user_id]);
 			$icon_counts = [];
 			$icon_ids = [];
 			while ($row = $this->db->sql_fetchrow($result))
@@ -606,10 +606,10 @@
 			$sql = 'SELECT pr.icon_id, COUNT(*) AS icon_count
 			FROM ' . $this->table_prefix . 'sebo_postreact_table pr
 			INNER JOIN ' . $this->table_prefix . 'posts p
-			ON pr.post_id = p.post_id
-			WHERE p.poster_id = ' . $user_id . '
+            ON pr.post_id = p.post_id
+			WHERE p.poster_id = ?
 			GROUP BY pr.icon_id';
-			$result = $this->db->sql_query($sql);
+			$result = $this->db->sql_query($sql, [$user_id]);
 			$received_icon_counts = [];
 			$received_icon_ids = [];
 			while ($row = $this->db->sql_fetchrow($result))
