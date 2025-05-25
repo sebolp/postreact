@@ -12,6 +12,13 @@
 	overflow: hidden;
 	justify-content: flex-start;
 }
+a.button.react-toggle:hover #pr_smile_svg {
+	fill: #0A8ED0 !important;
+}
+a.button.react-toggle:hover #pr_smile_svg_plus {
+	fill: #0A8ED0 !important;
+	stroke: #0ad00e !important;
+}
 .img_post_react_display_memberlist {
 	float: left;
 	position: relative;
