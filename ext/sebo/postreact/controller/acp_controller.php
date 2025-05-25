@@ -80,7 +80,7 @@ class acp_controller
 			// Costruisci l'array con i valori da inserire nella tabella
 			$data = array(
 				'icon_id'    => $new_id, // icon_id
-				'icon_url'   => 'ext/sebo/postreact/styles/all/img/default.png', // icon_url
+				'icon_url'   => 'ext/sebo/postreact/styles/all/img/default.svg', // icon_url
 				'icon_width' => 32, // icon_width
 				'icon_height'=> 32, // icon_height
 				'icon_alt'   => '', // icon_alt
