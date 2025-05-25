@@ -2,20 +2,25 @@
 	list-style: none;
 	cursor: pointer;
 }
+
+.pr_svg_style {
+	width: 18px;
+	vertical-align: bottom;
+}
+
 .react-toggle {
 	position: relative;
 }
 
 .container_pr {
 	position: relative;
-	display: inline-block;
 }
 
 .popup_pr {
 	position: absolute;
 	top: 100%;
 	right: 0;
-	margin-top: 18px;
+	margin-top: 10px;
 	width: clamp(160px, 50vw, 410px);
 	background-color: #fff;
 	border: 1px solid #ccc;
@@ -35,9 +40,6 @@
 	border-right: 6px solid transparent;
 	border-bottom: 6px solid #fff;
 }
-
-
-
 
 .popup-container_pr[open] .popup_pr {
 	display: block;
@@ -62,11 +64,9 @@
 
 @media (max-width: 700px) {
 	.arrow_pr {
-		left: 95%
+		right: 35px;
 	}
 	.popup_pr {
-		right: 10px;
-		transform: none;
-		left: auto;
+		transform: translateX(30px);
 	}
 }

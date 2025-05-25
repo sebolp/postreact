@@ -1,5 +1,5 @@
 {% if postrow.PERM_W == '1' %}
-<li>
+<li class="no-responsive">
     <a href="#" class="button button-icon-only react-toggle" title="{{ lang('REACT_TO_POST') }}" data-target="popup-{{ postrow.MY_PID }}">
         <!-- SVG ICON -->
         <svg
@@ -12,7 +12,7 @@
         xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
         xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
         xmlns="http://www.w3.org/2000/svg"
-        xmlns:svg="http://www.w3.org/2000/svg" style="width: 18px;vertical-align: bottom;"><defs
+        xmlns:svg="http://www.w3.org/2000/svg" class="pr_svg_style icon"><defs
             id="defs1" /><sodipodi:namedview
             id="namedview1"
             pagecolor="#ffffff"
@@ -37,7 +37,7 @@
             d="m 431.98262,343.1953 c 0,-7.4577 -6.05697,-13.48282 -13.55404,-13.48282 -7.49709,0 -13.55404,6.02512 -13.55404,13.48282 v 60.67269 h -60.99319 c -7.49709,0 -13.55405,6.02514 -13.55405,13.48283 0,7.45767 6.05696,13.48282 13.55405,13.48282 h 60.99319 v 60.67269 c 0,7.45768 6.05695,13.48281 13.55404,13.48281 7.49707,0 13.55404,-6.02513 13.55404,-13.48281 v -60.67269 h 60.99317 c 7.49709,0 13.55405,-6.02515 13.55405,-13.48282 0,-7.45769 -6.05696,-13.48283 -13.55405,-13.48283 h -60.99317 z"
             id="path1-8"
         style="fill:#8f8f8f;fill-opacity:1;stroke:#696969;stroke-width:12.622;stroke-dasharray:none;stroke-opacity:1;" /></svg>
-        <span class="sr-only"> </span>
+        <span class="sr-only">{{ lang('REACT_TO_POST') }}</span>
     </a>
     
     <div class="container_pr">
