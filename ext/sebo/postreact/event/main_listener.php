@@ -561,9 +561,9 @@
 			// Reactions sent
 			$sql = 'SELECT icon_id, COUNT(*) AS icon_count
 			FROM ' . $this->table_prefix . 'sebo_postreact_table
-			WHERE user_id = ?
+			WHERE user_id = ' . (int) $user_id . '
 			GROUP BY icon_id';
-			$result = $this->db->sql_query($sql, [$user_id]);
+			$result = $this->db->sql_query($sql);
 			$icon_counts = [];
 			$icon_ids = [];
 			while ($row = $this->db->sql_fetchrow($result))
@@ -606,10 +606,10 @@
 			$sql = 'SELECT pr.icon_id, COUNT(*) AS icon_count
 			FROM ' . $this->table_prefix . 'sebo_postreact_table pr
 			INNER JOIN ' . $this->table_prefix . 'posts p
-            ON pr.post_id = p.post_id
-			WHERE p.poster_id = ?
+			ON pr.post_id = p.post_id
+			WHERE p.poster_id = ' . (int) $user_id . '
 			GROUP BY pr.icon_id';
-			$result = $this->db->sql_query($sql, [$user_id]);
+			$result = $this->db->sql_query($sql);
 			$received_icon_counts = [];
 			$received_icon_ids = [];
 			while ($row = $this->db->sql_fetchrow($result))
