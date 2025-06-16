@@ -94,8 +94,12 @@
 			// ##
 			// grab icons
 			// take the line corresponds to post_id
-			$sql_ico = 'SELECT * FROM ' . $this->table_prefix . 'sebo_postreact_icon';
 			$data_ico = [];
+			$sql_array = [
+				'SELECT'    => '*',
+				'FROM'      => [$this->table_prefix . 'sebo_postreact_icon' => ''],
+			];
+			$sql_ico = $this->db->sql_build_query('SELECT', $sql_array);
 			$result_ico = $this->db->sql_query($sql_ico);
 			if ($result_ico)
 			{
@@ -112,19 +116,17 @@
 			$postrow = $event['postrow'];
 			$row = $event['row'];
 			// ##
-			// check permissions
-			//if($this->auth->acl_get('u_new_sebo_postreact') == '1'){
-			// granted
-			//}
-			//else if ($this->auth->acl_get('u_new_sebo_postreact_view') == '0'){
-			// return;
-			//}
-			// ##
 			//
 			$my_pid = $row['post_id'];
 			$my_tid = $row['topic_id'];
 			// take the line corresponds to post_id
-			$sql = 'SELECT * FROM ' . $this->table_prefix . 'sebo_postreact_table WHERE post_id = ' . (int) $my_pid;
+			$sql_array = [
+				'SELECT'    => '*',
+				'FROM'      => [$this->table_prefix . 'sebo_postreact_table' => ''],
+				'WHERE'     => 'post_id = ' . (int) $my_pid,
+			];
+			$sql = $this->db->sql_build_query('SELECT', $sql_array);
+			
 			$data = [];
 			if ($sql)
 			{
@@ -173,7 +175,12 @@
 					$user_id = $entry['user_id'];
 					if (!isset($user_data_detailed[$user_id]))
 					{
-						$query = "SELECT group_id, username, user_colour FROM " . $this->table_prefix . "users WHERE user_id = '$user_id'";
+						$sql_array = [
+							'SELECT'    => 'group_id, username, user_colour',
+							'FROM'      => [USERS_TABLE => ''],
+							'WHERE'     => 'user_id = ' . (int) $user_id,
+						];
+						$query = $this->db->sql_build_query('SELECT', $sql_array);
 						$result = $this->db->sql_query($query);
 						if ($result->num_rows > 0)
 						{
@@ -211,7 +218,13 @@
 			// mark your choise
 			$check = [];
 			$user_id_logged = $this->user->data['user_id'];
-			$sql_check = "SELECT post_id, icon_id FROM " . $this->table_prefix . "sebo_postreact_table WHERE user_id = '$user_id_logged' AND post_id = '$my_pid'";
+			
+			$sql_array = [
+							'SELECT'    => 'post_id, icon_id',
+							'FROM'      => [$this->table_prefix . 'sebo_postreact_table' => ''],
+							'WHERE'     => 'user_id = ' . (int) $user_id_logged . ' AND post_id = ' . (int) $my_pid,
+						];
+			$sql_check = $this->db->sql_build_query('SELECT', $sql_array);
 			$result_check = $this->db->sql_query($sql_check);
 			while ($row_check = $this->db->sql_fetchrow($result_check))
 			{
@@ -235,6 +248,32 @@
 			'REACTORS'	  => $user_ids_with_details,
 			));
 		}
+
+		public function add_notification($notification_data, $notification_type_name = 'sebo.postreact.notification.type.postreact_notification')
+		{
+			if ($this->notification_exists($notification_data, $notification_type_name))
+			{
+				$this->notification_manager->update_notifications($notification_type_name, $notification_data);
+			}
+			else
+			{
+				$this->notification_manager->add_notifications($notification_type_name, $notification_data);
+			}
+		}
+
+		public function notification_exists($pr_notification_data, $notification_type_name)
+		{
+			$notification_type_id = $this->notification_manager->get_notification_type_id($notification_type_name);
+			$sql = 'SELECT notification_id FROM ' . NOTIFICATIONS_TABLE . '
+				WHERE notification_type_id = ' . (int) $notification_type_id . '
+					AND item_id = ' . (int) $pr_notification_data['PR_N_post_id'];
+			$result = $this->db->sql_query($sql);
+			$item_id = $this->db->sql_fetchfield('notification_id');
+			$this->db->sql_freeresult($result);
+
+			return ($item_id) ?: false;
+		}
+
 		public function write_db()
 		{
 			// ##
@@ -250,73 +289,108 @@
 				{
 					// ##
 					// check if reacted
-					$sql_check = "SELECT COUNT(*) as count FROM " . $this->table_prefix . "sebo_postreact_table WHERE user_id = '$user_id_logged' AND post_id = '$my_post_id'";
+					$sql_array = [
+							'SELECT'    => 'COUNT(*) AS total_reactions',
+							'FROM'      => [$this->table_prefix . 'sebo_postreact_table' => ''],
+							'WHERE'     => 'user_id = ' . (int) $user_id_logged . ' AND post_id = ' . (int) $my_post_id,
+						];
+					$sql_check = $this->db->sql_build_query('SELECT', $sql_array);
 					$result_check = $this->db->sql_query($sql_check);
 					$row_check = $this->db->sql_fetchrow($result_check);
-					if ($row_check['count'] > 0)
+					if ($row_check['total_reactions'] > 0)
 					{
 						// ##
 						// delete if yes
-						$sql = "DELETE FROM " . $this->table_prefix . "sebo_postreact_table WHERE user_id = '$user_id_logged' AND post_id = '$my_post_id';";
+						$sql = 'DELETE FROM ' . $this->table_prefix . 'sebo_postreact_table
+								WHERE user_id = ' . (int) $user_id_logged . '
+								AND post_id = ' . (int) $my_post_id;
 						$result = $this->db->sql_query($sql);
 						if ($result)
 						{
 							//##
 							// NOTIFICATION SYS DELETE
 							// check posts info
-							$sql_pname = "SELECT
-							p.poster_id AS poster_id_clean, p.post_subject AS post_post_title, p.post_id,
-							u.username_clean AS poster_name_clean, u.user_id, u.user_colour AS poster_user_colour
-							FROM " . $this->table_prefix . "posts p
-							JOIN " . $this->table_prefix . "users u ON p.poster_id = u.user_id
-							WHERE p.post_id = $my_post_id;";
+							// Array with data for the full SQL statement
+							$sql_array = [
+								'SELECT'    => 'p.poster_id AS poster_id_clean, p.post_subject AS post_post_title, p.post_id,
+												u.username_clean AS poster_name_clean, u.user_id, u.user_colour AS poster_user_colour',
+								'FROM'      => [$this->table_prefix . 'posts' => 'p'],
+								'LEFT_JOIN'      => [
+									[
+										'FROM'  => [$this->table_prefix . 'users' => 'u'],
+										'ON'    => 'p.poster_id = u.user_id',
+									],
+								],
+								'WHERE'     => 'p.post_id = ' . (int) $my_post_id,
+							];
+							$sql_pname = $this->db->sql_build_query('SELECT', $sql_array);
 							$result_pname = $this->db->sql_query($sql_pname);
 							$row_pname = $this->db->sql_fetchrow($result_pname);
-							// DEL =(notification_type+item_id+parent_id(reactor)+user_id(reactor))
-							$PR_DEL_item_id = $my_post_id;
-							$this->notification_manager->delete_notifications('sebo.postreact.notification.type.postreact_notification', $PR_DEL_item_id, $user_id_logged, $user_id_logged);
+							$this->notification_manager->delete_notifications('sebo.postreact.notification.type.postreact_notification', (int) $my_post_id, $user_id_logged, $user_id_logged);
 							$this->db->sql_freeresult($result_pname);
-							//
 							$message = $this->user->lang('DELETED_VALUE') . '<br /><br />' . $this->user->lang('RETURN_FORUM', '<a href="' . append_sid("viewtopic.{$this->php_ext}?p={$my_post_id}#p{$my_post_id}") . '">', '</a>');
 							meta_refresh(2, append_sid("viewtopic.{$this->php_ext}?p={$my_post_id}#p{$my_post_id}"));
 							trigger_error($message);
 						}
-					} else
+					}
+					else
 					{
 						// ##
 						// react if not
-						$sql = "INSERT INTO " . $this->table_prefix . "sebo_postreact_table (postreact_id, topic_id, post_id, user_id, icon_id, react_time) VALUES (NULL, '$my_topic_id', '$my_post_id', '$user_id_logged', '$my_icon_id', '$r_time');";
+						$data_insert = [
+							'postreact_id'	=> NULL,
+							'topic_id'		=> (int) $my_topic_id,
+							'post_id'		=> (int) $my_post_id,
+							'user_id'		=> (int) $user_id_logged,
+							'icon_id'		=> (int) $my_icon_id,
+							'react_time'	=> (int) $r_time,
+						];
+
+						$sql = 'INSERT INTO ' . $this->table_prefix . 'sebo_postreact_table ' . $this->db->sql_build_array('INSERT', $data_insert);
 						$result = $this->db->sql_query($sql);
 						if ($result)
 						{
 							// ##
 							// NOTIFICATION SYS INSERT
 							// check posts info
-							$sql_pname = "SELECT
-							p.poster_id AS poster_id_clean, p.post_subject AS post_post_title, p.post_id,
-							u.username_clean AS poster_name_clean, u.user_id, u.user_colour AS poster_user_colour
-							FROM " . $this->table_prefix . "posts p
-							JOIN " . $this->table_prefix . "users u ON p.poster_id = u.user_id
-							WHERE p.post_id = $my_post_id;";
+							$sql_array = [
+								'SELECT'    => 'p.poster_id AS poster_id_clean, p.post_subject AS post_post_title, p.post_id, u.username_clean AS poster_name_clean, u.user_id, u.user_colour AS poster_user_colour',
+								'FROM'      => [$this->table_prefix . 'posts'  => 'p'],
+								'LEFT_JOIN' => [
+									[
+										'FROM'  => [USERS_TABLE => 'u'],
+										'ON'    => 'p.poster_id = u.user_id',
+									],
+								],
+								'WHERE'     => 'p.post_id = ' . (int) $my_post_id,
+							];
+							$sql_pname = $this->db->sql_build_query('SELECT', $sql_array);
+
 							$result_pname = $this->db->sql_query($sql_pname);
 							$row_pname = $this->db->sql_fetchrow($result_pname);
-							$sql_ico_pr = 'SELECT * FROM ' . $this->table_prefix . 'sebo_postreact_icon WHERE icon_id = '.$my_icon_id.';';
+
+							$sql_array = [
+								'SELECT'    => '*',
+								'FROM'      => [$this->table_prefix . 'sebo_postreact_icon' => ''],
+								'WHERE'     => 'icon_id = ' . (int) $my_icon_id,
+							];
+							$sql_ico_pr = $this->db->sql_build_query('SELECT', $sql_array);
 							$result_ico_pr = $this->db->sql_query($sql_ico_pr);
 							$row_ico_pr = $this->db->sql_fetchrow($result_ico_pr);
-							//item_id = poster_id + post_id + reactor_id
-							$this->notification_manager->add_notifications('sebo.postreact.notification.type.postreact_notification', [
-							'PR_N_item_id'	  => $my_post_id,
+
+							$pr_notification_data = [
+							'PR_N_item_id'	  => (int) $my_post_id,
 							'PR_N_username'	 => $row_pname['poster_name_clean'],
-							'PR_N_user_colour'  => $row_pname['poster_user_colour'],
 							'PR_N_post_title'   => $row_pname['post_post_title'],
 							'PR_N_user_id'	  => $row_pname['poster_id_clean'],
-							'PR_N_sender_id'	=> $user_id_logged,
-							'PR_N_post_id'	  => $my_post_id,
-							'PR_N_topic_id'	 => $my_topic_id,
+							'PR_N_sender_id'	=> (int) $user_id_logged,
+							'PR_N_post_id'	  => (int) $my_post_id,
+							'PR_N_topic_id'	 => (int) $my_topic_id,
 							'PR_N_icon'		 => $row_ico_pr['icon_url']
-							]);
-							$this->db->sql_freeresult($result_pname);
-							//
+							];
+							var_dump($pr_notification_data);
+							$this->add_notification($pr_notification_data);
+							// notification and reaction added
 							$message = $this->user->lang('INSERTED_VALUE') . '<br /><br />' . $this->user->lang('RETURN_FORUM', '<a href="' . append_sid("viewtopic.{$this->php_ext}?p={$my_post_id}#p{$my_post_id}") . '">', '</a>');
 							meta_refresh(2, append_sid("viewtopic.{$this->php_ext}?p={$my_post_id}#p{$my_post_id}"));
 							trigger_error($message);
@@ -343,8 +417,14 @@
 			$topicrow = $event['topicrow'];
 			$row = $event['row'];
 			$topic_id = $row['topic_id'];
-			$sql = 'SELECT * FROM ' . $this->table_prefix . 'sebo_postreact_table WHERE topic_id = ' . (int) $topic_id;
 			$data = [];
+
+			$sql_array = [
+								'SELECT'    => '*',
+								'FROM'      => [$this->table_prefix . 'sebo_postreact_table' => ''],
+								'WHERE'     => 'topic_id = ' . (int) $topic_id,
+							];
+			$sql = $this->db->sql_build_query('SELECT', $sql_array);
 			// do it
 			$result = $this->db->sql_query($sql);
 			// Array starts for data and IDs
@@ -361,7 +441,13 @@
 			// if IDs, check
 			if (!empty($post_ids))
 			{
-				$sql_post_exist = 'SELECT post_id FROM ' . $this->table_prefix . 'posts WHERE post_id IN (' . implode(',', $post_ids) . ')';
+				$sql_array = [
+					'SELECT' => 'post_id',
+					'FROM'   => [$this->table_prefix . 'posts' => ''],
+					'WHERE'  => $this->db->sql_in_set('post_id', $post_ids),
+				];
+
+				$sql_post_exist = $this->db->sql_build_query('SELECT', $sql_array);
 				$result_post_exist = $this->db->sql_query($sql_post_exist);
 				$existing_posts = [];
 				while ($row = $this->db->sql_fetchrow($result_post_exist))
@@ -426,8 +512,12 @@
 			$row = $event['row'];
 			// sql_escape because of potential inject (?)
 			$topic_id = isset($row['topic_id']) ? (int) $row['topic_id'] : 0;
-			$sql = 'SELECT * FROM ' . $this->table_prefix . 'sebo_postreact_table
-			WHERE topic_id = ' . (int) $topic_id;
+			$sql_array = [
+					'SELECT' => '*',
+					'FROM'   => [$this->table_prefix . 'sebo_postreact_table' => ''],
+					'WHERE'  => 'topic_id = ' . (int) $topic_id,
+				];
+			$sql = $this->db->sql_build_query('SELECT', $sql_array);
 			$result = $this->db->sql_query($sql);
 			$filtered_rows = [];
 			$post_ids = [];
@@ -441,7 +531,12 @@
 			$data = [];
 			if (!empty($post_ids))
 			{
-				$sql_post_exist = 'SELECT post_id FROM ' . $this->table_prefix . 'posts WHERE post_id IN (' . implode(',', $post_ids) . ')';
+				$sql_array = [
+					'SELECT' => 'post_id',
+					'FROM'   => [$this->table_prefix . 'posts' => ''],
+					'WHERE'  => $this->db->sql_in_set('post_id', $post_ids),
+				];
+				$sql_post_exist = $this->db->sql_build_query('SELECT', $sql_array);
 				$result_post_exist = $this->db->sql_query($sql_post_exist);
 				$existing_posts = [];
 				while ($row = $this->db->sql_fetchrow($result_post_exist))
@@ -529,21 +624,7 @@
 			'PERM_R'		=> $this->auth->acl_get('u_new_sebo_postreact_view')
 			]);
 		}
-		/**
-			* Add permissions to the ACP -> Permissions settings page
-			* This is where permissions are assigned language keys and
-			* categories (where they will appear in the Permissions table):
-			* actions|content|forums|misc|permissions|pm|polls|post
-			* post_actions|posting|profile|settings|topic_actions|user_group
-			*
-			* Developers note: To control access to ACP, MCP and UCP modules, you
-			* must assign your permissions in your module_info.php file. For example,
-			* to allow only users with the a_new_sebo_postreact permission
-			* access to your ACP module, you would set this in your acp/main_info.php:
-			*	'auth' => 'ext_sebo/postreact && acl_a_new_sebo_postreact'
-			*
-			* @param \phpbb\event\data $event  Event object
-		*/
+
 		public function add_permissions($event)
 		{
 			$permissions = $event['permissions'];
@@ -559,10 +640,13 @@
 			$user_id = (int) $event['member']['user_id'];
 			// *
 			// Reactions sent
-			$sql = 'SELECT icon_id, COUNT(*) AS icon_count
-			FROM ' . $this->table_prefix . 'sebo_postreact_table
-			WHERE user_id = ' . (int) $user_id . '
-			GROUP BY icon_id';
+			$sql_array = [
+					'SELECT' => 'icon_id, COUNT(*) AS icon_count',
+					'FROM'   => [$this->table_prefix . 'sebo_postreact_table' => ''],
+					'WHERE'  => 'user_id = ' . (int) $user_id,
+					'GROUP_BY' => 'icon_id',
+				];
+			$sql = $this->db->sql_build_query('SELECT', $sql_array);
 			$result = $this->db->sql_query($sql);
 			$icon_counts = [];
 			$icon_ids = [];
@@ -575,12 +659,13 @@
 			$icons = [];
 			if (!empty($icon_ids))
 			{
-				// start list for IN (...)
-				$icon_ids_list = implode(',', $icon_ids);
 				// Query for active icons (status = 1)
-				$sql = 'SELECT icon_id, icon_url, icon_width, icon_height, icon_alt
-				FROM ' . $this->table_prefix . 'sebo_postreact_icon
-				WHERE icon_id IN (' . $icon_ids_list . ') AND status = 1';
+				$sql_array = [
+					'SELECT'   => 'icon_id, icon_url, icon_width, icon_height, icon_alt',
+					'FROM'     => [$this->table_prefix . 'sebo_postreact_icon' => ''],
+					'WHERE'    => $this->db->sql_in_set('icon_id', $icon_ids) . ' AND status = 1',
+				];
+				$sql = $this->db->sql_build_query('SELECT', $sql_array);
 				$result = $this->db->sql_query($sql);
 				while ($row = $this->db->sql_fetchrow($result))
 				{
@@ -603,12 +688,19 @@
 			$this->profile_data['icons'] = $icons;
 			// *
 			// Reactions received
-			$sql = 'SELECT pr.icon_id, COUNT(*) AS icon_count
-			FROM ' . $this->table_prefix . 'sebo_postreact_table pr
-			INNER JOIN ' . $this->table_prefix . 'posts p
-			ON pr.post_id = p.post_id
-			WHERE p.poster_id = ' . (int) $user_id . '
-			GROUP BY pr.icon_id';
+			$sql_array = [
+				'SELECT'   => 'pr.icon_id, COUNT(*) AS icon_count',
+				'FROM'     => [$this->table_prefix . 'sebo_postreact_table' => 'pr'],
+				'LEFT_JOIN' => [
+					[
+						'FROM' => [$this->table_prefix . 'posts' => 'p'],
+						'ON'   => 'pr.post_id = p.post_id',
+					],
+				],
+				'WHERE'    => 'p.poster_id = ' . (int) $user_id,
+				'GROUP_BY' => 'pr.icon_id',
+			];
+			$sql = $this->db->sql_build_query('SELECT', $sql_array);
 			$result = $this->db->sql_query($sql);
 			$received_icon_counts = [];
 			$received_icon_ids = [];
@@ -622,10 +714,13 @@
 			$received_icons = [];
 			if (!empty($received_icon_ids))
 			{
-				$icon_ids_list = implode(',', $received_icon_ids);
-				$sql = 'SELECT icon_id, icon_url, icon_width, icon_height, icon_alt
-				FROM ' . $this->table_prefix . 'sebo_postreact_icon
-				WHERE icon_id IN (' . $icon_ids_list . ') AND status = 1';
+				$sql_array = [
+					'SELECT' => 'icon_id, icon_url, icon_width, icon_height, icon_alt',
+					'FROM'   => [$this->table_prefix . 'sebo_postreact_icon' => ''],
+					'WHERE'  => $this->db->sql_in_set('icon_id', $received_icon_ids) . ' AND status = 1',
+				];
+
+				$sql = $this->db->sql_build_query('SELECT', $sql_array);
 				$result = $this->db->sql_query($sql);
 				while ($row = $this->db->sql_fetchrow($result))
 				{

@@ -25,7 +25,7 @@ $lang = array_merge($lang, [
 	'DELETED_VALUE'	=> 'Reazione cancellata!',
 	'LOGIN_TO_REACT'	=> 'Effettua il login per reagire!',
 
-	'SEBO_POSTREACT_NOTIFICATION'	=> '<img src="%s" style="width:32px !important;height:32px !important;"><strong>Hai ricevuto una reazione</strong> da %s nell\'argomento "%s"',
+	'SEBO_POSTREACT_NOTIFICATION'	=> '%s ha reagito al tuo post "%s"',
 	'ALREADY_REACTED'	=> 'Hai gia reagito a questo messaggio. Clicca per cancellare la tua reazione.',
 	'REACTION_SENT_LIST'	=> 'Elenco reazioni inviate dall\'utente',
 	'REACTION_RECEIVED_LIST'	=> 'Elenco reazioni ricevute dall\'utente',
