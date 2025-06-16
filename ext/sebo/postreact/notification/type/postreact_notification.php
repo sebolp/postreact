@@ -56,7 +56,7 @@ class postreact_notification extends \phpbb\notification\type\base
 	{
 		return $this->check_user_notification_options([$data['PR_N_user_id']], $options);
 	}
-	
+
 	public function users_to_query()
 	{
 		return [$this->get_data('PR_N_sender_id')];

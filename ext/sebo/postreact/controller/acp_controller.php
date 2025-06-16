@@ -159,7 +159,8 @@ class acp_controller
 				$all_queries_successful = true;
 				$failed_icon_urls = [];
 
-				foreach ($update_data as $icon_id => $data) {
+				foreach ($update_data as $icon_id => $data)
+				{
 					$sql_array = [
 						'icon_url'    => 'ext/sebo/postreact/styles/all/img/' . $data['url'],
 						'icon_alt'    => $data['icon_alt'],
@@ -173,17 +174,21 @@ class acp_controller
 
 					$query_result = $this->db->sql_query($sql);
 
-					if (!$query_result) {
+					if (!$query_result)
+					{
 						$all_queries_successful = false;
 						$failed_icon_urls[] = $data['url'];
 					}
 				}
 
-				if ($all_queries_successful) {
+				if ($all_queries_successful)
+				{
 					trigger_error($this->language->lang('ACP_POSTREACT_SETTING_SAVED') . adm_back_link($this->u_action));
-				} else {
+				} else
+				{
 					$error_message = $this->language->lang('ACP_POSTREACT_SETTING_NOT_SAVED');
-					if (!empty($failed_icon_urls)) {
+					if (!empty($failed_icon_urls))
+					{
 						$error_message .= '<br />' . $this->language->lang('POSTREACT_FAILED_ICONS') . ': ' . implode(', ', $failed_icon_urls);
 					}
 					trigger_error($error_message . adm_back_link($this->u_action));

@@ -126,7 +126,7 @@
 				'WHERE'     => 'post_id = ' . (int) $my_pid,
 			];
 			$sql = $this->db->sql_build_query('SELECT', $sql_array);
-			
+
 			$data = [];
 			if ($sql)
 			{
@@ -218,7 +218,7 @@
 			// mark your choise
 			$check = [];
 			$user_id_logged = $this->user->data['user_id'];
-			
+
 			$sql_array = [
 							'SELECT'    => 'post_id, icon_id',
 							'FROM'      => [$this->table_prefix . 'sebo_postreact_table' => ''],
@@ -338,7 +338,7 @@
 						// ##
 						// react if not
 						$data_insert = [
-							'postreact_id'	=> NULL,
+							'postreact_id'	=> null,
 							'topic_id'		=> (int) $my_topic_id,
 							'post_id'		=> (int) $my_post_id,
 							'user_id'		=> (int) $user_id_logged,
