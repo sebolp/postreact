@@ -210,6 +210,17 @@ class install_data extends \phpbb\db\migration\migration
 					'active'        => '0',
 				],
 		];
+		$sql_ary = [
+			'SELECT'        => 'COUNT(*) AS total_rows',
+			'FROM'          => [$this->table_prefix . 'sebo_postreact_icon' => ''],
+		];
+		$result = $this->db->sql_build_query('SELECT', $sql_ary);
+		$result_check = $this->db->sql_query($result);
+		$row_check = $this->db->sql_fetchrow($result_check);
+		$this->db->sql_freeresult($result_check);
+		if ($row_check['total_rows'] == 0)
+		{
 		$this->db->sql_multi_insert($this->table_prefix . 'sebo_postreact_icon', $data);
+		}
 	}
 }
