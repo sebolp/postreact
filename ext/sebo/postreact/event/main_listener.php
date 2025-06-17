@@ -388,7 +388,6 @@
 							'PR_N_topic_id'	 => (int) $my_topic_id,
 							'PR_N_icon'		 => $row_ico_pr['icon_url']
 							];
-							var_dump($pr_notification_data);
 							$this->add_notification($pr_notification_data);
 							// notification and reaction added
 							$message = $this->user->lang('INSERTED_VALUE') . '<br /><br />' . $this->user->lang('RETURN_FORUM', '<a href="' . append_sid("viewtopic.{$this->php_ext}?p={$my_post_id}#p{$my_post_id}") . '">', '</a>');
