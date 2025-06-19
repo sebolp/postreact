@@ -14,7 +14,7 @@ class install_acp_module extends \phpbb\db\migration\migration
 {
 	public static function depends_on()
 	{
-		return ['\sebo\postreact\migrations\install_sample_data'];
+		return ['\sebo\postreact\migrations\install_data'];
 	}
 
 	public function update_data()
