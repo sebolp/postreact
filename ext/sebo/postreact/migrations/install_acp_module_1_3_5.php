@@ -19,14 +19,14 @@ class install_acp_module_1_3_5 extends \phpbb\db\migration\migration
 
 	public function update_data()
 	{
-        return [
-            ['module.add', ['acp', 'ACP_POSTREACT_TITLE', [
-                    'module_basename'	=> '\sebo\postreact\acp\purge_module',
-                    'module_langname'	=> 'ACP_POSTREACT_PURGE',
-                    'module_mode'		=> 'settings',
-                    'module_auth'		=> 'ext_sebo/postreact && acl_a_board',
-            ]]],
-        ];
+		return [
+			['module.add', ['acp', 'ACP_POSTREACT_TITLE', [
+					'module_basename'	=> '\sebo\postreact\acp\purge_module',
+					'module_langname'	=> 'ACP_POSTREACT_PURGE',
+					'module_mode'		=> 'settings',
+					'module_auth'		=> 'ext_sebo/postreact && acl_a_board',
+			]]],
+		];
 	}
 
 	public function revert_schema()
@@ -34,9 +34,9 @@ class install_acp_module_1_3_5 extends \phpbb\db\migration\migration
 		return [
 			['module.remove', ['acp', 'ACP_POSTREACT_TITLE', [
 					'module_basename'	=> '\sebo\postreact\acp\purge_module',
-                    'module_langname'	=> 'ACP_POSTREACT_PURGE',
-                    'module_mode'		=> 'settings',
-                    'module_auth'		=> 'ext_sebo/postreact && acl_a_board',
+					'module_langname'	=> 'ACP_POSTREACT_PURGE',
+					'module_mode'		=> 'settings',
+					'module_auth'		=> 'ext_sebo/postreact && acl_a_board',
 			]]],
 		];
 	}

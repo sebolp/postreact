@@ -210,7 +210,7 @@ class acp_controller
 			'U_ACTION'		=> $this->u_action,
 			'LINK_DONATE'	=> 'https://www.paypal.com/donate/?hosted_button_id=GS3T9MFDJJGT4',
 		]);
-		
+
 		// purge module
 		add_form_key('sebo_postreact_purge');
 		$errors = [];
