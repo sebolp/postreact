@@ -82,7 +82,7 @@ class acp_controller
 			$last_id = $this->db->sql_fetchrow($result_last);
 			$this->db->sql_freeresult($result_last);
 			$new_id = $last_id['icon_id'] + 1;
-			// Costruisci l'array con i valori da inserire nella tabella
+			// Default array creating
 			$data = array(
 				'icon_id'    => $new_id, // icon_id
 				'icon_url'   => 'ext/sebo/postreact/styles/all/img/default.svg', // icon_url
@@ -92,10 +92,8 @@ class acp_controller
 				'status'     => 0,  // status
 				'active'     => 0   // active
 			);
-			// Costruisci la query di inserimento
 			$sql_insert = 'INSERT INTO ' . $this->table_prefix . 'sebo_postreact_icon ' .
 						  $this->db->sql_build_array('INSERT', $data);
-			// Esegui la query
 			$this->db->sql_query($sql_insert);
 		}
 		//##
@@ -125,6 +123,7 @@ class acp_controller
 			}
 			$this->db->sql_freeresult($result_ico);
 		}
+		// ## main one
 		add_form_key('sebo_postreact_acp');
 		$errors = [];
 		// Is the form being submitted to us?
@@ -211,6 +210,115 @@ class acp_controller
 			'U_ACTION'		=> $this->u_action,
 			'LINK_DONATE'	=> 'https://www.paypal.com/donate/?hosted_button_id=GS3T9MFDJJGT4',
 		]);
+		
+		// purge module
+		add_form_key('sebo_postreact_purge');
+		$errors = [];
+		if ($this->request->is_set_post('sync'))
+		{
+			// Test if the submitted form is valid
+			if (!check_form_key('sebo_postreact_purge'))
+			{
+				$errors[] = $this->language->lang('FORM_INVALID');
+			}
+			// If no errors, process the form data
+			if (empty($errors))
+			{
+				// take query time
+				$start_pr_sync_time = microtime(true);
+
+				// Count
+				$sql_count = 'SELECT COUNT(*) AS total_missing
+							  FROM ' . $this->table_prefix . 'sebo_postreact_table s
+							  LEFT JOIN ' . $this->table_prefix . 'posts p
+								  ON s.post_id = p.post_id
+							  WHERE p.post_id IS NULL';
+				$result = $this->db->sql_query($sql_count);
+				$total_missing = (int) $this->db->sql_fetchfield('total_missing');
+				$this->db->sql_freeresult($result);
+
+				// Delete
+				$sql_delete = 'DELETE s
+							   FROM ' . $this->table_prefix . 'sebo_postreact_table s
+							   LEFT JOIN ' . $this->table_prefix . 'posts p
+								   ON s.post_id = p.post_id
+							   WHERE p.post_id IS NULL';
+				$this->db->sql_query($sql_delete);
+
+				// Stop time
+				$execution_pr_sync_time = microtime(true) - $start_pr_sync_time;
+
+				meta_refresh(5, $this->u_action);
+				$message = $this->language->lang('PR_SYNCSYSTEM_UPDATED', $total_missing, $execution_pr_sync_time) . '<br /><br />' . $this->language->lang('RETURN_ACP', $this->u_action);
+				trigger_error($message);
+			}
+		}
+		if ($this->request->is_set_post('purge'))
+		{
+			// Test if the submitted form is valid
+			if (!check_form_key('sebo_postreact_purge'))
+			{
+				$errors[] = $this->language->lang('FORM_INVALID');
+			}
+			// If no errors, process the form data
+			if (empty($errors))
+			{
+				// Start timer
+				$start_pr_purge_time = microtime(true);
+
+				// Count before
+				$sql_count = 'SELECT COUNT(*) AS total_rows
+							  FROM ' . $this->table_prefix . 'sebo_postreact_table';
+				$result = $this->db->sql_query($sql_count);
+				$total_deleted = (int) $this->db->sql_fetchfield('total_rows');
+				$this->db->sql_freeresult($result);
+
+				// do it
+				$sql_truncate = 'TRUNCATE TABLE ' . $this->table_prefix . 'sebo_postreact_table';
+				$this->db->sql_query($sql_truncate);
+
+				// Stop time
+				$execution_pr_purge_time = microtime(true) - $start_pr_purge_time;
+
+				meta_refresh(5, $this->u_action);
+				$message = $this->language->lang('PR_PURGESYSTEM_UPDATED', $total_deleted, $execution_pr_purge_time) . '<br /><br />' . $this->language->lang('RETURN_ACP', $this->u_action);
+
+				trigger_error($message);
+			}
+		}
+		if ($this->request->is_set_post('purge_ico'))
+		{
+			// Test if the submitted form is valid
+			if (!check_form_key('sebo_postreact_purge'))
+			{
+				$errors[] = $this->language->lang('FORM_INVALID');
+			}
+			// If no errors, process the form data
+			if (empty($errors))
+			{
+				// Start timer
+				$start_pr_purge_time = microtime(true);
+
+				// Count before
+				$sql_count = 'SELECT COUNT(*) AS total_rows
+							  FROM ' . $this->table_prefix . 'sebo_postreact_icon';
+				$result = $this->db->sql_query($sql_count);
+				$total_deleted = (int) $this->db->sql_fetchfield('total_rows');
+				$this->db->sql_freeresult($result);
+
+				// do it
+				$sql_truncate = 'TRUNCATE TABLE ' . $this->table_prefix . 'sebo_postreact_icon';
+				$this->db->sql_query($sql_truncate);
+
+				// Stop time
+				$execution_pr_purge_time = microtime(true) - $start_pr_purge_time;
+
+				meta_refresh(5, $this->u_action);
+				$message = $this->language->lang('PR_PURGEICOSYSTEM_UPDATED', $total_deleted, $execution_pr_purge_time) . '<br /><br />' . $this->language->lang('RETURN_ACP', $this->u_action);
+
+				trigger_error($message);
+			}
+		}
 	}
 
 	public function set_page_url($u_action)

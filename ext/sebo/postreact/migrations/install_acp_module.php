@@ -20,20 +20,26 @@ class install_acp_module extends \phpbb\db\migration\migration
 	public function update_data()
 	{
 		return [
-
-			['module.add', [
-				'acp',
-				'ACP_CAT_DOT_MODS',
-				'ACP_POSTREACT_TITLE'
-			]],
-			['module.add', [
-				'acp',
-				'ACP_POSTREACT_TITLE',
-				[
+			['module.add', ['acp', 'ACP_CAT_DOT_MODS', 'ACP_POSTREACT_TITLE']],
+			['module.add', ['acp', 'ACP_POSTREACT_TITLE', [
 					'module_basename'	=> '\sebo\postreact\acp\main_module',
-					'modes'				=> ['settings'],
-				],
-			]],
+					'module_langname'	=> 'ACP_POSTREACT_TITLE',
+					'module_mode'		=> 'settings',
+					'module_auth'		=> 'ext_sebo/postreact && acl_a_board',
+			]]],
+		];
+	}
+
+	public function revert_schema()
+	{
+		return [
+			['module.remove', ['acp', 'ACP_CAT_DOT_MODS', 'ACP_POSTREACT_TITLE']],
+			['module.remove', ['acp', 'ACP_POSTREACT_TITLE', [
+					'module_basename'	=> '\sebo\postreact\acp\main_module',
+					'module_langname'	=> 'ACP_POSTREACT_TITLE',
+					'module_mode'		=> 'settings',
+					'module_auth'		=> 'ext_sebo/postreact && acl_a_board',
+			]]],
 		];
 	}
 }

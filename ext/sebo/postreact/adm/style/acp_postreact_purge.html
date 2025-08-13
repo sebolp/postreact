@@ -1,0 +1,49 @@
+{% include 'overall_header.html' %}
+
+<!-- INCLUDECSS @sebo_postreact/acp_css.css -->
+<!-- INCLUDEJS @sebo_postreact/acp_js.js -->
+
+<h1>{{ lang('ACP_POSTREACT_PURGE_T') }}</h1>
+
+<form id="sebo_postreact_purge" name="sebo_postreact_purge" method="post" action="{{ U_ACTION }}">
+
+	<fieldset>
+	{{ lang('PURGE_PAGE_EXPLAIN') }}
+	</fieldset>
+	
+	<fieldset>
+	<legend>{{ lang('PR_PS_S1') }}</legend>
+		<dl>
+			{{ lang('PR_PS_S1_EXPLAIN') }}
+			<br>
+			<em>{{ lang('PR_PS_S1_EXPLAIN_SUB') }}</em>
+		</dl>
+	
+	<input class="button1" type="submit" id="sync" name="sync" value="{{ lang('SYNC_IT') }}" />&nbsp;
+		{{ S_FORM_TOKEN }}
+		
+	</fieldset>
+
+	<fieldset>
+	<legend>{{ lang('PR_PS_S2') }}</legend>
+		<dl>
+			{{ lang('PR_PS_S2_EXPLAIN') }}
+		</dl>
+		
+	<input class="button1" type="submit" id="purge" name="purge" value="{{ lang('PURGE_IT') }}" />&nbsp;
+		{{ S_FORM_TOKEN }}
+	</fieldset>
+	
+	<fieldset>
+	<legend>{{ lang('PR_PS_S3') }}</legend>
+		<dl>
+			{{ lang('PR_PS_S3_EXPLAIN') }}
+		</dl>
+		
+	<input class="button1" type="submit" id="purge_ico" name="purge_ico" value="{{ lang('PURGE_IT') }}" />&nbsp;
+		{{ S_FORM_TOKEN }}
+	</fieldset>
+
+</form>
+
+{% include 'overall_footer.html' %}

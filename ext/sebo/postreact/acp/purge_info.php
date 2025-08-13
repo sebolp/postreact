@@ -13,23 +13,18 @@ namespace sebo\postreact\acp;
 /**
  * PostReaction ACP module info.
  */
-class main_info
+class purge_info
 {
 	public function module()
 	{
 		return [
-			'filename'	=> '\sebo\postreact\acp\main_module',
+			'filename'	=> '\sebo\postreact\acp\purge_module',
 			'title'		=> 'ACP_POSTREACT_TITLE',
 			'modes'		=> [
 				'settings'	=> [
 					'title'	=> 'ACP_POSTREACT',
 					'auth'	=> 'ext_sebo/postreact && acl_a_board',
-					'cat'	=> ['ACP_POSTREACT_TITLE'],
-				],
-				'purge'	=> [
-					'title'	=> 'ACP_POSTREACT_PURGE',
-					'auth'	=> 'ext_sebo/postreact && acl_a_board',
-					'cat'	=> ['ACP_POSTREACT_TITLE'],
+					'cat'	=> ['ACP_POSTREACT_PURGE'],
 				],
 			],
 		];
