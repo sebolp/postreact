@@ -1,65 +1,54 @@
 <!-- Darken overlay -->
 <div id="darken"></div>
 
-<!-- Alert box -->
+<!-- Alert box (popup utenti) -->
 <div id="phpbb_confirm_{{ postrow.POST_ID }}" class="phpbb_confirm">
-    
-    <a href="#" class="alert_close" data-post-id="{{ postrow.POST_ID }}" aria-label="Close">&nbsp</a>
+    <a href="#" class="alert_close" data-post-id="{{ postrow.POST_ID }}" aria-label="Close">&nbsp;</a>
     
     <div class="alert_text">
-        <h3 style="border-bottom: 2px solid; margin-right:0;">POSTREACT(ions) {{ lang('POSTREACT_SUMMARY') }}</h3>
-        <p>
-            {% for icon in postrow.ICONS %}
-            {% set count = 0 %}
-            {% set user_details = [] %}
-            
-            {% for icon_id, cnt in postrow.ICON_COUNTS %}
-            {% if icon_id == icon.icon_id %}
-            {% set count = cnt %}
-            {% set user_details = postrow.REACTORS[icon_id] %}
-            {% endif %}
-            {% endfor %}
+        <h3 style="border-bottom: 2px solid; margin-right:0;">POSTREACT(ions) {{ lang('POSTREACT_SUMMARY') }} </h3>
+        
+        {% for icon in postrow.ICONS %}
+            {% set count = postrow.ICON_COUNTS[icon.icon_id]|default(0) %}
+            {% set user_details = postrow.REACTORS[icon.icon_id]|default([]) %}
             
             {% if count > 0 %}
-            <div class="post_react_explain_container">
-                <div class="post_react_explain">
-                    <img src="{{ icon.icon_url }}" title="{{ icon.icon_alt }}" alt="{{ icon.icon_alt }}" width="{{ icon.icon_width }}" height="{{ icon.icon_height }}"> 
-                    <strong>({{ count }})</strong> 
-                    <i class="fa fa-chevron-circle-right" aria-hidden="true"></i>
+                <div class="post_react_explain_container" data-icon-id="{{ icon.icon_id }}">
+                    <div class="post_react_explain">
+                        <img src="{{ icon.icon_url }}" title="{{ icon.icon_alt }}" alt="{{ icon.icon_alt }}" width="{{ icon.icon_width }}" height="{{ icon.icon_height }}"> 
+                        <strong>({{ count }})</strong> 
+                        <i class="fa fa-chevron-circle-right" aria-hidden="true"></i>
+                    </div>
+                    <div class="post_react_list">
+                        {% for user in user_details %}
+                            <span style="color: #{{ user.user_colour }}; {% if user.user_colour is not empty %}font-weight: bold;{% endif %}">
+                                {{ user.username }}
+                            </span>{% if not loop.last %}, {% endif %}
+                        {% endfor %}
+                    </div>
                 </div>
-                <div class="post_react_list">
-                    {% for user in user_details %}
-                    <span style="color: #{{ user.user_colour }}; {% if user.user_colour is not empty %}font-weight: bold;{% endif %}">{{ user.username }}</span>{% if not loop.last %}, {% endif %}
-                    {% endfor %}
-                </div>
-            </div>
             {% endif %}
-            {% endfor %}
-        </p>
+        {% endfor %}
     </div>
 </div>
 
+<!-- Bubble display delle reazioni -->
 {% if postrow.PERM_R == '1' %}
-<div id="post_react_display" class="post_react_display">
+<div id="post_react_display_{{ postrow.POST_ID }}" class="post_react_display">
     {% for icon in postrow.ICONS %}
-    {% set count = 0 %}
-    {% for icon_id, cnt in postrow.ICON_COUNTS %}
-    {% if icon_id == icon.icon_id %}
-    {% set count = cnt %}
-    {% endif %}
-    {% endfor %}
-    {% if count > 0 %}
-    <div id="img_post_react_display" class="img_post_react_display">
-        <div id="bubble_post_react_display" class="{% if count > 99 %}bubble_post_react_display_bb{% elseif count > 9 %}bubble_post_react_display_b{% else %}bubble_post_react_display{% endif %}">
-            {{ count }} 
-        </div>
+        {% set count = postrow.ICON_COUNTS[icon.icon_id]|default(0) %}
         
-        <a href="#" class="toggle-react-summary" data-post-id="{{ postrow.POST_ID }}">
-            <img src="{{ icon.icon_url }}" title="{{ icon.icon_alt }}" alt="{{ icon.icon_alt }}" width="{{ icon.icon_width }}" height="{{ icon.icon_height }}">
-        </a>
-        
-    </div>
-    {% endif %}
+        {% if count > 0 %}
+            <div class="img_post_react_display" data-icon-id="{{ icon.icon_id }}">
+                <div class="bubble_post_react_display {% if count > 99 %}bubble_post_react_display_bb{% elseif count > 9 %}bubble_post_react_display_b{% endif %}">
+                    {{ count }}
+                </div>
+                
+                <a href="#" class="toggle-react-summary" data-post-id="{{ postrow.POST_ID }}">
+                    <img src="{{ icon.icon_url }}" title="{{ icon.icon_alt }}" alt="{{ icon.icon_alt }}" width="{{ icon.icon_width }}" height="{{ icon.icon_height }}">
+                </a>
+            </div>
+        {% endif %}
     {% endfor %}
 </div>
 {% endif %}

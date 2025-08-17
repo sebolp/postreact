@@ -59,22 +59,29 @@ class postreact_notification extends \phpbb\notification\type\base
 
 	public function users_to_query()
 	{
-		return [$this->get_data('PR_N_sender_id')];
+		return [$this->get_data('sender_id')];
 	}
 
 	public function get_avatar()
 	{
-		return $this->user_loader->get_avatar($this->get_data('PR_N_sender_id'), false, true);
+		return $this->user_loader->get_avatar($this->get_data('sender_id'), false, true);
 	}
 
 	public function get_title()
 	{
-		return '<img src="'.$this->get_data('PR_N_icon').'" style="width:32px !important;height:32px !important;"> ' . $this->language->lang('SEBO_POSTREACT_NOTIFICATION', $this->user_loader->get_username($this->get_data('PR_N_sender_id'), 'no_profile'), $this->get_data('PR_N_post_title'));
+		$extra = $this->get_data('extra_data');
+
+		$username   = $this->user_loader->get_username($this->get_data('sender_id'), 'no_profile');
+		$post_title = $extra['post_title'];
+		$icon       = $extra['icon'];
+
+		return '<img src="' . $icon . '" style="width:32px !important;height:32px  !important;"> '
+			 . $this->language->lang('SEBO_POSTREACT_NOTIFICATION', $username, $post_title);
 	}
 
 	public function get_url()
 	{
-		return append_sid($this->phpbb_root_path . 'viewtopic.' . $this->php_ext, "p={$this->get_data('PR_N_post_id')}#p{$this->get_data('PR_N_post_id')}");
+		return append_sid($this->phpbb_root_path . 'viewtopic.' . $this->php_ext, "p={$this->get_data('item_id')}#p{$this->get_data('item_id')}");
 	}
 
 	public function get_email_template()
@@ -89,13 +96,19 @@ class postreact_notification extends \phpbb\notification\type\base
 
 	public function create_insert_array($data, $pre_create_data = [])
 	{
-		$this->set_data('PR_N_sender_id', $data['PR_N_sender_id']);
-		$this->set_data('PR_N_post_id', $data['PR_N_post_id']);
-		$this->set_data('PR_N_topic_id', $data['PR_N_topic_id']);
-		$this->set_data('PR_N_username', $data['PR_N_username']);
-		$this->set_data('PR_N_post_title', $data['PR_N_post_title']);
-		$this->set_data('PR_N_icon', $data['PR_N_icon']);
+		$this->set_data('item_id', $data['PR_N_post_id']);
+		$this->set_data('user_id', $data['PR_N_user_id']);
+		$this->set_data('item_parent_id', $data['PR_N_topic_id']);
+		$this->set_data('sender_id', $data['PR_N_sender_id']);
+
+		$this->set_data('extra_data', [
+			'username'   => $data['PR_N_username'],
+			'post_title' => $data['PR_N_post_title'],
+			'icon'       => $data['PR_N_icon'],
+		]);
 
 		parent::create_insert_array($data, $pre_create_data);
 	}
+
+
 }

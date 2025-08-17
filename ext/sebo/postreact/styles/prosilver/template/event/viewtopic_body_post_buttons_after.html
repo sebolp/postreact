@@ -52,9 +52,15 @@
                     {% endif %}
                     {% endfor %}
                     
-                    <a href="viewtopic.php?t={{ postrow.MY_TID }}&iid={{ icon.icon_id }}&pid={{ postrow.MY_PID }}&tid={{ postrow.MY_TID }}#p{{ postrow.MY_PID }}">
-                        <img src="{{ icon.icon_url }}" title="{{ icon.icon_alt }}" alt="{{ icon.icon_alt }}" width="{{ icon.icon_width }}" height="{{ icon.icon_height }}">
-                    </a>
+                    <a href="#"
+   class="post-react"
+   data-ajax="add_react"
+   data-post_id="{{ postrow.MY_PID }}"
+   data-topic_id="{{ postrow.MY_TID }}"
+   data-icon_id="{{ icon.icon_id }}">
+    <img src="{{ icon.icon_url }}" title="{{ icon.icon_alt }}" alt="{{ icon.icon_alt }}" width="{{ icon.icon_width }}" height="{{ icon.icon_height }}">
+</a>
+
                     
                     {% for check in postrow.ICON_CHECK %}
                     {% if check.post_id == postrow.MY_PID and check.icon_id == icon.icon_id %}

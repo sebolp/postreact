@@ -89,6 +89,92 @@
 			];
 			$event['lang_set_ext'] = $lang_set_ext;
 		}
+
+		public function handle_postreact_notification($post_id, $topic_id, $icon_id, $action)
+		{
+			switch ($action)
+			{
+				case 'remove':
+					$this->remove_postreact_notification($post_id);
+					break;
+
+				case 'add':
+					$this->add_postreact_notification($post_id, $topic_id, $icon_id);
+					break;
+
+				default:
+					break;
+			}
+		}
+
+		public function add_postreact_notification($post_id, $topic_id, $icon_id)
+		{
+			$user_id_logged = (int) $this->user->data['user_id'];
+
+			// get post infos
+			$sql_array = [
+				'SELECT'    => 'p.poster_id AS poster_id_clean, p.post_subject AS post_post_title, p.post_id, u.username_clean AS poster_name_clean, u.user_id, u.user_colour AS poster_user_colour',
+				'FROM'      => [$this->table_prefix . 'posts' => 'p'],
+				'LEFT_JOIN' => [
+					[
+						'FROM' => [USERS_TABLE => 'u'],
+						'ON'   => 'p.poster_id = u.user_id',
+					],
+				],
+				'WHERE'     => 'p.post_id = ' . (int) $post_id,
+			];
+			$sql_post = $this->db->sql_build_query('SELECT', $sql_array);
+			$result_post = $this->db->sql_query($sql_post);
+			$row_post = $this->db->sql_fetchrow($result_post);
+			$this->db->sql_freeresult($result_post);
+
+			if (!$row_post) return;
+
+			// get icon infos
+			$sql_array = [
+				'SELECT' => '*',
+				'FROM'   => [$this->table_prefix . 'sebo_postreact_icon' => ''],
+				'WHERE'  => 'icon_id = ' . (int) $icon_id,
+			];
+			$sql_icon = $this->db->sql_build_query('SELECT', $sql_array);
+			$result_icon = $this->db->sql_query($sql_icon);
+			$row_icon = $this->db->sql_fetchrow($result_icon);
+			$this->db->sql_freeresult($result_icon);
+
+			if (!$row_icon) return;
+
+			// make array
+			$pr_notification_data = [
+				'PR_N_item_id'    => (int) $post_id,
+				'PR_N_username'   => $row_post['poster_name_clean'],
+				'PR_N_post_title' => $row_post['post_post_title'],
+				'PR_N_user_id'    => (int) $row_post['poster_id_clean'],
+				'PR_N_sender_id'  => $user_id_logged,
+				'PR_N_post_id'    => (int) $post_id,
+				'PR_N_topic_id'   => (int) $topic_id,
+				'PR_N_icon'       => $row_icon['icon_url']
+			];
+
+			$this->add_notification($pr_notification_data);
+		}
+
+		public function remove_postreact_notification($post_id)
+		{
+			$user_id_logged = (int) $this->user->data['user_id'];
+
+			$this->notification_manager->delete_notifications(
+				'sebo.postreact.notification.type.postreact_notification',
+				(int) $post_id,
+				false,
+				$user_id_logged
+			);
+		}
+
+		public function add_notification($notification_data, $notification_type_name = 'sebo.postreact.notification.type.postreact_notification')
+		{
+			$result = $this->notification_manager->add_notifications($notification_type_name, $notification_data);
+		}
+
 		public function grab_icons()
 		{
 			// ##
@@ -247,31 +333,6 @@
 			'ICON_CHECK'	=> $check,
 			'REACTORS'	  => $user_ids_with_details,
 			));
-		}
-
-		public function add_notification($notification_data, $notification_type_name = 'sebo.postreact.notification.type.postreact_notification')
-		{
-			if ($this->notification_exists($notification_data, $notification_type_name))
-			{
-				$this->notification_manager->update_notifications($notification_type_name, $notification_data);
-			}
-			else
-			{
-				$this->notification_manager->add_notifications($notification_type_name, $notification_data);
-			}
-		}
-
-		public function notification_exists($pr_notification_data, $notification_type_name)
-		{
-			$notification_type_id = $this->notification_manager->get_notification_type_id($notification_type_name);
-			$sql = 'SELECT notification_id FROM ' . NOTIFICATIONS_TABLE . '
-				WHERE notification_type_id = ' . (int) $notification_type_id . '
-					AND item_id = ' . (int) $pr_notification_data['PR_N_post_id'];
-			$result = $this->db->sql_query($sql);
-			$item_id = $this->db->sql_fetchfield('notification_id');
-			$this->db->sql_freeresult($result);
-
-			return ($item_id) ?: false;
 		}
 
 		public function write_db()

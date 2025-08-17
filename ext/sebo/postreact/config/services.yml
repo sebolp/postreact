@@ -9,6 +9,19 @@ services:
             - '%core.table_prefix%'
             - '@dbal.conn'
             - '%core.php_ext%'
+            
+
+    sebo.postreact.controller.react_controller:
+        class: sebo\postreact\controller\react_controller
+        arguments:
+            - '@dbal.conn'
+            - '@user'
+            - '@request'
+            - '%core.table_prefix%'
+            - '%core.php_ext%'
+            - '@notification_manager'
+            - '@sebo.postreact.listener'
+        public: true
 
     sebo.postreact.listener:
         class: sebo\postreact\event\main_listener
