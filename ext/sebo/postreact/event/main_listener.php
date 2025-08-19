@@ -128,7 +128,10 @@
 			$row_post = $this->db->sql_fetchrow($result_post);
 			$this->db->sql_freeresult($result_post);
 
-			if (!$row_post) return;
+			if (!$row_post)
+			{
+				return;
+			}
 
 			// get icon infos
 			$sql_array = [
@@ -141,7 +144,10 @@
 			$row_icon = $this->db->sql_fetchrow($result_icon);
 			$this->db->sql_freeresult($result_icon);
 
-			if (!$row_icon) return;
+			if (!$row_icon)
+			{
+				return;
+			}
 
 			// make array
 			$pr_notification_data = [
