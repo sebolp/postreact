@@ -212,12 +212,10 @@ class acp_controller
 		]);
 
 		// purge module
-		add_form_key('sebo_postreact_purge');
-		$errors = [];
 		if ($this->request->is_set_post('sync'))
 		{
 			// Test if the submitted form is valid
-			if (!check_form_key('sebo_postreact_purge'))
+			if (!check_form_key('sebo_postreact_acp'))
 			{
 				$errors[] = $this->language->lang('FORM_INVALID');
 			}
@@ -256,7 +254,7 @@ class acp_controller
 		if ($this->request->is_set_post('purge'))
 		{
 			// Test if the submitted form is valid
-			if (!check_form_key('sebo_postreact_purge'))
+			if (!check_form_key('sebo_postreact_acp'))
 			{
 				$errors[] = $this->language->lang('FORM_INVALID');
 			}
