@@ -1,23 +1,45 @@
-/* open */
-document.addEventListener("DOMContentLoaded", function () {
-	document.querySelectorAll(".toggle-react-summary").forEach(button => {
-		button.addEventListener("click", function (e) {
-			e.preventDefault();
-			let postId = this.getAttribute("data-post-id");
-			document.getElementById("darken").style.display = "block";
-			document.getElementById("phpbb_confirm_" + postId).style.display = "block";
-		});
-	});
-});
+/* POSTREACTION(S) POPUP DISPLAY-HIDE SYS */
 
-/* close */
 document.addEventListener("DOMContentLoaded", function () {
+    
+    const darken = document.getElementById("darken");
+
+    /* 1. OPEN */
+    document.querySelectorAll(".toggle-react-summary").forEach(button => {
+        button.addEventListener("click", function (e) {
+            e.preventDefault();
+            let postId = this.getAttribute("data-post-id");
+            
+            // SHOW IT
+            if (darken) darken.style.display = "block";
+            let popup = document.getElementById("phpbb_confirm_" + postId);
+            if (popup) popup.style.display = "block";
+        });
+    });
+
+    /* 2. X CLOSING */
     document.querySelectorAll(".alert_close").forEach(link => {
         link.addEventListener("click", function (e) {
-            e.preventDefault(); // Evita il comportamento predefinito del link
+            e.preventDefault();
             let postId = this.getAttribute("data-post-id");
-			document.getElementById("darken").style.display = "none";
-			document.getElementById("phpbb_confirm_" + postId).style.display = "none";
-		});
-	});
+            
+            // CLOSE OVERLAY AND POPUP
+            if (darken) darken.style.display = "none";
+            let popup = document.getElementById("phpbb_confirm_" + postId);
+            if (popup) popup.style.display = "none";
+        });
+    });
+
+    /* 3. OUTSIDE CLOSING */
+    if (darken) {
+        darken.addEventListener("click", function () {
+            // HIDE OVERLAY
+            this.style.display = "none";
+            
+            // HIDE ALL POPUPS OPENED
+            document.querySelectorAll(".phpbb_confirm").forEach(popup => {
+                popup.style.display = "none";
+            });
+        });
+    }
 });

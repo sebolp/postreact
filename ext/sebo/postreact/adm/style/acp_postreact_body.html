@@ -46,7 +46,24 @@
 		</dl>
 	</fieldset>
 	<fieldset>
-		<legend>{{ lang('SETTINGS') }}</legend>
+        <legend>{{ lang('CONFIG_SETTINGS') }}</legend>
+        <dl>
+            <dt>
+                <label for="config_self_react">{{ lang('ENABLE_SELF_REACTING') }}</label>
+            </dt>
+            
+            <dd>
+                <div>
+                    <label class="switch" title="{{ lang('ENABLE_DISABLE') }}">
+                        <input type="checkbox" id="config_self_react" name="config_self_react" {% if SELF_REACT_VAL == 0 %}checked{% endif %}>
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+            </dd>
+        </dl>
+    </fieldset>
+	<fieldset>
+		<legend>{{ lang('ICON_SETTINGS') }}</legend>
 		<dl>
 			<dt>
 				<a class="btn btn-danger" href="{CREATE_PR_URL}">

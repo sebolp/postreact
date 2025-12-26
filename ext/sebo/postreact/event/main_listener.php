@@ -350,8 +350,37 @@
 			$my_post_id = $this->request->variable('pid', 0, false);
 			$my_icon_id = $this->request->variable('iid', 0, false);
 			$r_time = time();
+			
+			// ##
+			// check if you can self_react need user_logged, post_creator
+			
 			if ($user_id_logged !== null && $user_id_logged !== 1)
 			{
+				// self react check
+				$sql_array = [
+					'SELECT' => 'poster_id',
+					'FROM'   => [$this->table_prefix . 'posts' => ''],
+					'WHERE'  => 'post_id = ' . (int) $my_post_id,
+				];
+				$sql_check_poster = $this->db->sql_build_query('SELECT', $sql_array);
+				$result_check_poster = $this->db->sql_query($sql_check_poster);
+				$row_check_poster = $this->db->sql_fetchrow($result_check_poster);
+				$this->db->sql_freeresult($result_check_poster);
+
+				if ($row_check_poster)
+				{
+					// read config: if no config set 0 by default
+					$config_self_react = isset($this->config['sebo_postreact_self_react']) ? (int) $this->config['sebo_postreact_self_react'] : 0;
+
+					// if config is 1 (denied) user_poster is the reactor
+					if ($config_self_react === 1 && (int) $row_check_poster['poster_id'] === (int) $user_id_logged)
+					{
+						$message = $this->user->lang('CANNOT_SELF_REACT') . '<br /><br />' . $this->user->lang('RETURN_FORUM', '<a href="' . append_sid("viewtopic.{$this->php_ext}?p={$my_post_id}#p{$my_post_id}") . '">', '</a>');
+						trigger_error($message);
+					}
+				}
+
+				
 				if ($my_icon_id !== null && $my_post_id !== null && $my_topic_id !== null && $my_icon_id !== 0 && $my_post_id !== 0 && $my_topic_id !== 0 && is_numeric($my_topic_id) && is_numeric($my_icon_id) && is_numeric($my_post_id))
 				{
 					// ##

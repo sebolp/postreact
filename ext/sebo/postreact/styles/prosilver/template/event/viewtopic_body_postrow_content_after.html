@@ -1,12 +1,12 @@
 <!-- Darken overlay -->
 <div id="darken"></div>
 
-<!-- Alert box (popup utenti) -->
+<!-- ALERT BOX USER POPUP -->
 <div id="phpbb_confirm_{{ postrow.POST_ID }}" class="phpbb_confirm">
     <a href="#" class="alert_close" data-post-id="{{ postrow.POST_ID }}" aria-label="Close">&nbsp;</a>
     
     <div class="alert_text">
-        <h3 style="border-bottom: 2px solid; margin-right:0;">POSTREACT(ions) {{ lang('POSTREACT_SUMMARY') }} </h3>
+        <h3 style="border-bottom: 2px solid; margin-right:0;">{{ lang('PR_EXTENSION_NAME') }} {{ lang('POSTREACT_SUMMARY') }} </h3>
         
         {% for icon in postrow.ICONS %}
             {% set count = postrow.ICON_COUNTS[icon.icon_id]|default(0) %}
@@ -32,7 +32,7 @@
     </div>
 </div>
 
-<!-- Bubble display delle reazioni -->
+<!-- REACTIONS BUBBLE DISPLAY -->
 {% if postrow.PERM_R == '1' %}
 <div id="post_react_display_{{ postrow.POST_ID }}" class="post_react_display">
     {% for icon in postrow.ICONS %}

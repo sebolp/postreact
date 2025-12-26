@@ -12,6 +12,7 @@
 	protected $php_ext;
 	protected $notification_manager;
 	protected $main_listener;
+	protected $config;
 
 	public function __construct
 	(
@@ -21,7 +22,8 @@
 		$table_prefix,
 		$php_ext,
 		\phpbb\notification\manager $notification_manager,
-		\sebo\postreact\event\main_listener $main_listener
+		\sebo\postreact\event\main_listener $main_listener,
+		\phpbb\config\config $config
 	)
 	{
 		$this->db = $db;
@@ -31,6 +33,7 @@
 		$this->php_ext = $php_ext;
 		$this->notification_manager = $notification_manager;
 		$this->main_listener = $main_listener;
+		$this->config = $config;
 	}
 
 	// PRIVATE
@@ -273,6 +276,30 @@
 		}
 		else
 		{
+			// self react check
+			$sql_array = [
+				'SELECT' => 'poster_id',
+				'FROM'   => [$this->table_prefix . 'posts' => ''],
+				'WHERE'  => 'post_id = ' . (int) $post_id,
+			];
+			
+			$sql_check_poster = $this->db->sql_build_query('SELECT', $sql_array);
+			$result_check_poster = $this->db->sql_query($sql_check_poster);
+			$row_check_poster = $this->db->sql_fetchrow($result_check_poster);
+			$this->db->sql_freeresult($result_check_poster);
+
+			if ($row_check_poster)
+			{
+				// read config: default 0
+				$config_self_react = isset($this->config['sebo_postreact_self_react']) ? (int) $this->config['sebo_postreact_self_react'] : 0;
+				// if 1 (denied) user is poster
+				if ($config_self_react === 1 && (int) $row_check_poster['poster_id'] === (int) $user_id)
+				{
+					// send response
+					$this->send_json_response(false, $this->user->lang('CANNOT_SELF_REACT'));
+					return; 
+				}
+			}
 			// add
 			$this->add_reaction($user_id, $post_id, $topic_id, $icon_id);
 		}

@@ -29,6 +29,8 @@ class acp_controller
 	protected $db;
 	/** @var php_ext */
 	protected $php_ext;
+	/** @var \phpbb\config\config */
+    protected $config;
 	/**
 	 * Constructor.
 	 *
@@ -45,7 +47,8 @@ class acp_controller
 		\phpbb\user $user,
 		$table_prefix,
 		\phpbb\db\driver\driver_interface $db,
-		$php_ext
+		$php_ext,
+		\phpbb\config\config $config
 		)
 	{
 		$this->language	= $language;
@@ -55,6 +58,7 @@ class acp_controller
 		$this->table_prefix = $table_prefix;
 		$this->db		= $db;
 		$this->php_ext = $php_ext;
+		$this->config   = $config;
 	}
 	/**
 	 * Display the options a user can configure for this extension.
@@ -137,6 +141,16 @@ class acp_controller
 			// If no errors, process the form data
 			if (empty($errors))
 			{
+		
+				// save self_react config
+                // Checkbox on -> want value 0
+                // Checkbox null -> want value 1 (denied)
+                $self_react_status = $this->request->variable('config_self_react', '');
+                $new_config_value = ($self_react_status === 'on') ? 0 : 1;
+                
+                $this->config->set('sebo_postreact_self_react', $new_config_value);
+				// end
+				
 				$update_data = [];
 				$icon_ids = $this->request->variable('icon_ids', [0]);
 				if (!is_array($icon_ids))
@@ -200,6 +214,7 @@ class acp_controller
 		$s_errors = !empty($errors);
 
 		$this->template->assign_vars([
+			'SELF_REACT_VAL' => (int) $this->config['sebo_postreact_self_react'],
 			'ICONS' 		=> $data_ico,
 			'SID'			=> $sid_pr,
 			'ARROW' 		=> '<i class="fa icon fa-chevron-right fa-fw" aria-hidden="true"></i>',

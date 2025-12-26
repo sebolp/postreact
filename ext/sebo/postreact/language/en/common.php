@@ -30,6 +30,8 @@ $lang = array_merge($lang, [
 	'REACTION_SENT_LIST'	=> 'Total reactions sent by the user',
 	'REACTION_RECEIVED_LIST'	=> 'Total reactions received by the user',
 	'POSTREACT_SUMMARY'			=> 'SUMMARY',
-	'REACT_TO_POST'				=> 'React to this post'
+	'REACT_TO_POST'				=> 'React to this post',
+	
+	'CANNOT_SELF_REACT'			=> 'You cannot react to your own post!'
 
 ]);

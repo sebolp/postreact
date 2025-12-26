@@ -30,6 +30,9 @@ $lang = array_merge($lang, [
 	'REACTION_SENT_LIST'	=> 'Elenco reazioni inviate dall\'utente',
 	'REACTION_RECEIVED_LIST'	=> 'Elenco reazioni ricevute dall\'utente',
 	'POSTREACT_SUMMARY'			=> 'SUMMARY',
-	'REACT_TO_POST'				=> 'Reagisci a questo messaggio'
+	'REACT_TO_POST'				=> 'Reagisci a questo messaggio',
+	/* > 2.1 */
+	'CANNOT_SELF_REACT'			=> 'Non puoi reagire ad un tuo messaggio',
+	'PR_EXTENSION_NAME'			=> 'POSTREACT(ions)'
 
 ]);

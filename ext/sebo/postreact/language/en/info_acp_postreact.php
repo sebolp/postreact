@@ -61,4 +61,8 @@ $lang = array_merge($lang, [
 	'PR_SYNCSYSTEM_UPDATED'	=> 'Database synchronization successful!<br>Removed <strong>%d</strong> reactions.<br><em>The query took %s seconds.</em>',
 	'PR_PURGESYSTEM_UPDATED'=> 'Database was succefully purged.<br>Removed <strong>%d</strong> reactions.<br><em>The query took %s seconds.</em>',
 	'PR_PURGEICOSYSTEM_UPDATED'=> 'Database was succefully purged.<br>Removed <strong>%d</strong> icons.<br><em>The query took %s seconds.</em>',
+	/* > 2.1 */
+	'CONFIG_SETTINGS'		=> 'General Settings',
+	'ICON_SETTINGS'			=> 'Icon settings',
+	'ENABLE_SELF_REACTING'	=> 'Allow users to react to their own posts'
 ]);

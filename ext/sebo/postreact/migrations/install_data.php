@@ -21,6 +21,7 @@ class install_data extends \phpbb\db\migration\migration
 		return [
 			// Add new config table settings
 			['config.add', ['sebo_postreact', 0]],
+			//['config.add', ['sebo_postreact_self_react', 0],
 			// Add new permissions
 			['permission.add', ['u_new_sebo_postreact']],
 			['permission.add', ['u_new_sebo_postreact_view']],

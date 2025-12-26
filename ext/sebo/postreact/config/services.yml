@@ -9,6 +9,7 @@ services:
             - '%core.table_prefix%'
             - '@dbal.conn'
             - '%core.php_ext%'
+            - '@config'
             
 
     sebo.postreact.controller.react_controller:
@@ -21,6 +22,7 @@ services:
             - '%core.php_ext%'
             - '@notification_manager'
             - '@sebo.postreact.listener'
+            - '@config'
         public: true
 
     sebo.postreact.listener:
