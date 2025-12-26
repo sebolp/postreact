@@ -12,22 +12,22 @@ namespace sebo\postreact\migrations;
 
 class install_data_2_1 extends \phpbb\db\migration\migration
 {
-    public static function depends_on()
-    {
-        return ['\sebo\postreact\migrations\install_data'];
-    }
+	public static function depends_on()
+	{
+		return ['\sebo\postreact\migrations\install_data'];
+	}
 
-    public function update_data()
-    {
-        return [
-            ['config.add', ['sebo_postreact_self_react', 0]],
-        ];
-    }
+	public function update_data()
+	{
+		return [
+			['config.add', ['sebo_postreact_self_react', 0]],
+		];
+	}
 
-    public function revert_data()
-    {
-        return [
-            ['config.remove', ['sebo_postreact_self_react']],
-        ];
-    }
+	public function revert_data()
+	{
+		return [
+			['config.remove', ['sebo_postreact_self_react']],
+		];
+	}
 }
