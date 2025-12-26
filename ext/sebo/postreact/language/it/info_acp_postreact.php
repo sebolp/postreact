@@ -65,4 +65,9 @@ $lang = array_merge($lang, [
 	'CONFIG_SETTINGS'		=> 'Impostazioni generali',
 	'ICON_SETTINGS'			=> 'Gestione icone',
 	'ENABLE_SELF_REACTING'	=> 'Permetti agli utenti di reagire ai loro stessi messaggi'
+	/* > 2.1.1 */
+	'DISPLAY_POSITION'		=> 'Visualizza le reazioni nel post sul lato ',
+	'DISPLAY_POSITION_R'	=> 'DESTRO',
+	'DISPLAY_POSITION_L'	=> 'SINISTRO',
+	'SAVING_REQUIRED'		=> 'Ricorda di inviare il form per salvare le impostazioni'
 ]);

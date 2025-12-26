@@ -64,5 +64,10 @@ $lang = array_merge($lang, [
 	/* > 2.1 */
 	'CONFIG_SETTINGS'		=> 'General Settings',
 	'ICON_SETTINGS'			=> 'Icon settings',
-	'ENABLE_SELF_REACTING'	=> 'Allow users to react to their own posts'
+	'ENABLE_SELF_REACTING'	=> 'Allow users to react to their own posts',
+	/* > 2.1.1 */
+	'DISPLAY_POSITION'		=> 'Align reactions on post to ',
+	'DISPLAY_POSITION_R'	=> 'RIGHT',
+	'DISPLAY_POSITION_L'	=> 'LEFT',
+	'SAVING_REQUIRED'		=> 'Remember to submit form to save this config'
 ]);

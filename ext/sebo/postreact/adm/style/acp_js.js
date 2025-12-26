@@ -32,3 +32,29 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 });
+
+(function($) {
+    'use strict';
+    $(function() {
+        $('#config_display_position').on('change', function() {
+            var textContainer = $('#dynamic_position_text');
+            var alertContainer = $('#save_alert');
+            
+            // Mostra alert
+            alertContainer.fadeIn();
+
+            // Leggi traduzioni
+            var textChecked = $(this).attr('data-lang-checked');     // DESTRA
+            var textUnchecked = $(this).attr('data-lang-unchecked'); // SINISTRA
+
+            // Applica testo
+            if ($(this).is(':checked')) {
+                // Selezionato (Valore 0) -> DESTRA
+                textContainer.text(textChecked);
+            } else {
+                // Non Selezionato (Valore 1) -> SINISTRA
+                textContainer.text(textUnchecked);
+            }
+        });
+    });
+})(jQuery);

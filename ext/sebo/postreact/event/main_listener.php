@@ -25,7 +25,7 @@
 			'core.user_setup'						   => 'load_language_on_setup',
 			'core.viewtopic_assign_template_vars_before'=> 'grab_icons',
 			'core.viewtopic_modify_post_row'			=> 'assign_to_template',
-			'core.viewtopic_modify_page_title'		  => 'write_db',
+			/* 'core.viewtopic_modify_page_title'		  => 'write_db', */
 			'core.viewforum_modify_page_title'		  => 'grab_icons',
 			'core.viewforum_modify_topicrow'			=> 'viewforum_edit',
 			'core.search_modify_tpl_ary'				=> 'search_edit',
@@ -51,7 +51,10 @@
 		protected $notification_manager;
 		/** @var php_ext */
 		protected $php_ext;
+		/** @var profile */
 		protected $profile_data;
+		/** @var config */
+		protected $config;
 		/**
 			* Constructor
 		*/
@@ -64,7 +67,8 @@
 		$table_prefix,
 		\phpbb\auth\auth $auth,
 		\phpbb\notification\manager $notification_manager,
-		$php_ext
+		$php_ext,
+		\phpbb\config\config $config
 		)
 		{
 			$this->language = $language;
@@ -76,6 +80,7 @@
 			$this->auth = $auth;
 			$this->notification_manager   = $notification_manager;
 			$this->php_ext = $php_ext;
+			$this->config = $config;
 		}
 		/**
 			* Load common language files during user setup
@@ -329,6 +334,7 @@
 			// ##
 			// template
 			$event['post_row'] = array_merge($event['post_row'], array(
+			'POSTREACT_FLOAT_CLASS' => ((int) $this->config['sebo_postreact_display_position'] === 1) ? 'left' : 'right',
 			'PERM_W'		=> $this->auth->acl_get('u_new_sebo_postreact'),
 			'PERM_R'		=> $this->auth->acl_get('u_new_sebo_postreact_view'),
 			'N_REACTIONS'   => $total_match_count,
@@ -341,6 +347,7 @@
 			));
 		}
 
+		/*
 		public function write_db()
 		{
 			// ##
@@ -506,6 +513,7 @@
 				trigger_error($message);
 			}
 		}
+		*/
 		public function viewforum_edit($event)
 		{
 			$topicrow = $event['topicrow'];

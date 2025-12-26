@@ -151,6 +151,15 @@ class acp_controller
 				$this->config->set('sebo_postreact_self_react', $new_config_value);
 				// end
 
+				// save display_position config
+				// Checkbox on -> want value 0 - right
+				// Checkbox null -> want value 1 - left
+				$display_position_status = $this->request->variable('config_display_position', '');
+				$new_display_position_value = ($display_position_status === 'on') ? 0 : 1;
+
+				$this->config->set('sebo_postreact_display_position', $new_display_position_value);
+				// end
+
 				$update_data = [];
 				$icon_ids = $this->request->variable('icon_ids', [0]);
 				if (!is_array($icon_ids))
@@ -214,6 +223,7 @@ class acp_controller
 		$s_errors = !empty($errors);
 
 		$this->template->assign_vars([
+			'DISPLAY_OPTION_VAL' => (int) $this->config['sebo_postreact_display_position'],
 			'SELF_REACT_VAL' => (int) $this->config['sebo_postreact_self_react'],
 			'ICONS' 		=> $data_ico,
 			'SID'			=> $sid_pr,

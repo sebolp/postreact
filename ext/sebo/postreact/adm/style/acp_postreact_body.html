@@ -61,6 +61,36 @@
                 </div>
             </dd>
         </dl>
+		<dl>
+			<dt>
+				<label for="config_display_position">
+					{{ lang('DISPLAY_POSITION') }}: 
+					<strong id="dynamic_position_text" style="text-transform: uppercase;">
+						{# Logica: 0 (Checked) = DESTRA, 1 (Unchecked) = SINISTRA #}
+						{% if DISPLAY_OPTION_VAL == 0 %}
+							{{ lang('DISPLAY_POSITION_R') }}
+						{% else %}
+							{{ lang('DISPLAY_POSITION_L') }}
+						{% endif %}
+					</strong>
+				</label>
+				<br />
+				<span id="save_alert" style="display:none; color: #BC2A4D; font-weight: bold; font-size: 0.9em;">
+					<i class="fa fa-exclamation-triangle"></i> {{ lang('SAVING_REQUIRED') }}
+				</span>
+			</dt>
+			<dd>
+				<div style="display: flex; align-items: center;">
+					<label class="switch fixed-blue" title="{{ lang('ENABLE_DISABLE') }}">
+						<input type="checkbox" id="config_display_position" name="config_display_position" 
+							   {% if DISPLAY_OPTION_VAL == 0 %}checked{% endif %}
+							   data-lang-checked="{{ lang('DISPLAY_POSITION_R') }}"
+							   data-lang-unchecked="{{ lang('DISPLAY_POSITION_L') }}">
+						<span class="slider round"></span>
+					</label>
+				</div>
+			</dd>
+		</dl>
     </fieldset>
 	<fieldset>
 		<legend>{{ lang('ICON_SETTINGS') }}</legend>

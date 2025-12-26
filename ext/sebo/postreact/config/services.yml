@@ -37,6 +37,7 @@ services:
             - '@auth'
             - '@notification_manager'
             - '%core.php_ext%'
+            - '@config'
             
         tags:
             - { name: event.listener }

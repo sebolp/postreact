@@ -1,8 +1,11 @@
 .no-responsive {
 	display: block;
 }
-.post_react_display {
-	float: right;
+.post_react_display.right {
+    float: right;
+}
+.post_react_display.left {
+    float: left;
 }
 #post_react_display {
 	display: flex;

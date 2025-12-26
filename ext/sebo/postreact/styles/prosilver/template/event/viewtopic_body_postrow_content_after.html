@@ -34,7 +34,7 @@
 
 <!-- REACTIONS BUBBLE DISPLAY -->
 {% if postrow.PERM_R == '1' %}
-<div id="post_react_display_{{ postrow.POST_ID }}" class="post_react_display">
+<div id="post_react_display_{{ postrow.POST_ID }}" class="post_react_display {{ postrow.POSTREACT_FLOAT_CLASS }}">
     {% for icon in postrow.ICONS %}
         {% set count = postrow.ICON_COUNTS[icon.icon_id]|default(0) %}
         
