@@ -30,7 +30,7 @@ class acp_controller
 	/** @var php_ext */
 	protected $php_ext;
 	/** @var \phpbb\config\config */
-    protected $config;
+	protected $config;
 	/**
 	 * Constructor.
 	 *
@@ -141,16 +141,16 @@ class acp_controller
 			// If no errors, process the form data
 			if (empty($errors))
 			{
-		
+
 				// save self_react config
-                // Checkbox on -> want value 0
-                // Checkbox null -> want value 1 (denied)
-                $self_react_status = $this->request->variable('config_self_react', '');
-                $new_config_value = ($self_react_status === 'on') ? 0 : 1;
-                
-                $this->config->set('sebo_postreact_self_react', $new_config_value);
+				// Checkbox on -> want value 0
+				// Checkbox null -> want value 1 (denied)
+				$self_react_status = $this->request->variable('config_self_react', '');
+				$new_config_value = ($self_react_status === 'on') ? 0 : 1;
+
+				$this->config->set('sebo_postreact_self_react', $new_config_value);
 				// end
-				
+
 				$update_data = [];
 				$icon_ids = $this->request->variable('icon_ids', [0]);
 				if (!is_array($icon_ids))

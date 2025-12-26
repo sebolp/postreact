@@ -350,10 +350,10 @@
 			$my_post_id = $this->request->variable('pid', 0, false);
 			$my_icon_id = $this->request->variable('iid', 0, false);
 			$r_time = time();
-			
+
 			// ##
 			// check if you can self_react need user_logged, post_creator
-			
+
 			if ($user_id_logged !== null && $user_id_logged !== 1)
 			{
 				// self react check
@@ -380,7 +380,6 @@
 					}
 				}
 
-				
 				if ($my_icon_id !== null && $my_post_id !== null && $my_topic_id !== null && $my_icon_id !== 0 && $my_post_id !== 0 && $my_topic_id !== 0 && is_numeric($my_topic_id) && is_numeric($my_icon_id) && is_numeric($my_post_id))
 				{
 					// ##

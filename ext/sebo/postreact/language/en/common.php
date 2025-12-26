@@ -31,7 +31,8 @@ $lang = array_merge($lang, [
 	'REACTION_RECEIVED_LIST'	=> 'Total reactions received by the user',
 	'POSTREACT_SUMMARY'			=> 'SUMMARY',
 	'REACT_TO_POST'				=> 'React to this post',
-	
-	'CANNOT_SELF_REACT'			=> 'You cannot react to your own post!'
+	/* > 2.1 */
+	'CANNOT_SELF_REACT'			=> 'You cannot react to your own post!',
+	'PR_EXTENSION_NAME'			=> 'POSTREACT(ions)'
 
 ]);

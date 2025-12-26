@@ -282,7 +282,7 @@
 				'FROM'   => [$this->table_prefix . 'posts' => ''],
 				'WHERE'  => 'post_id = ' . (int) $post_id,
 			];
-			
+
 			$sql_check_poster = $this->db->sql_build_query('SELECT', $sql_array);
 			$result_check_poster = $this->db->sql_query($sql_check_poster);
 			$row_check_poster = $this->db->sql_fetchrow($result_check_poster);
@@ -297,7 +297,7 @@
 				{
 					// send response
 					$this->send_json_response(false, $this->user->lang('CANNOT_SELF_REACT'));
-					return; 
+					return;
 				}
 			}
 			// add
