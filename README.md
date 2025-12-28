@@ -28,6 +28,7 @@ ction" extension.
 <img width="1267" height="741" alt="Screenshot 2025-12-28 133736" src="https://github.com/user-attachments/assets/c66a8acc-9aa3-40dd-9d61-8807b72b17e1" />
 <img width="1089" height="480" alt="Screenshot 2025-12-28 133749" src="https://github.com/user-attachments/assets/d93221ee-fe4c-4067-8c89-17b78a04aa86" />
 <img width="1058" height="119" alt="Screenshot 2025-12-28 133937" src="https://github.com/user-attachments/assets/3376bb77-74c2-4fc9-9ab5-d6bc6aacdb02" />
+<img width="644" height="544" alt="Screenshot 2025-12-28 134116" src="https://github.com/user-attachments/assets/306b3db0-5359-4a56-8f3d-b9b1bb84daf6" />
 
 ## License
 
