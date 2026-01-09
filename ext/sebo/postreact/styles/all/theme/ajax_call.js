@@ -150,7 +150,8 @@ $(document).ready(function() {
         var reacted_language = $(this).data('reacted_language');
 
         $.ajax({
-            url: root_path + 'postreact/ajax',
+            /*url: root_path + 'postreact/ajax',*/
+            url: postreact_ajax_url, /*to be tested*/
             method: 'POST',
             dataType: 'text',
             data: { post_id, topic_id, icon_id, icon_alt, icon_height, icon_width, reacted_language},

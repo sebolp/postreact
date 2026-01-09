@@ -1,7 +1,7 @@
 <?php
 	namespace sebo\postreact\controller;
 
-	use phpbb\json_response;
+	use Symfony\Component\HttpFoundation\JsonResponse;
 
 	class react_controller
 	{
@@ -36,17 +36,6 @@
 		$this->config = $config;
 	}
 
-	// PRIVATE
-	// *******
-	private function send_basic_info()
-	{
-		global $phpbb_root_path, $phpEx;
-
-		$info1 = $phpbb_root_path;
-		$info2 = $phpEx;
-		$this->send_json_response(true, $info1, $info2);
-	}
-
 	private function check_existing_reaction($user_id, $post_id)
 	{
 		$sql_array = [
@@ -75,8 +64,7 @@
 
 		if (!$existing_reaction)
 		{
-			$this->send_json_response(false, 'No reaction to remove');
-			return;
+			return $this->send_json_response(false, 'No reaction to remove');
 		}
 
 		$removed_icon_id = $existing_reaction['icon_id'];
@@ -97,7 +85,7 @@
 			$reaction_data = $this->get_reaction_data($post_id);
 			$new_count = isset($reaction_data['counts'][$removed_icon_id]) ? $reaction_data['counts'][$removed_icon_id] : 0;
 
-			$this->send_json_response(true, $this->user->lang('DELETED_VALUE'), [
+			return $this->send_json_response(true, $this->user->lang('DELETED_VALUE'), [
 				'action'		=> 'removed',
 				'new_count'	 => $new_count,
 				'icon_id'	   => $removed_icon_id,
@@ -111,7 +99,7 @@
 		}
 		else
 		{
-			$this->send_json_response(false, 'Error removing reaction');
+			return $this->send_json_response(false, 'Error removing reaction');
 		}
 	}
 
@@ -142,7 +130,7 @@
 			$icon_data = $this->get_icon_data($icon_id);
 			$new_count = isset($reaction_data['counts'][$icon_id]) ? $reaction_data['counts'][$icon_id] : 1;
 
-			$this->send_json_response(true, $this->user->lang('INSERTED_VALUE'), [
+			return $this->send_json_response(true, $this->user->lang('INSERTED_VALUE'), [
 				'action'		=> 'added',
 				'post_id'	   => $post_id,
 				'icon_id'	   => $icon_id,
@@ -161,7 +149,7 @@
 		}
 		else
 		{
-			$this->send_json_response(false, $this->user->lang('NOT_INSERTED_VALUE'));
+			return $this->send_json_response(false, $this->user->lang('NOT_INSERTED_VALUE'));
 		}
 	}
 
@@ -247,8 +235,11 @@
 			'message' => $message
 		], $data);
 
+		/* old way
 		$json_response = new json_response();
 		$json_response->send($response_data);
+		*/
+		return new JsonResponse($response_data);
 	}
 
 	// public
@@ -272,7 +263,7 @@
 		if ($existing_reaction > 0)
 		{
 			// remove
-			$this->remove_reaction($user_id, $post_id, $topic_id, $icon_id);
+			return $this->remove_reaction($user_id, $post_id, $topic_id, $icon_id);
 		}
 		else
 		{
@@ -296,12 +287,11 @@
 				if ($config_self_react === 1 && (int) $row_check_poster['poster_id'] === (int) $user_id)
 				{
 					// send response
-					$this->send_json_response(false, $this->user->lang('CANNOT_SELF_REACT'));
-					return;
+					return $this->send_json_response(false, $this->user->lang('CANNOT_SELF_REACT'));
 				}
 			}
 			// add
-			$this->add_reaction($user_id, $post_id, $topic_id, $icon_id);
+			return $this->add_reaction($user_id, $post_id, $topic_id, $icon_id);
 		}
 	}
 }
