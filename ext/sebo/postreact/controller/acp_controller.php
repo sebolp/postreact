@@ -289,6 +289,7 @@ class acp_controller
 			'U_ACTION'		=> $this->u_action,
 			'LINK_DONATE'	=> 'https://www.paypal.com/donate/?hosted_button_id=GS3T9MFDJJGT4',
 			'PR_FOLDER_PATH'=> $this->url_reactions_path,
+            'EMOJI_JS_PATH' => $this->phpbb_root_path . 'ext/sebo/postreact/adm/style/emoji_picker.js'
 		]);
 
 		// purge module

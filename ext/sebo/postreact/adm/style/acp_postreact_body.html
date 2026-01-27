@@ -2,6 +2,7 @@
 
 <!-- INCLUDECSS @sebo_postreact/acp_css.css -->
 <!-- INCLUDEJS @sebo_postreact/acp_js.js -->
+<script type="module" src="{EMOJI_JS_PATH}"></script>
 
 <div id="confirm-delete-reaction" class="popup-confirm-delete">
 	<div class="popup-content-delete">
@@ -183,5 +184,8 @@
 	</fieldset>
 
 </form>
+
+<!-- Emoji Picker Container -->
+<div id="emoji-picker-container" style="display: none; position: fixed; z-index: 9999; margin: 0; padding: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.15);"></div>
 
 {% include 'overall_footer.html' %}
