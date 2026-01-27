@@ -78,7 +78,8 @@ class postreact_notification extends \phpbb\notification\type\base
 	public function users_to_query()
 	{
 		$sender_id = $this->get_data('sender_id');
-		if (!$sender_id) {
+		if (!$sender_id)
+        {
 			$sender_id = $this->get_data('PR_N_sender_id');
 		}
 		return [$sender_id];
@@ -87,7 +88,8 @@ class postreact_notification extends \phpbb\notification\type\base
 	public function get_avatar()
 	{
 		$sender_id = $this->get_data('sender_id');
-		if (!$sender_id) {
+		if (!$sender_id)
+        {
 			$sender_id = $this->get_data('PR_N_sender_id');
 		}
 		return $this->user_loader->get_avatar($sender_id, false, true);
@@ -174,10 +176,13 @@ class postreact_notification extends \phpbb\notification\type\base
 		$sender_id = 0;
 		$post_title = '';
 
-		if (!empty($extra)) {
+		if (!empty($extra))
+        {
 			$sender_id  = $this->get_data('sender_id');
 			$post_title = isset($extra['post_title']) ? $extra['post_title'] : '';
-		} else {
+		}
+        else
+        {
 			$sender_id  = $this->get_data('PR_N_sender_id');
 			$post_title = $this->get_data('PR_N_post_title');
 		}
