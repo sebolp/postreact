@@ -397,7 +397,7 @@ class acp_controller
 				trigger_error($message);
 			}
 		}
-	
+
 		if ($this->request->is_set_post('purge_reaction_folder'))
 		{
 			// Test if the submitted form is valid

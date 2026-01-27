@@ -18,7 +18,7 @@ class postreact_notification extends \phpbb\notification\type\base
 	protected $user_loader;
 	/** @var \phpbb\config\config */
 	protected $config;
-    /** @var \phpbb\db\driver\driver_interface */
+	/** @var \phpbb\db\driver\driver_interface */
 	protected $db;
 	protected $table_prefix;
 
@@ -30,10 +30,10 @@ class postreact_notification extends \phpbb\notification\type\base
 		$this->helper = $helper;
 	}
 
-    public function set_table_prefix($table_prefix)
-    {
-        $this->table_prefix = $table_prefix;
-    }
+	public function set_table_prefix($table_prefix)
+	{
+		$this->table_prefix = $table_prefix;
+	}
 
 	public function set_user_loader(\phpbb\user_loader $user_loader)
 	{
@@ -94,65 +94,6 @@ class postreact_notification extends \phpbb\notification\type\base
 	}
 
 	public function get_title()
-    {
-        $extra = $this->get_data('extra_data');
-
-        $sender_id  = 0;
-        $post_title = '';
-        $icon       = '';
-
-        if (!empty($extra))
-        {
-            $sender_id  = $this->get_data('sender_id');
-            $post_title = isset($extra['post_title']) ? $extra['post_title'] : '';
-            $icon       = isset($extra['icon']) ? $extra['icon'] : '';
-        }
-        else
-        {
-            $sender_id  = $this->get_data('PR_N_sender_id');
-            $post_title = $this->get_data('PR_N_post_title');
-            $icon       = $this->get_data('PR_N_icon');
-        }
-
-        $username = $this->user_loader->get_username($sender_id, 'no_profile');
-
-        // --- NEW LOGIC: Retrieve Emoji from DB ---
-        $emoji = '';
-        
-        $filename = basename($icon);
-
-        if ($filename)
-        {
-            $sql_array = [
-                'SELECT' => 'icon_emoji',
-                'FROM'   => [
-                    $this->table_prefix . 'sebo_postreact_icon' => 'i',
-                ],
-                'WHERE'  => "icon_url LIKE '%" . $this->db->sql_escape($filename) . "'",
-            ];
-
-            $sql = $this->db->sql_build_query('SELECT', $sql_array);
-            
-            $result = $this->db->sql_query($sql);
-            $row = $this->db->sql_fetchrow($result);
-            $this->db->sql_freeresult($result);
-
-            if ($row)
-            {
-                $emoji = html_entity_decode($row['icon_emoji']);
-            }
-        }
-
-        $hidden_emoji = '';
-        if ($emoji !== '')
-        {
-            $hidden_emoji = '<span style="display:none;">' . $emoji . ' </span>';
-        }
-
-        return $hidden_emoji . '<img src="' . $icon . '" style="width:32px !important;height:32px !important;"> '
-            . $this->language->lang('SEBO_POSTREACT_NOTIFICATION', $username, $post_title);
-    }
-    /*public function get_title()
 	{
 		$extra = $this->get_data('extra_data');
 
@@ -160,11 +101,14 @@ class postreact_notification extends \phpbb\notification\type\base
 		$post_title = '';
 		$icon       = '';
 
-		if (!empty($extra)) {
+		if (!empty($extra))
+		{
 			$sender_id  = $this->get_data('sender_id');
 			$post_title = isset($extra['post_title']) ? $extra['post_title'] : '';
 			$icon       = isset($extra['icon']) ? $extra['icon'] : '';
-		} else {
+		}
+		else
+		{
 			$sender_id  = $this->get_data('PR_N_sender_id');
 			$post_title = $this->get_data('PR_N_post_title');
 			$icon       = $this->get_data('PR_N_icon');
@@ -172,51 +116,48 @@ class postreact_notification extends \phpbb\notification\type\base
 
 		$username = $this->user_loader->get_username($sender_id, 'no_profile');
 
-		// MAPPATURA EMOJI
-		$filename = basename($icon); 
+		// --- NEW LOGIC: Retrieve Emoji from DB ---
 		$emoji = '';
 
-		if (strpos($filename, 'like.png') !== false) {
-			$emoji = '👍';
-		} elseif (strpos($filename, 'heart.png') !== false) {
-			$emoji = '❤️';
-		} elseif (strpos($filename, 'laugh.png') !== false) {
-			$emoji = '😂';
-		} elseif (strpos($filename, 'sad.png') !== false) {
-			$emoji = '😢';
-		} elseif (strpos($filename, 'angry.png') !== false) {
-			$emoji = '😡';
-		} elseif (strpos($filename, 'surprise.png') !== false) {
-			$emoji = '😮';
-		} elseif (strpos($filename, 'sunglasses.png') !== false) {
-			$emoji = '😎';
-		} elseif (strpos($filename, 'love.png') !== false) {
-			$emoji = '😍';
-		} elseif (strpos($filename, 'cry.png') !== false) {
-			$emoji = '😭';
-		} elseif (strpos($filename, 'censored.png') !== false) {
-			$emoji = '🤬';
-		} elseif (strpos($filename, 'waving.webp') !== false) {
-			$emoji = '👋';
-		} elseif (strpos($filename, 'lol.png') !== false) {
-			$emoji = '😆';
-		} elseif (strpos($filename, 'party.png') !== false) {
-			$emoji = '🥳';
+		$filename = basename($icon);
+
+		if ($filename)
+		{
+			$sql_array = [
+				'SELECT' => 'icon_emoji',
+				'FROM'   => [
+					$this->table_prefix . 'sebo_postreact_icon' => 'i',
+				],
+				'WHERE'  => "icon_url LIKE '%" . $this->db->sql_escape($filename) . "'",
+			];
+
+			$sql = $this->db->sql_build_query('SELECT', $sql_array);
+
+			$result = $this->db->sql_query($sql);
+			$row = $this->db->sql_fetchrow($result);
+			$this->db->sql_freeresult($result);
+
+			if ($row)
+			{
+				$emoji = html_entity_decode($row['icon_emoji']);
+			}
 		}
 
 		$hidden_emoji = '';
-		if ($emoji !== '') {
+		if ($emoji !== '')
+		{
 			$hidden_emoji = '<span style="display:none;">' . $emoji . ' </span>';
 		}
 
 		return $hidden_emoji . '<img src="' . $icon . '" style="width:32px !important;height:32px !important;"> '
-			 . $this->language->lang('SEBO_POSTREACT_NOTIFICATION', $username, $post_title);
-	}*/
+			. $this->language->lang('SEBO_POSTREACT_NOTIFICATION', $username, $post_title);
+	}
 
 	public function get_url()
 	{
-		$post_id = $this->get_data('item_id'); 
-		if (!$post_id) {
+		$post_id = $this->get_data('item_id');
+		if (!$post_id)
+		{
 			$post_id = $this->get_data('PR_N_post_id');
 		}
 		return append_sid($this->phpbb_root_path . 'viewtopic.' . $this->php_ext, "p={$post_id}#p{$post_id}");
@@ -224,7 +165,7 @@ class postreact_notification extends \phpbb\notification\type\base
 
 	public function get_email_template()
 	{
-		return '@sebo_postreact/postreact_notify'; 
+		return '@sebo_postreact/postreact_notify';
 	}
 
 	public function get_email_template_variables()

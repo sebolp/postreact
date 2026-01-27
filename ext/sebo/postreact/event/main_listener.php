@@ -186,7 +186,7 @@
 			$mode    = $this->request->variable('mode', 'sent');
 			$user_id = $this->request->variable('u', 0);
 			$icon_id = $this->request->variable('icon_id', 0);
-			
+
 			// Default username
 			$username = $this->language->lang('GUEST');
 			$icon_emoji = '';
@@ -239,7 +239,7 @@
 			}
 			else
 			{
-				$title = $this->language->lang('SEARCH_USER_REACTIONS', $icon_emoji, $username); 
+				$title = $this->language->lang('SEARCH_USER_REACTIONS', $icon_emoji, $username);
 			}
 
 			// Assign title to the event

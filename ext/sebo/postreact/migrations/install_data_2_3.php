@@ -33,7 +33,7 @@ class install_data_2_3 extends \phpbb\db\migration\container_aware_migration
 		{
 			$this->filesystem = $this->container->get('filesystem');
 			$this->phpbb_root_path = $this->container->getParameter('core.root_path');
-			
+
 			$this->source_dir = $this->phpbb_root_path . 'ext/sebo/postreact/styles/all/img';
 			$this->dest_dir = $this->phpbb_root_path . 'images/sebo_postreact/reactions';
 		}
@@ -221,7 +221,6 @@ class install_data_2_3 extends \phpbb\db\migration\container_aware_migration
 				}
 			}
 		}
-		
 		closedir($dir);
 	}
 }

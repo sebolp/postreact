@@ -37,8 +37,8 @@ $lang = array_merge($lang, [
 	/* > 2.2 */
 	'POSTREACTION_AJAX_ERROR'	=> 'Error during AJAX request',
 	'POSTREACTION_JSON_ERROR'	=> 'Error parsing JSON response from server',
-    /* > 2.3 */
-    'SEARCH_USER_REACTIONS_RECEIVED' => 'PostReact(ions) %s received by %s',
-    'SEARCH_USER_REACTIONS'     => 'PostReact(ions) %s given by %s',
+	/* > 2.3 */
+	'SEARCH_USER_REACTIONS_RECEIVED' => 'PostReact(ions) %s received by %s',
+	'SEARCH_USER_REACTIONS'     => 'PostReact(ions) %s given by %s',
 
 ]);
