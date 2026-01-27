@@ -282,11 +282,11 @@ $(document).ready(function() {
                     }
                     
                 } catch(e) {
-                    alert("Errore nel parsing JSON. Controlla la console per i dettagli.");
+                    alert(phpbb.lang('POSTREACTION_JSON_ERROR'));
                 }
             },
             error: function(xhr, status, error) {
-                alert("Errore durante la richiesta AJAX");
+                alert(phpbb.lang('POSTREACTION_AJAX_ERROR'));
             }
         });
     });

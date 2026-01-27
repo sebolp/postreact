@@ -19,6 +19,7 @@
                         <strong>({{ count }})</strong> 
                         <i class="fa fa-chevron-circle-right" aria-hidden="true"></i>
                     </div>
+                    <!-- vecchio codice per lista utenti 
                     <div class="post_react_list">
                         {% for user in user_details %}
                             <span style="color: #{{ user.user_colour }}; {% if user.user_colour is not empty %}font-weight: bold;{% endif %}">
@@ -26,6 +27,25 @@
                             </span>{% if not loop.last %}, {% endif %}
                         {% endfor %}
                     </div>
+                    fine vecchio codice per lista utenti --> 
+                    <div class="post_react_list">
+                    {% for user in user_details %}
+                        {# Pre-calculate the style to avoid CSS linter errors in VS Code #}
+                        {% set user_style = '' %}
+                        
+                        {% if user.user_colour %}
+                            {% set user_style = 'color: #' ~ user.user_colour ~ '; font-weight: bold;' %}
+                        {% endif %}
+
+                        <span style="{{ user_style }}">
+                            {{ user.username }}
+                        </span>
+                        
+                        {% if not loop.last %}
+                            , 
+                        {% endif %}
+                    {% endfor %}
+                </div>
                 </div>
             {% endif %}
         {% endfor %}

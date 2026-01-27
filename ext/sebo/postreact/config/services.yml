@@ -10,7 +10,7 @@ services:
             - '@dbal.conn'
             - '%core.php_ext%'
             - '@config'
-            
+            - '%core.root_path%'
 
     sebo.postreact.controller.react_controller:
         class: sebo\postreact\controller\react_controller
@@ -38,7 +38,7 @@ services:
             - '@notification_manager'
             - '%core.php_ext%'
             - '@config'
-            
+            - '%core.root_path%'
         tags:
             - { name: event.listener }
 
@@ -48,6 +48,7 @@ services:
         parent: notification.type.base
         calls:
             - [set_controller_helper, ['@controller.helper']]
-            - ['set_user_loader', ['@user_loader']]
+            - [set_user_loader, ['@user_loader']]
+            - [set_table_prefix, ['%core.table_prefix%']]
         tags:
             - { name: notification.type }

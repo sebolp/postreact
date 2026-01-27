@@ -33,6 +33,12 @@ $lang = array_merge($lang, [
 	'REACT_TO_POST'				=> 'React to this post',
 	/* > 2.1 */
 	'CANNOT_SELF_REACT'			=> 'You cannot react to your own post!',
-	'PR_EXTENSION_NAME'			=> 'POSTREACT(ions)'
+	'PR_EXTENSION_NAME'			=> 'POSTREACT(ions)',
+	/* > 2.2 */
+	'POSTREACTION_AJAX_ERROR'	=> 'Error during AJAX request',
+	'POSTREACTION_JSON_ERROR'	=> 'Error parsing JSON response from server',
+    /* > 2.3 */
+    'SEARCH_USER_REACTIONS_RECEIVED' => 'PostReact(ions) %s received by %s',
+    'SEARCH_USER_REACTIONS'     => 'PostReact(ions) %s given by %s',
 
 ]);

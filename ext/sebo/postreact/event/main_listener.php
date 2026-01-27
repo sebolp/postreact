@@ -25,13 +25,14 @@
 			'core.user_setup'						   => 'load_language_on_setup',
 			'core.viewtopic_assign_template_vars_before'=> 'grab_icons',
 			'core.viewtopic_modify_post_row'			=> 'assign_to_template',
-			/* 'core.viewtopic_modify_page_title'		  => 'write_db', */
 			'core.viewforum_modify_page_title'		  => 'grab_icons',
 			'core.viewforum_modify_topicrow'			=> 'viewforum_edit',
 			'core.search_modify_tpl_ary'				=> 'search_edit',
 			'core.permissions'						  => 'add_permissions',
 			'core.memberlist_view_profile'			  => 'edit_view_profile',
-			'core.memberlist_modify_view_profile_template_vars' => 'assign_edit_view_profile'
+			'core.memberlist_modify_view_profile_template_vars' => 'assign_edit_view_profile',
+			'core.search_modify_param_after'        => 'search_user_reactions_title',
+			'core.search_backend_search_after'      => 'search_user_reactions',
 			];
 		}
 		/* @var \phpbb\language\language */
@@ -55,6 +56,8 @@
 		protected $profile_data;
 		/** @var config */
 		protected $config;
+		/** @var string phpBB root path */
+		protected $phpbb_root_path;
 		/**
 			* Constructor
 		*/
@@ -68,7 +71,8 @@
 		\phpbb\auth\auth $auth,
 		\phpbb\notification\manager $notification_manager,
 		$php_ext,
-		\phpbb\config\config $config
+		\phpbb\config\config $config,
+		$phpbb_root_path
 		)
 		{
 			$this->language = $language;
@@ -81,6 +85,7 @@
 			$this->notification_manager   = $notification_manager;
 			$this->php_ext = $php_ext;
 			$this->config = $config;
+			$this->phpbb_root_path = $phpbb_root_path;
 		}
 		/**
 			* Load common language files during user setup
@@ -93,6 +98,158 @@
 			'lang_set' => 'common',
 			];
 			$event['lang_set_ext'] = $lang_set_ext;
+		}
+
+		/**
+		 * Handle custom search results injection
+		 *
+		 * @param \phpbb\event\data $event The event object
+		 */
+		public function search_user_reactions($event)
+		{
+			// We use request variable here because search_id might be reset in search.php logic
+			if ($this->request->variable('search_id', '') !== 'sebo_user_reactions')
+			{
+				return;
+			}
+
+			$user_id = $this->request->variable('u', 0);
+			$icon_id = $this->request->variable('icon_id', 0);
+			$mode    = $this->request->variable('mode', 'sent');
+
+			if (!$user_id)
+			{
+				return;
+			}
+
+			$sql_array = [
+				'SELECT'    => 'pr.post_id',
+				'FROM'      => [
+					$this->table_prefix . 'sebo_postreact_table' => 'pr',
+				],
+				'LEFT_JOIN' => [
+					[
+						'FROM'  => [$this->table_prefix . 'posts' => 'p'],
+						'ON'    => 'pr.post_id = p.post_id',
+					],
+				],
+				'WHERE'     => 'p.post_id IS NOT NULL',
+				'ORDER_BY'  => 'p.post_time DESC',
+			];
+
+			if ($mode === 'received')
+			{
+				$sql_array['WHERE'] .= ' AND p.poster_id = ' . (int) $user_id;
+			}
+			else
+			{
+				$sql_array['WHERE'] .= ' AND pr.user_id = ' . (int) $user_id;
+			}
+
+			if ($icon_id > 0)
+			{
+				$sql_array['WHERE'] .= ' AND pr.icon_id = ' . (int) $icon_id;
+			}
+
+			$sql = $this->db->sql_build_query('SELECT', $sql_array);
+			$result = $this->db->sql_query($sql);
+
+			$id_ary = [];
+			while ($row = $this->db->sql_fetchrow($result))
+			{
+				$id_ary[] = (int) $row['post_id'];
+			}
+			$this->db->sql_freeresult($result);
+
+			if (!empty($id_ary))
+			{
+				// Inject IDs into the event data
+				$event['id_ary'] = $id_ary;
+				$event['total_match_count'] = count($id_ary);
+				$event['show_results'] = 'posts';
+			}
+		}
+
+		/**
+		 * Set the page title for the custom search using the correct event
+		 *
+		 * @param \phpbb\event\data $event The event object
+		 */
+		public function search_user_reactions_title($event)
+		{
+			// Check the search_id from the event data
+			if ($event['search_id'] !== 'sebo_user_reactions')
+			{
+				return;
+			}
+
+			$mode    = $this->request->variable('mode', 'sent');
+			$user_id = $this->request->variable('u', 0);
+			$icon_id = $this->request->variable('icon_id', 0);
+			
+			// Default username
+			$username = $this->language->lang('GUEST');
+			$icon_emoji = '';
+
+			// 1. Retrieve Username
+			if ($user_id > 0)
+			{
+				if ($user_id == $this->user->data['user_id'])
+				{
+					$username = $this->user->data['username'];
+				}
+				else
+				{
+					$sql = 'SELECT username
+						FROM ' . USERS_TABLE . '
+						WHERE user_id = ' . (int) $user_id;
+					$result = $this->db->sql_query($sql);
+					$row = $this->db->sql_fetchrow($result);
+					$this->db->sql_freeresult($result);
+
+					if ($row)
+					{
+						$username = $row['username'];
+					}
+				}
+			}
+
+			// 2. Retrieve Emoji
+			if ($icon_id > 0)
+			{
+				$sql = 'SELECT icon_emoji
+					FROM ' . $this->table_prefix . 'sebo_postreact_icon
+					WHERE icon_id = ' . (int) $icon_id;
+				$result = $this->db->sql_query($sql);
+				$row = $this->db->sql_fetchrow($result);
+				$this->db->sql_freeresult($result);
+
+				if ($row)
+				{
+					$icon_emoji = html_entity_decode($row['icon_emoji']);
+				}
+			}
+
+			// 3. Set Title into the event variable
+			// FIX: Variable order swapped to match language string: "PostReact %s given by %s"
+			// 1st arg: Emoji, 2nd arg: Username
+			if ($mode === 'received')
+			{
+				$title = $this->language->lang('SEARCH_USER_REACTIONS_RECEIVED', $icon_emoji, $username);
+			}
+			else
+			{
+				$title = $this->language->lang('SEARCH_USER_REACTIONS', $icon_emoji, $username); 
+			}
+
+			// Assign title to the event
+			$event['l_search_title'] = $title;
+
+			// edit last navlink
+			$this->template->alter_block_array('navlinks', array(
+				'FORUM_NAME'		=> $title,
+				'U_VIEW_FORUM'		=> append_sid($this->phpbb_root_path . 'search.' . $this->php_ext, "search_id=sebo_user_reactions&u=$user_id&icon_id=$icon_id&mode=$mode"),
+			), true, 'change');
 		}
 
 		public function handle_postreact_notification($post_id, $topic_id, $icon_id, $action)
@@ -229,23 +386,22 @@
 			{
 				// do it
 				$result = $this->db->sql_query($sql);
-				$this->data = [];
 				if ($result)
 				{
 					while ($my_row = $this->db->sql_fetchrow($result))
 					{
-						$this->data[] = $my_row;
+						$data[] = $my_row;
 					}
 					$this->db->sql_freeresult($result);
 				}
 			}
 			// total reaction count
-			$total_match_count = count($this->data);
+			$total_match_count = count($data);
 			// ##
 			// count icon_id and users_ids
 			$icon_counts = [];
 			$user_ids_list = [];
-			foreach ($this->data as $record)
+			foreach ($data as $record)
 			{
 				$icon_id = $record['icon_id'];
 				$user_id = $record['user_id'];
@@ -279,14 +435,13 @@
 						];
 						$query = $this->db->sql_build_query('SELECT', $sql_array);
 						$result = $this->db->sql_query($query);
-						if ($result->num_rows > 0)
+						if ($row_user = $this->db->sql_fetchrow($result))
 						{
-							$row = $result->fetch_assoc();
 							$user_data_detailed[$user_id] = [
-							'group_id' => $row['group_id'],
-							'username' => $row['username'],
-							'user_colour' => $row['user_colour'],
-							];
+							'group_id' => $row_user['group_id'],
+							'username' => $row_user['username'],
+							'user_colour' => $row_user['user_colour'],
+						];
 						}
 						$this->db->sql_freeresult($result);
 					}
@@ -338,182 +493,16 @@
 			'PERM_W'		=> $this->auth->acl_get('u_new_sebo_postreact'),
 			'PERM_R'		=> $this->auth->acl_get('u_new_sebo_postreact_view'),
 			'N_REACTIONS'   => $total_match_count,
-			'ICONS'		 => $this->grab_icons(),
+			'ICONS'			=> $this->grab_icons(),
 			'MY_PID'		=> (int) $my_pid,
 			'MY_TID'		=> (int) $my_tid,
 			'ICON_COUNTS'   => $icon_counts,
 			'ICON_CHECK'	=> $check,
-			'REACTORS'	  => $user_ids_with_details,
+			'REACTORS'	  	=> $user_ids_with_details,
+			'SELF_REACT'	=> $this->config['sebo_postreact_self_react'],
 			));
 		}
 
-		/*
-		public function write_db()
-		{
-			// ##
-			// request
-			$user_id_logged = $this->user->data['user_id'];
-			$my_topic_id = $this->request->variable('tid', 0, false);
-			$my_post_id = $this->request->variable('pid', 0, false);
-			$my_icon_id = $this->request->variable('iid', 0, false);
-			$r_time = time();
-
-			// ##
-			// check if you can self_react need user_logged, post_creator
-
-			if ($user_id_logged !== null && $user_id_logged !== 1)
-			{
-				// self react check
-				$sql_array = [
-					'SELECT' => 'poster_id',
-					'FROM'   => [$this->table_prefix . 'posts' => ''],
-					'WHERE'  => 'post_id = ' . (int) $my_post_id,
-				];
-				$sql_check_poster = $this->db->sql_build_query('SELECT', $sql_array);
-				$result_check_poster = $this->db->sql_query($sql_check_poster);
-				$row_check_poster = $this->db->sql_fetchrow($result_check_poster);
-				$this->db->sql_freeresult($result_check_poster);
-
-				if ($row_check_poster)
-				{
-					// read config: if no config set 0 by default
-					$config_self_react = isset($this->config['sebo_postreact_self_react']) ? (int) $this->config['sebo_postreact_self_react'] : 0;
-
-					// if config is 1 (denied) user_poster is the reactor
-					if ($config_self_react === 1 && (int) $row_check_poster['poster_id'] === (int) $user_id_logged)
-					{
-						$message = $this->user->lang('CANNOT_SELF_REACT') . '<br /><br />' . $this->user->lang('RETURN_FORUM', '<a href="' . append_sid("viewtopic.{$this->php_ext}?p={$my_post_id}#p{$my_post_id}") . '">', '</a>');
-						trigger_error($message);
-					}
-				}
-
-				if ($my_icon_id !== null && $my_post_id !== null && $my_topic_id !== null && $my_icon_id !== 0 && $my_post_id !== 0 && $my_topic_id !== 0 && is_numeric($my_topic_id) && is_numeric($my_icon_id) && is_numeric($my_post_id))
-				{
-					// ##
-					// check if reacted
-					$sql_array = [
-							'SELECT'    => 'COUNT(*) AS total_reactions',
-							'FROM'      => [$this->table_prefix . 'sebo_postreact_table' => ''],
-							'WHERE'     => 'user_id = ' . (int) $user_id_logged . ' AND post_id = ' . (int) $my_post_id,
-						];
-					$sql_check = $this->db->sql_build_query('SELECT', $sql_array);
-					$result_check = $this->db->sql_query($sql_check);
-					$row_check = $this->db->sql_fetchrow($result_check);
-					if ($row_check['total_reactions'] > 0)
-					{
-						// ##
-						// delete if yes
-						$sql = 'DELETE FROM ' . $this->table_prefix . 'sebo_postreact_table
-								WHERE user_id = ' . (int) $user_id_logged . '
-								AND post_id = ' . (int) $my_post_id;
-						$result = $this->db->sql_query($sql);
-						if ($result)
-						{
-							//##
-							// NOTIFICATION SYS DELETE
-							// check posts info
-							// Array with data for the full SQL statement
-							$sql_array = [
-								'SELECT'    => 'p.poster_id AS poster_id_clean, p.post_subject AS post_post_title, p.post_id,
-												u.username_clean AS poster_name_clean, u.user_id, u.user_colour AS poster_user_colour',
-								'FROM'      => [$this->table_prefix . 'posts' => 'p'],
-								'LEFT_JOIN'      => [
-									[
-										'FROM'  => [$this->table_prefix . 'users' => 'u'],
-										'ON'    => 'p.poster_id = u.user_id',
-									],
-								],
-								'WHERE'     => 'p.post_id = ' . (int) $my_post_id,
-							];
-							$sql_pname = $this->db->sql_build_query('SELECT', $sql_array);
-							$result_pname = $this->db->sql_query($sql_pname);
-							$row_pname = $this->db->sql_fetchrow($result_pname);
-							$this->notification_manager->delete_notifications('sebo.postreact.notification.type.postreact_notification', (int) $my_post_id, $user_id_logged, $user_id_logged);
-							$this->db->sql_freeresult($result_pname);
-							$message = $this->user->lang('DELETED_VALUE') . '<br /><br />' . $this->user->lang('RETURN_FORUM', '<a href="' . append_sid("viewtopic.{$this->php_ext}?p={$my_post_id}#p{$my_post_id}") . '">', '</a>');
-							meta_refresh(2, append_sid("viewtopic.{$this->php_ext}?p={$my_post_id}#p{$my_post_id}"));
-							trigger_error($message);
-						}
-					}
-					else
-					{
-						// ##
-						// react if not
-						$data_insert = [
-							'postreact_id'	=> null,
-							'topic_id'		=> (int) $my_topic_id,
-							'post_id'		=> (int) $my_post_id,
-							'user_id'		=> (int) $user_id_logged,
-							'icon_id'		=> (int) $my_icon_id,
-							'react_time'	=> (int) $r_time,
-						];
-
-						$sql = 'INSERT INTO ' . $this->table_prefix . 'sebo_postreact_table ' . $this->db->sql_build_array('INSERT', $data_insert);
-						$result = $this->db->sql_query($sql);
-						if ($result)
-						{
-							// ##
-							// NOTIFICATION SYS INSERT
-							// check posts info
-							$sql_array = [
-								'SELECT'    => 'p.poster_id AS poster_id_clean, p.post_subject AS post_post_title, p.post_id, u.username_clean AS poster_name_clean, u.user_id, u.user_colour AS poster_user_colour',
-								'FROM'      => [$this->table_prefix . 'posts'  => 'p'],
-								'LEFT_JOIN' => [
-									[
-										'FROM'  => [USERS_TABLE => 'u'],
-										'ON'    => 'p.poster_id = u.user_id',
-									],
-								],
-								'WHERE'     => 'p.post_id = ' . (int) $my_post_id,
-							];
-							$sql_pname = $this->db->sql_build_query('SELECT', $sql_array);
-
-							$result_pname = $this->db->sql_query($sql_pname);
-							$row_pname = $this->db->sql_fetchrow($result_pname);
-
-							$sql_array = [
-								'SELECT'    => '*',
-								'FROM'      => [$this->table_prefix . 'sebo_postreact_icon' => ''],
-								'WHERE'     => 'icon_id = ' . (int) $my_icon_id,
-							];
-							$sql_ico_pr = $this->db->sql_build_query('SELECT', $sql_array);
-							$result_ico_pr = $this->db->sql_query($sql_ico_pr);
-							$row_ico_pr = $this->db->sql_fetchrow($result_ico_pr);
-
-							$pr_notification_data = [
-							'PR_N_item_id'	  => (int) $my_post_id,
-							'PR_N_username'	 => $row_pname['poster_name_clean'],
-							'PR_N_post_title'   => $row_pname['post_post_title'],
-							'PR_N_user_id'	  => $row_pname['poster_id_clean'],
-							'PR_N_sender_id'	=> (int) $user_id_logged,
-							'PR_N_post_id'	  => (int) $my_post_id,
-							'PR_N_topic_id'	 => (int) $my_topic_id,
-							'PR_N_icon'		 => $row_ico_pr['icon_url']
-							];
-							$this->add_notification($pr_notification_data);
-							// notification and reaction added
-							$message = $this->user->lang('INSERTED_VALUE') . '<br /><br />' . $this->user->lang('RETURN_FORUM', '<a href="' . append_sid("viewtopic.{$this->php_ext}?p={$my_post_id}#p{$my_post_id}") . '">', '</a>');
-							meta_refresh(2, append_sid("viewtopic.{$this->php_ext}?p={$my_post_id}#p{$my_post_id}"));
-							trigger_error($message);
-						} else
-						{
-							// something wrong = not inserted
-							$message = $this->user->lang('NOT_INSERTED_VALUE') . '<br /><br />' . $this->user->lang('RETURN_FORUM', '<a href="' . append_sid("viewtopic.{$this->php_ext}?p={$my_post_id}#p{$my_post_id}") . '">', '</a>');
-							meta_refresh(2, append_sid("viewtopic.{$this->php_ext}?p={$my_post_id}#p{$my_post_id}"));
-							trigger_error($message);
-						}
-						$this->db->sql_freeresult($result);
-					}
-					$this->db->sql_freeresult($result_check);
-				}
-			} else
-			{
-				$message = $this->user->lang('LOGIN_TO_REACT') . '<br /><br />' . $this->user->lang('RETURN_FORUM', '<a href="' . append_sid("viewtopic.{$this->php_ext}?p={$my_post_id}#p{$my_post_id}") . '">', '</a>');
-				meta_refresh(2, append_sid("viewtopic.{$this->php_ext}?p={$my_post_id}#p{$my_post_id}"));
-				trigger_error($message);
-			}
-		}
-		*/
 		public function viewforum_edit($event)
 		{
 			$topicrow = $event['topicrow'];
@@ -740,6 +729,7 @@
 		public function edit_view_profile($event)
 		{
 			$user_id = (int) $event['member']['user_id'];
+			$this->profile_data['user_id'] = $user_id;
 			// *
 			// Reactions sent
 			$sql_array = [
@@ -781,6 +771,7 @@
 						'ICON_WIDTH'  => $row['icon_width'],
 						'ICON_HEIGHT' => $row['icon_height'],
 						'ICON_ALT'	=> $row['icon_alt'],
+						'USER_ID'     => $this->profile_data['user_id'],
 						];
 					}
 				}
@@ -836,6 +827,7 @@
 						'ICON_WIDTH'  => $row['icon_width'],
 						'ICON_HEIGHT' => $row['icon_height'],
 						'ICON_ALT'	=> $row['icon_alt'],
+						'USER_ID'     => $this->profile_data['user_id'],
 						];
 					}
 				}
@@ -860,6 +852,7 @@
 						'ICON_WIDTH'  => $icon['ICON_WIDTH'],
 						'ICON_HEIGHT' => $icon['ICON_HEIGHT'],
 						'ICON_ALT'	=> $icon['ICON_ALT'],
+						'USER_ID'     => $this->profile_data['user_id'],
 						]);
 					}
 				}
@@ -875,6 +868,7 @@
 						'ICON_WIDTH'  => $icon['ICON_WIDTH'],
 						'ICON_HEIGHT' => $icon['ICON_HEIGHT'],
 						'ICON_ALT'	=> $icon['ICON_ALT'],
+						'USER_ID'     => $this->profile_data['user_id'],
 						]);
 					}
 				}

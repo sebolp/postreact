@@ -4,11 +4,11 @@
 <!-- INCLUDEJS @sebo_postreact/acp_js.js -->
 
 <div id="confirm-delete-reaction" class="popup-confirm-delete">
-    <div class="popup-content-delete">
-        <p>{{ lang('DELETE_WARNING') }}</p>
-        <button id="confirm-delete">{{ lang('DELETE_DELETE') }}</button>
-        <button id="cancel-delete">{{ lang('DELETE_UNDONE') }}</button>
-    </div>
+	<div class="popup-content-delete">
+		<p>{{ lang('DELETE_WARNING') }}</p>
+		<button id="confirm-delete">{{ lang('DELETE_DELETE') }}</button>
+		<button id="cancel-delete">{{ lang('DELETE_UNDONE') }}</button>
+	</div>
 </div>
 
 <h1>{{ lang('ACP_POSTREACT_TITLE') }}</h1>
@@ -46,27 +46,26 @@
 		</dl>
 	</fieldset>
 	<fieldset>
-        <legend>{{ lang('CONFIG_SETTINGS') }}</legend>
-        <dl>
-            <dt>
-                <label for="config_self_react">{{ lang('ENABLE_SELF_REACTING') }}</label>
-            </dt>
-            
-            <dd>
-                <div>
-                    <label class="switch" title="{{ lang('ENABLE_DISABLE') }}">
-                        <input type="checkbox" id="config_self_react" name="config_self_react" {% if SELF_REACT_VAL == 0 %}checked{% endif %}>
-                        <span class="slider round"></span>
-                    </label>
-                </div>
-            </dd>
-        </dl>
+		<legend>{{ lang('CONFIG_SETTINGS') }}</legend>
+		<dl>
+			<dt>
+				<label for="config_self_react">{{ lang('ENABLE_SELF_REACTING') }}</label>
+			</dt>
+			
+			<dd>
+				<div>
+					<label class="switch" title="{{ lang('ENABLE_DISABLE') }}">
+						<input type="checkbox" id="config_self_react" name="config_self_react" {% if SELF_REACT_VAL == 0 %}checked{% endif %}>
+						<span class="slider round"></span>
+					</label>
+				</div>
+			</dd>
+		</dl>
 		<dl>
 			<dt>
 				<label for="config_display_position">
 					{{ lang('DISPLAY_POSITION') }}: 
 					<strong id="dynamic_position_text" style="text-transform: uppercase;">
-						{# Logica: 0 (Checked) = DESTRA, 1 (Unchecked) = SINISTRA #}
 						{% if DISPLAY_OPTION_VAL == 0 %}
 							{{ lang('DISPLAY_POSITION_R') }}
 						{% else %}
@@ -91,7 +90,7 @@
 				</div>
 			</dd>
 		</dl>
-    </fieldset>
+	</fieldset>
 	<fieldset>
 		<legend>{{ lang('ICON_SETTINGS') }}</legend>
 		<dl>
@@ -100,62 +99,82 @@
 				<i class="fa fa-plus-circle fa-lg"></i> {{ lang('ADD_PR') }}</a>
 			</dt>
 			<dd>
-				{{ lang('HOW_TO') }}
+				{{ lang('HOW_TO', PR_FOLDER_PATH) }}
 				<br>
 				<a href="https://www.iconarchive.com/show/noto-emoji-smileys-icons-by-google.1.html" target="_blank">
 					{{ lang('FREE_IP_EX') }} <i class="fa fa-external-link-square" aria-hidden="true"></i>
 				</a>
+                <br>
+				<a href="https://emojipedia.org/" target="_blank">
+					{{ lang('FREE_EM_EX') }} <i class="fa fa-external-link-square" aria-hidden="true"></i>
+				</a>
 			</dd>
 		</dl>
+        {% if PR_DIR_NOT_EXISTS %}
+        <dl>
+            <div class="errorbox">
+                <h3>{{ lang('WARNING') }}</h3>
+                <p>{{ lang('PR_DIR_NOT_EXISTS_MSG', PR_FOLDER_PATH) }}</p>
+            </div>
+        </dl>
+        {% endif %}
 		<dl>
-	{% for icon in ICONS %}
-        <div class="icon-container" id="first_c_one">
-            <div class="separator">
-                <div>
-					<img src="../{{ icon.icon_url }}" title="{{ icon.icon_alt }}" alt="{{ icon.icon_alt }}" width="{{ icon.icon_width }}" height="{{ icon.icon_height }}">
-                </div>
-                
-                <div>
-					{% set modified_icon_url = icon.icon_url|slice(34) %}
-                    <label for="icon_url_{{ icon.icon_id }}">{{ lang('ICON_URL') ~ lang('COLON') }}</label>
-                    <input type="text" id="icon_url_{{ icon.icon_id }}" name="icon_url_{{ icon.icon_id }}" value="{{ modified_icon_url }}">
-                </div>
-                
-                <div>
-                    <label for="icon_alt_{{ icon.icon_id }}">{{ lang('ICON_ALT') ~ lang('COLON') }}</label>
-                    <input type="text" id="icon_alt_{{ icon.icon_id }}" name="icon_alt_{{ icon.icon_id }}" size="5" value="{{ icon.icon_alt }}">
-                </div>
-                
-                <div>
-                    <label for="icon_width_{{ icon.icon_id }}">{{ lang('ICON_WIDTH') ~ lang('COLON') }}</label>
-                    <input type="text" id="icon_width_{{ icon.icon_id }}" name="icon_width_{{ icon.icon_id }}" size="2" value="{{ icon.icon_width }}">
-                </div>
-                
-                <div>
-                    <label for="icon_height_{{ icon.icon_id }}">{{ lang('ICON_HEIGHT') ~ lang('COLON') }}</label>
-                    <input type="text" id="icon_height_{{ icon.icon_id }}" name="icon_height_{{ icon.icon_id }}" size="2" value="{{ icon.icon_height }}">
-                </div>
-            </div>
-                
-            <div>
-                <label class="switch" title="{{ lang('ENABLE_DISABLE') }}">
-                    <input type="checkbox" id="status_{{ icon.icon_id }}" name="status_{{ icon.icon_id }}" {% if icon.status == '1' %}checked{% else %} {% endif %}>
-                    <span class="slider round"></span>
-                </label>
-            </div>
+	    <table class="table1 zebra-table pr-table">
+			<thead>
+				<tr>
+					<th style="text-align: center; width: 50px;">{{ lang('PREVIEW') }}</th>
+					<th>{{ lang('ICON_URL') }}</th>
+					<th>{{ lang('ICON_ALT') }}</th>
+					<th style="text-align: center;">{{ lang('ICON_WIDTH') }} x {{ lang('ICON_HEIGHT') }}</th>
+					<th style="text-align: center;">{{ lang('ICON_EMOJI') }}</th>
+					<th style="text-align: center;">{{ lang('ENABLE_DISABLE') }}</th>
+					<th style="text-align: center; width: 50px;">{{ lang('DELETE') }}</th>
+				</tr>
+			</thead>
+			<tbody>
+			{% for icon in ICONS %}
+				<tr>
+					<td style="text-align: center;">
+						<img src="../{{ icon.icon_url }}?v={{ 'now'|date('U') }}" title="{{ icon.icon_alt }}" alt="{{ icon.icon_alt }}" style="max-width: 32px; max-height: 32px;" onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgdmlld0JveD0iMCAwIDMyIDMyIj48cmVjdCB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIGZpbGw9IiNmMmYyZjIiIHJ4PSI0Ii8+PHBhdGggZD0iTTEwIDEwTDIyIDIyTTIyIDEwTDEwIDIyIiBzdHJva2U9IiNiYzJhMDAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PC9zdmc+';">
+					</td>
 
-            <div>
-                <span class="fa-stack fa-lg">
-                    <a href="#" class="delete-reaction" data-url="{DELETE_PR_URL}{{ icon.icon_id }}">
-						<i class="fa fa-trash fa-stack-1x" alt="{{ lang('DELETE') }}"></i>
-					</a>
-                </span>
-            </div>
-        </div>
-        <!-- Add an hidden text for icon IDs -->
-        <input type="hidden" name="icon_ids[]" value="{{ icon.icon_id }}">
-    {% endfor %}
-	</dl>
+					<td>
+						{% set modified_icon_url = icon.icon_url|slice(32) %}
+						<input class="inputbox pr-input-text" type="text" id="icon_url_{{ icon.icon_id }}" name="icon_url_{{ icon.icon_id }}" value="{{ modified_icon_url }}">
+					</td>
+
+					<td>
+						<input class="inputbox pr-input-text" type="text" id="icon_alt_{{ icon.icon_id }}" name="icon_alt_{{ icon.icon_id }}" value="{{ icon.icon_alt }}">
+					</td>
+
+					<td style="text-align: center; white-space: nowrap;">
+						<input class="inputbox tiny pr-input-tiny" type="text" id="icon_width_{{ icon.icon_id }}" name="icon_width_{{ icon.icon_id }}" value="{{ icon.icon_width }}" size="3">
+						x 
+						<input class="inputbox tiny pr-input-tiny" type="text" id="icon_height_{{ icon.icon_id }}" name="icon_height_{{ icon.icon_id }}" value="{{ icon.icon_height }}" size="3">
+					</td>
+
+					<td style="text-align: center;">
+						<input class="inputbox tiny pr-input-emoji" type="text" id="icon_emoji_{{ icon.icon_id }}" name="icon_emoji_{{ icon.icon_id }}" value="{{ icon.icon_emoji }}" size="3">
+					</td>
+
+					<td style="text-align: center;">
+						<label class="switch" title="{{ lang('ENABLE_DISABLE') }}">
+							<input type="checkbox" id="status_{{ icon.icon_id }}" name="status_{{ icon.icon_id }}" {% if icon.status == '1' %}checked{% endif %}>
+							<span class="slider round"></span>
+						</label>
+					</td>
+
+					<td style="text-align: center;">
+						<a href="#" class="delete-reaction" data-url="{DELETE_PR_URL}{{ icon.icon_id }}">
+							<i class="fa fa-trash fa-lg pr-delete-icon" alt="{{ lang('DELETE') }}"></i>
+						</a>
+						<input type="hidden" name="icon_ids[]" value="{{ icon.icon_id }}">
+					</td>
+				</tr>
+			{% endfor %}
+			</tbody>
+		</table>
+	    </dl>
 	</fieldset>
 
 	<fieldset class="submit-buttons">

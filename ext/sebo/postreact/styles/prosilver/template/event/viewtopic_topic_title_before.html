@@ -3,7 +3,12 @@
 <!-- INCLUDECSS @sebo_postreact/open_bubble.css -->
 <!-- INCLUDEJS @sebo_postreact/open_bubble.js -->
 <!-- INCLUDEJS @sebo_postreact/bubble.js -->
- <script>
-    var postreact_ajax_url = '{{ path("sebo_postreact_ajax") }}';
+<script>
+	var postreact_ajax_url = '{{ path("sebo_postreact_ajax") }}';
+	
+	phpbb.add_lang_vars({
+		'POSTREACTION_AJAX_ERROR': '{{ lang("POSTREACTION_AJAX_ERROR")|escape("js") }}',
+		'POSTREACTION_JSON_ERROR': '{{ lang("POSTREACTION_JSON_ERROR")|escape("js") }}'
+	});
 </script>
 <!-- INCLUDEJS @sebo_postreact/ajax_call.js -->

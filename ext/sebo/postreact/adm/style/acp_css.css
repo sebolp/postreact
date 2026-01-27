@@ -1,3 +1,48 @@
+/* Table alignment improvement */
+.pr-table td
+{
+	vertical-align: middle !important;
+}
+/* Standard text inputs (URL, Alt) */
+.pr-input-text
+{
+	font-size: 1em !important;
+	width: 95%;
+}
+/* Tiny inputs (Width, Height) */
+.pr-input-tiny
+{
+	font-size: 1em !important;
+	text-align: center;
+}
+/* Emoji input specific style */
+.pr-input-emoji
+{
+	font-size: 1.5em !important;
+	width: 2.5em !important;
+	height: auto !important;
+	text-align: center;
+}
+/* Delete icon */
+.pr-delete-icon
+{
+    color: #bc2a00;
+    font-size: 1.7em;
+    cursor: pointer;
+}
+/* inline folder coding */
+code.inline {
+    background: #FFF;
+    border: 1px solid #C9D2D8;
+    color: #2E8B57;
+    display: inline;
+    font-family: Monaco, "Andale Mono", "Courier New", Courier, monospace;
+    font-size: 0.9em;
+    font-style: normal;
+    line-height: 1.3em;
+    white-space: pre;
+    padding: 0 3px;
+}
 /* fixe_col_checkbox 4 acp */
 .switch.fixed-blue .slider {
     background-color: #87CEEB; 

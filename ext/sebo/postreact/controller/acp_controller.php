@@ -31,6 +31,10 @@ class acp_controller
 	protected $php_ext;
 	/** @var \phpbb\config\config */
 	protected $config;
+	/** @var string phpBB root path */
+	protected $phpbb_root_path;
+	/** @var string Path to reaction images */
+	protected $url_reactions_path = 'images/sebo_postreact/reactions/';
 	/**
 	 * Constructor.
 	 *
@@ -48,7 +52,8 @@ class acp_controller
 		$table_prefix,
 		\phpbb\db\driver\driver_interface $db,
 		$php_ext,
-		\phpbb\config\config $config
+		\phpbb\config\config $config,
+		$phpbb_root_path
 		)
 	{
 		$this->language	= $language;
@@ -59,6 +64,46 @@ class acp_controller
 		$this->db		= $db;
 		$this->php_ext = $php_ext;
 		$this->config   = $config;
+		$this->phpbb_root_path = $phpbb_root_path;
+	}
+
+	/**
+	 * Recursively remove a directory and its contents.
+	 *
+	 * @param string $path Path to the directory
+	 * @return void
+	 */
+	private function remove_directory($path)
+	{
+		if (!is_dir($path))
+		{
+			return;
+		}
+
+		$files = array_diff(scandir($path), ['.', '..']);
+
+		foreach ($files as $file)
+		{
+			$current_path = $path . DIRECTORY_SEPARATOR . $file;
+
+			if (is_dir($current_path))
+			{
+				$this->remove_directory($current_path);
+			}
+			else
+			{
+				unlink($current_path);
+			}
+		}
+
+		rmdir($path);
+	}
+	/**
+	 * 	Check if directory exists to display error
+	 */
+	private function check_pr_directory($path)
+	{
+		return is_dir($path);
 	}
 	/**
 	 * Display the options a user can configure for this extension.
@@ -89,12 +134,12 @@ class acp_controller
 			// Default array creating
 			$data = array(
 				'icon_id'    => $new_id, // icon_id
-				'icon_url'   => 'ext/sebo/postreact/styles/all/img/default.svg', // icon_url
+				'icon_url'   => $this->url_reactions_path . 'default.svg', // icon_url
 				'icon_width' => 32, // icon_width
 				'icon_height'=> 32, // icon_height
 				'icon_alt'   => '', // icon_alt
 				'status'     => 0,  // status
-				'active'     => 0   // active
+				'icon_emoji' => '', // emoji
 			);
 			$sql_insert = 'INSERT INTO ' . $this->table_prefix . 'sebo_postreact_icon ' .
 						  $this->db->sql_build_array('INSERT', $data);
@@ -110,6 +155,12 @@ class acp_controller
 			$result_remove = $this->db->sql_query($sql_remove);
 		}
 		// ##
+		// display error if directory not exists
+		if (!$this->check_pr_directory($this->phpbb_root_path . $this->url_reactions_path))
+		{
+			$this->template->assign_var('PR_DIR_NOT_EXISTS', true);
+		}
+		// ##
 		// grab icons
 		// take the line corresponds to post_id
 		$data_ico = [];
@@ -123,6 +174,8 @@ class acp_controller
 		{
 			while ($my_icons = $this->db->sql_fetchrow($result_ico))
 			{
+				// Decodifichiamo l'entità per mostrare l'emoji vera nel campo di input
+				$my_icons['icon_emoji'] = html_entity_decode($my_icons['icon_emoji']);
 				$data_ico[] = $my_icons;
 			}
 			$this->db->sql_freeresult($result_ico);
@@ -171,11 +224,11 @@ class acp_controller
 					// grab variables
 					$update_data[$icon_id] = [
 						'url' => $this->request->variable('icon_url_' . (int) $icon_id, ''),
-						'icon_alt' => $this->request->variable('icon_alt_' . (int) $icon_id, ''),
+						'icon_alt' => $this->request->variable('icon_alt_' . (int) $icon_id, '', true),
 						'icon_width' => $this->request->variable('icon_width_' . (int) $icon_id, ''),
 						'icon_height' => $this->request->variable('icon_height_' . (int) $icon_id, ''),
 						'status' => $this->request->variable('status_' . (int) $icon_id, '') === 'on' ? 1 : 0,
-						'active' => $this->request->variable('icon_height_' . (int) $icon_id, ''),
+						'icon_emoji' => $this->request->variable('icon_emoji_' . (int) $icon_id, '', true),
 					];
 				}
 				$all_queries_successful = true;
@@ -183,13 +236,14 @@ class acp_controller
 
 				foreach ($update_data as $icon_id => $data)
 				{
+					$emoji_safe = mb_convert_encoding($data['icon_emoji'], 'HTML-ENTITIES', 'UTF-8');
 					$sql_array = [
-						'icon_url'    => 'ext/sebo/postreact/styles/all/img/' . $data['url'],
+						'icon_url'    => $this->url_reactions_path . $data['url'],
 						'icon_alt'    => $data['icon_alt'],
 						'icon_width'  => (int) $data['icon_width'],
 						'icon_height' => (int) $data['icon_height'],
 						'status'      => (int) $data['status'],
-						'active'      => (int) $data['active'],
+						'icon_emoji'  => $emoji_safe,
 					];
 
 					$sql = 'UPDATE ' . $this->table_prefix . 'sebo_postreact_icon SET ' . $this->db->sql_build_array('UPDATE', $sql_array) . ' WHERE icon_id = ' . (int) $icon_id;
@@ -234,6 +288,7 @@ class acp_controller
 			'CREATE_PR_URL' => $create_url,
 			'U_ACTION'		=> $this->u_action,
 			'LINK_DONATE'	=> 'https://www.paypal.com/donate/?hosted_button_id=GS3T9MFDJJGT4',
+			'PR_FOLDER_PATH'=> $this->url_reactions_path,
 		]);
 
 		// purge module
@@ -338,6 +393,34 @@ class acp_controller
 
 				meta_refresh(5, $this->u_action);
 				$message = $this->language->lang('PR_PURGEICOSYSTEM_UPDATED', $total_deleted, $execution_pr_purge_time) . '<br /><br />' . $this->language->lang('RETURN_ACP', $this->u_action);
+
+				trigger_error($message);
+			}
+		}
+	
+		if ($this->request->is_set_post('purge_reaction_folder'))
+		{
+			// Test if the submitted form is valid
+			if (!check_form_key('sebo_postreact_acp'))
+			{
+				$errors[] = $this->language->lang('FORM_INVALID');
+			}
+			// If no errors, process the form data
+			if (empty($errors))
+			{
+				// Step 1: Get the full path to reactions: root/images/sebo_postreact/reactions/
+				$reaction_subfolder = $this->phpbb_root_path . $this->url_reactions_path;
+
+				// Step 2: Get the parent folder: root/images/sebo_postreact/
+				// dirname() strips the last folder from the path
+				$extension_main_folder = dirname($reaction_subfolder);
+
+				// Step 3: Remove the entire extension folder in images
+				// This removes sebo_postreact and everything inside it (including reactions)
+				$this->remove_directory($extension_main_folder);
+
+				meta_refresh(5, $this->u_action);
+				$message = $this->language->lang('PR_PURGE_FOLDER_DONE') . '<br /><br />' . $this->language->lang('RETURN_ACP', $this->u_action);
 
 				trigger_error($message);
 			}

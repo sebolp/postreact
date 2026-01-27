@@ -9,7 +9,9 @@
 			<div id="bubble_post_react_display" class="bubble_post_react_display">
 				{user_reactions_received.ICON_COUNT} 
 			</div>
-			<img src="{user_reactions_received.ICON_URL}" title="{user_reactions_received.ICON_ALT}" alt="{user_reactions_received.ICON_ALT}" width="{user_reactions_received.ICON_WIDTH}" height="{user_reactions_received.ICON_HEIGHT}">
+            <a href="{U_SEARCH}?search_id=sebo_user_reactions&amp;u={user_reactions_received.USER_ID}&amp;icon_id={user_reactions_received.ICON_ID}&amp;mode=received">
+			    <img src="{user_reactions_received.ICON_URL}" title="{user_reactions_received.ICON_ALT}" alt="{user_reactions_received.ICON_ALT}" width="{user_reactions_received.ICON_WIDTH}" height="{user_reactions_received.ICON_HEIGHT}">
+            </a>
 		</div>
 		<!-- END user_reactions_received -->
 	</div>
@@ -21,7 +23,9 @@
 			<div id="bubble_post_react_display" class="bubble_post_react_display">
 				{user_reactions.ICON_COUNT} 
 			</div>
-			<img src="{user_reactions.ICON_URL}" title="{user_reactions.ICON_ALT}" alt="{user_reactions.ICON_ALT}" width="{user_reactions.ICON_WIDTH}" height="{user_reactions.ICON_HEIGHT}">
+            <a href="{U_SEARCH}?search_id=sebo_user_reactions&amp;u={user_reactions.USER_ID}&amp;icon_id={user_reactions.ICON_ID}&amp;mode=sent">
+			    <img src="{user_reactions.ICON_URL}" title="{user_reactions.ICON_ALT}" alt="{user_reactions.ICON_ALT}" width="{user_reactions.ICON_WIDTH}" height="{user_reactions.ICON_HEIGHT}">
+            </a>
 		</div>			
 		<!-- END user_reactions -->
 	</div>

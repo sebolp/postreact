@@ -1,0 +1,10 @@
+Subject: Nuova reazione al tuo messaggio: {POST_SUBJECT}
+
+Ciao {AUTHOR_NAME},
+
+Qualcuno ha reagito al tuo messaggio "{POST_SUBJECT}" su "{SITENAME}".
+
+Puoi vedere la reazione cliccando qui:
+{U_TOPIC}
+
+{EMAIL_SIG}

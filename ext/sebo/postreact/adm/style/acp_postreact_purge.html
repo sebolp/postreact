@@ -44,6 +44,17 @@
 		{{ S_FORM_TOKEN }}
 	</fieldset>
 
+    <fieldset>
+	<legend>{{ lang('PR_PURGE_REACTION_FOLDER') }}</legend>
+		<dl>
+			{{ lang('PR_PURGE_REACTION_FOLDER_EXPLAIN') }}
+            {{ lang('PR_PURGE_REACTION_FOLDER_EXPLAIN_AVOID', PR_FOLDER_PATH) }}
+		</dl>
+		
+	<input class="button1" type="submit" id="purge_reaction_folder" name="purge_reaction_folder" value="{{ lang('PR_PURGE_FOLDER_BUTTON') }}" />&nbsp;
+		{{ S_FORM_TOKEN }}
+	</fieldset>
+
 </form>
 
 {% include 'overall_footer.html' %}
