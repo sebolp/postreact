@@ -46,10 +46,10 @@ class install_data_2_3 extends \phpbb\db\migration\container_aware_migration
 	 */
 	public function effectively_installed()
 	{
-		$this->init();
-
-		// If the destination directory exists AND the source is gone, consider it done
-		return $this->filesystem->exists($this->dest_dir) && !$this->filesystem->exists($this->source_dir);
+		return $this->db_tools->sql_column_exists(
+			$this->table_prefix . 'sebo_postreact_icon',
+			'icon_emoji'
+		);
 	}
 
 	public static function depends_on()
@@ -195,32 +195,27 @@ class install_data_2_3 extends \phpbb\db\migration\container_aware_migration
 	 */
 	protected function copy_recursive($src, $dst)
 	{
-		$dir = opendir($src);
-
-		// Ensure the specific sub-destination exists
 		if (!$this->filesystem->exists($dst))
 		{
 			$this->filesystem->mkdir($dst, 0755);
 		}
 
-		while (false !== ($file = readdir($dir)))
-		{
-			if (($file != '.') && ($file != '..'))
-			{
-				$src_file = $src . '/' . $file;
-				$dst_file = $dst . '/' . $file;
+		$iterator = new \RecursiveIteratorIterator(
+			new \RecursiveDirectoryIterator($src, \RecursiveDirectoryIterator::SKIP_DOTS),
+			\RecursiveIteratorIterator::SELF_FIRST
+		);
 
-				if (is_dir($src_file))
-				{
-					// Recursive call for subdirectories
-					$this->copy_recursive($src_file, $dst_file);
-				}
-				else
-				{
-					$this->filesystem->copy($src_file, $dst_file);
-				}
+		foreach ($iterator as $item)
+		{
+			$dest_path = $dst . '/' . $iterator->getSubPathname();
+			if ($item->isDir())
+			{
+				$this->filesystem->mkdir($dest_path, 0755);
+			}
+			else
+			{
+				$this->filesystem->copy($item->getPathname(), $dest_path);
 			}
 		}
-		closedir($dir);
 	}
 }

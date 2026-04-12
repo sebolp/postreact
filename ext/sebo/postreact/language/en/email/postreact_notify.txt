@@ -1,10 +1,10 @@
-Subject: Nuova reazione al tuo messaggio: {POST_SUBJECT}
+Subject: New reaction to your post: {POST_SUBJECT}
 
-Ciao {AUTHOR_NAME},
+Hi {AUTHOR_NAME},
 
-Qualcuno ha reagito al tuo messaggio "{POST_SUBJECT}" su "{SITENAME}".
+Someone reacted to your post "{POST_SUBJECT}" on "{SITENAME}".
 
-Puoi vedere la reazione cliccando qui:
+You can see the reaction here:
 {U_TOPIC}
 
 {EMAIL_SIG}

@@ -51,19 +51,22 @@ class install_schema extends \phpbb\db\migration\migration
 
 	public function revert_schema()
 	{
-	$sql = 'SELECT COUNT(*) AS total_rows
+		$sql = 'SELECT COUNT(*) AS total_rows
 			FROM ' . $this->table_prefix . 'sebo_postreact_table';
-	$result = $this->db->sql_query($sql);
-	$total_rows = (int) $this->db->sql_fetchfield('total_rows');
-	$this->db->sql_freeresult($result);
+		$result = $this->db->sql_query($sql);
+		$total_rows = (int) $this->db->sql_fetchfield('total_rows');
+		$this->db->sql_freeresult($result);
+
 		if ($total_rows === 0)
 		{
 			return [
 				'remove_tables' => [
 					$this->table_prefix . 'sebo_postreact_table',
+					$this->table_prefix . 'sebo_postreact_icon',
 				],
 			];
 		}
-	return [];
+
+		return [];
 	}
 }

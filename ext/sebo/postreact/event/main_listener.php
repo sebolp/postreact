@@ -3,29 +3,29 @@
 		*
 		* PostReaction. An extension for the phpBB Forum Software package.
 		*
-		* @copyright (c) 2024, sebo, https://www.fiatpandaclub.org
+		* @copyright (c) 2026, sebo, https://www.fiatpandaclub.org
 		* @license GNU General Public License, version 2 (GPL-2.0)
 		*
 	*/
-	namespace sebo\postreact\event;
+namespace sebo\postreact\event;
 
 	/**
 		* @ignore
 	*/
-	use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 	/**
 		* PostReaction Event listener.
 	*/
-	class main_listener implements EventSubscriberInterface
+class main_listener implements EventSubscriberInterface
 	{
 		public static function getSubscribedEvents()
 		{
 			return [
 			'core.user_setup'						   => 'load_language_on_setup',
-			'core.viewtopic_assign_template_vars_before'=> 'grab_icons',
-			'core.viewtopic_modify_post_row'			=> 'assign_to_template',
-			'core.viewforum_modify_page_title'		  => 'grab_icons',
+			'core.viewtopic_assign_template_vars_before'=> 'preload_icons',
+			'core.viewtopic_modify_post_row'            => 'assign_to_template',
+			'core.viewforum_modify_page_title'          => 'preload_icons',
 			'core.viewforum_modify_topicrow'			=> 'viewforum_edit',
 			'core.search_modify_tpl_ary'				=> 'search_edit',
 			'core.permissions'						  => 'add_permissions',
@@ -58,13 +58,15 @@
 		protected $config;
 		/** @var string phpBB root path */
 		protected $phpbb_root_path;
+		/** @var icons */
+		protected $icons_cache = null;
 		/**
 			* Constructor
 		*/
 		public function __construct(
 		\phpbb\language\language $language,
 		\phpbb\db\driver\driver_interface $db,
-		\phpbb\user $user,
+		$user,
 		\phpbb\request\request $request,
 		\phpbb\template\template $template,
 		$table_prefix,
@@ -246,10 +248,10 @@
 			$event['l_search_title'] = $title;
 
 			// edit last navlink
-			$this->template->alter_block_array('navlinks', array(
+			$this->template->alter_block_array('navlinks', [
 				'FORUM_NAME'		=> $title,
 				'U_VIEW_FORUM'		=> append_sid($this->phpbb_root_path . 'search.' . $this->php_ext, "search_id=sebo_user_reactions&u=$user_id&icon_id=$icon_id&mode=$mode"),
-			), true, 'change');
+			], true, 'change');
 		}
 
 		public function handle_postreact_notification($post_id, $topic_id, $icon_id, $action)
@@ -343,10 +345,23 @@
 			$result = $this->notification_manager->add_notifications($notification_type_name, $notification_data);
 		}
 
+		/**
+		 * Preload icons cache on page init events
+		 */
+		public function preload_icons($event)
+		{
+			$this->grab_icons();
+		}
+
 		public function grab_icons()
 		{
 			// ##
-			// grab icons
+			// grab icons from cache
+			if ($this->icons_cache !== null)
+			{
+				return $this->icons_cache;
+			}
+
 			// take the line corresponds to post_id
 			$data_ico = [];
 			$sql_array = [
@@ -363,7 +378,8 @@
 				}
 				$this->db->sql_freeresult($result_ico);
 			}
-			return $data_ico;
+			$this->icons_cache = $data_ico;
+			return $this->icons_cache;
 		}
 		public function assign_to_template($event)
 		{
@@ -488,7 +504,7 @@
 			$this->db->sql_freeresult($result_check);
 			// ##
 			// template
-			$event['post_row'] = array_merge($event['post_row'], array(
+			$event['post_row'] = array_merge($event['post_row'], [
 			'POSTREACT_FLOAT_CLASS' => ((int) $this->config['sebo_postreact_display_position'] === 1) ? 'left' : 'right',
 			'PERM_W'		=> $this->auth->acl_get('u_new_sebo_postreact'),
 			'PERM_R'		=> $this->auth->acl_get('u_new_sebo_postreact_view'),
@@ -500,7 +516,7 @@
 			'ICON_CHECK'	=> $check,
 			'REACTORS'	  	=> $user_ids_with_details,
 			'SELF_REACT'	=> $this->config['sebo_postreact_self_react'],
-			));
+			]);
 		}
 
 		public function viewforum_edit($event)
@@ -686,21 +702,20 @@
 				$topic_id = $rec['topic_id'];
 				if (isset($data_ico_assoc[$icon_id]))
 				{
-					// Only if the icon_id has not already been added to the final array
+					$count = isset($icon_counts[$topic_id][$icon_id]) ? (string) $icon_counts[$topic_id][$icon_id] : '0';
 					if (!isset($new_array[$icon_id]))
 					{
 						$icon_info = $data_ico_assoc[$icon_id];
-						$count = isset($icon_counts[$topic_id][$icon_id]) ? (string) $icon_counts[$topic_id][$icon_id] : '0';
 						$new_array[$icon_id] = [
-						'icon_id' => $icon_info['icon_id'],
-						'icon_url' => $icon_info['icon_url'],
-						'icon_alt' => $icon_info['icon_alt'],
-						'topic_id' => $topic_id,
-						'count' => $count
+							'icon_id'  => $icon_info['icon_id'],
+							'icon_url' => $icon_info['icon_url'],
+							'icon_alt' => $icon_info['icon_alt'],
+							'topic_id' => $topic_id,
+							'count'    => $count,
 						];
-					} else
+					}
+					else
 					{
-						// Update the count if icon_id already exists
 						$new_array[$icon_id]['count'] = (string) max($new_array[$icon_id]['count'], $count);
 					}
 				}

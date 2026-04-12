@@ -3,7 +3,7 @@
  *
  * PostReaction. An extension for the phpBB Forum Software package.
  *
- * @copyright (c) 2024, sebo, https://www.fiatpandaclub.org
+ * @copyright (c) 2026, sebo, https://www.fiatpandaclub.org
  * @license GNU General Public License, version 2 (GPL-2.0)
  *
  */
@@ -48,7 +48,7 @@ class acp_controller
 		\phpbb\language\language $language,
 		\phpbb\request\request $request,
 		\phpbb\template\template $template,
-		\phpbb\user $user,
+		$user,
 		$table_prefix,
 		\phpbb\db\driver\driver_interface $db,
 		$php_ext,
@@ -132,7 +132,7 @@ class acp_controller
 			$this->db->sql_freeresult($result_last);
 			$new_id = $last_id['icon_id'] + 1;
 			// Default array creating
-			$data = array(
+			$data = [
 				'icon_id'    => $new_id, // icon_id
 				'icon_url'   => $this->url_reactions_path . 'default.svg', // icon_url
 				'icon_width' => 32, // icon_width
@@ -140,7 +140,7 @@ class acp_controller
 				'icon_alt'   => '', // icon_alt
 				'status'     => 0,  // status
 				'icon_emoji' => '', // emoji
-			);
+			];
 			$sql_insert = 'INSERT INTO ' . $this->table_prefix . 'sebo_postreact_icon ' .
 						  $this->db->sql_build_array('INSERT', $data);
 			$this->db->sql_query($sql_insert);
@@ -272,11 +272,12 @@ class acp_controller
 			}
 		}
 		// Create urlS
-		$delete_url = append_sid("index.{$this->php_ext}") . "&i=-sebo-postreact-acp-main_module&remove_pr=";
-		$create_url = append_sid("index.{$this->php_ext}") . "&i=-sebo-postreact-acp-main_module&add_pr=1";
+		$delete_url = $this->u_action . '&remove_pr=';
+		$create_url = $this->u_action . '&add_pr=1';
 		$s_errors = !empty($errors);
 
 		$this->template->assign_vars([
+			'POSTREACT_ADM_PATH' => '../ext/sebo/postreact/adm/style/',
 			'DISPLAY_OPTION_VAL' => (int) $this->config['sebo_postreact_display_position'],
 			'SELF_REACT_VAL' => (int) $this->config['sebo_postreact_self_react'],
 			'ICONS' 		=> $data_ico,

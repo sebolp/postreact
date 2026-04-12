@@ -3,7 +3,7 @@
  *
  * PostReaction. An extension for the phpBB Forum Software package.
  *
- * @copyright (c) 2024, sebo, https://www.fiatpandaclub.org
+ * @copyright (c) 2026, sebo, https://www.fiatpandaclub.org
  * @license GNU General Public License, version 2 (GPL-2.0)
  *
  */
@@ -33,7 +33,7 @@ $lang = array_merge($lang, [
 	'REACT_TO_POST'				=> 'Reagisci a questo messaggio',
 	/* > 2.1 */
 	'CANNOT_SELF_REACT'			=> 'Non puoi reagire ad un tuo messaggio',
-	'PR_EXTENSION_NAME'			=> 'POSTREACT(ions)'
+	'PR_EXTENSION_NAME'			=> 'POSTREACT(ions)',
 	/* > 2.2 */,
 	'POSTREACTION_AJAX_ERROR'	=> 'Errore durante la richiesta AJAX',
 	'POSTREACTION_JSON_ERROR'	=> 'Errore nel parsing della risposta JSON dal server',

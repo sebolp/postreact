@@ -1,12 +1,22 @@
 <?php
-	namespace sebo\postreact\controller;
+/**
+ *
+ * PostReaction. An extension for the phpBB Forum Software package.
+ *
+ * @copyright (c) 2026, sebo, https://www.fiatpandaclub.org
+ * @license GNU General Public License, version 2 (GPL-2.0)
+ *
+ */
 
-	use Symfony\Component\HttpFoundation\JsonResponse;
+namespace sebo\postreact\controller;
 
-	class react_controller
-	{
+use Symfony\Component\HttpFoundation\JsonResponse;
+
+class react_controller
+{
 	protected $db;
 	protected $user;
+	protected $language;
 	protected $request;
 	protected $table_prefix;
 	protected $php_ext;
@@ -14,10 +24,10 @@
 	protected $main_listener;
 	protected $config;
 
-	public function __construct
-	(
+	public function __construct(
 		\phpbb\db\driver\driver_interface $db,
-		\phpbb\user $user,
+		$user,
+		\phpbb\language\language $language,
 		\phpbb\request\request_interface $request,
 		$table_prefix,
 		$php_ext,
@@ -28,6 +38,7 @@
 	{
 		$this->db = $db;
 		$this->user = $user;
+		$this->language = $language;
 		$this->request = $request;
 		$this->table_prefix = $table_prefix;
 		$this->php_ext = $php_ext;
@@ -40,8 +51,8 @@
 	{
 		$sql_array = [
 			'SELECT'	=> 'COUNT(*) AS total_reactions',
-			'FROM'	  => [$this->table_prefix . 'sebo_postreact_table' => ''],
-			'WHERE'	 => 'user_id = ' . (int) $user_id . ' AND post_id = ' . (int) $post_id,
+			'FROM'		=> [$this->table_prefix . 'sebo_postreact_table' => ''],
+			'WHERE'		=> 'user_id = ' . (int) $user_id . ' AND post_id = ' . (int) $post_id,
 		];
 
 		$sql = $this->db->sql_build_query('SELECT', $sql_array);
@@ -54,7 +65,6 @@
 
 	private function remove_reaction($user_id, $post_id, $topic_id, $icon_id)
 	{
-		// get existing icon_id and react_time
 		$sql = 'SELECT icon_id, react_time FROM ' . $this->table_prefix . 'sebo_postreact_table
 				WHERE user_id = ' . (int) $user_id . '
 				AND post_id = ' . (int) $post_id;
@@ -68,9 +78,7 @@
 		}
 
 		$removed_icon_id = $existing_reaction['icon_id'];
-		$react_time = $existing_reaction['react_time'];
 
-		// Remove all reactions
 		$sql = 'DELETE FROM ' . $this->table_prefix . 'sebo_postreact_table
 				WHERE user_id = ' . (int) $user_id . '
 				AND post_id = ' . (int) $post_id;
@@ -78,23 +86,21 @@
 
 		if ($result)
 		{
-			// Passa tutto al main_listener per gestire le notifiche
 			$this->main_listener->handle_postreact_notification($post_id, $topic_id, $icon_id, 'remove');
 
-			// Get updated data
 			$reaction_data = $this->get_reaction_data($post_id);
 			$new_count = isset($reaction_data['counts'][$removed_icon_id]) ? $reaction_data['counts'][$removed_icon_id] : 0;
 
-			return $this->send_json_response(true, $this->user->lang('DELETED_VALUE'), [
+			return $this->send_json_response(true, $this->language->lang('DELETED_VALUE'), [
 				'action'		=> 'removed',
-				'new_count'	 => $new_count,
-				'icon_id'	   => $removed_icon_id,
-				'post_id'	   => $post_id,
-				'reaction_data' => $reaction_data,
-				'user_data'	 => array(
-					'username'	  => $this->user->data['username'],
-					'user_colour'   => $this->user->data['user_colour']
-				)
+				'new_count'		=> $new_count,
+				'icon_id'		=> $removed_icon_id,
+				'post_id'		=> $post_id,
+				'reaction_data'	=> $reaction_data,
+				'user_data'		=> [
+					'username'		=> $this->user->data['username'],
+					'user_colour'	=> $this->user->data['user_colour'],
+				],
 			]);
 		}
 		else
@@ -107,60 +113,56 @@
 	{
 		$time = time();
 		$data = [
-			'postreact_id'  => null,
-			'topic_id'	  => (int) $topic_id,
-			'post_id'	   => (int) $post_id,
-			'user_id'	   => (int) $user_id,
-			'icon_id'	   => (int) $icon_id,
+			'postreact_id'	=> null,
+			'topic_id'		=> (int) $topic_id,
+			'post_id'		=> (int) $post_id,
+			'user_id'		=> (int) $user_id,
+			'icon_id'		=> (int) $icon_id,
 			'react_time'	=> (int) $time,
 		];
 
-		// sql query di phpbb
 		$sql = 'INSERT INTO ' . $this->table_prefix . 'sebo_postreact_table ' .
 			   $this->db->sql_build_array('INSERT', $data);
 		$result = $this->db->sql_query($sql);
 
 		if ($result)
 		{
-			// Add notify
-			// *************************
 			$this->main_listener->handle_postreact_notification($post_id, $topic_id, $icon_id, 'add');
 
 			$reaction_data = $this->get_reaction_data($post_id);
 			$icon_data = $this->get_icon_data($icon_id);
 			$new_count = isset($reaction_data['counts'][$icon_id]) ? $reaction_data['counts'][$icon_id] : 1;
 
-			return $this->send_json_response(true, $this->user->lang('INSERTED_VALUE'), [
-				'action'		=> 'added',
-				'post_id'	   => $post_id,
-				'icon_id'	   => $icon_id,
-				'new_count'	 => $new_count,
-				'icon_url'	  => $icon_data['icon_url'],
-				'icon_width'	=> $icon_data['icon_width'],
-				'icon_height'   => $icon_data['icon_height'],
-				'icon_alt'	  => $icon_data['icon_alt'],
-				'reaction_data' => $reaction_data,
-				'reacted_language'  => $this->user->lang('ALREADY_REACTED'),
-				'user_data' => array(
-					'username'	  => $this->user->data['username'],
-					'user_colour'   => $this->user->data['user_colour']
-				)
+			return $this->send_json_response(true, $this->language->lang('INSERTED_VALUE'), [
+				'action'			=> 'added',
+				'post_id'			=> $post_id,
+				'icon_id'			=> $icon_id,
+				'new_count'			=> $new_count,
+				'icon_url'			=> $icon_data['icon_url'],
+				'icon_width'		=> $icon_data['icon_width'],
+				'icon_height'		=> $icon_data['icon_height'],
+				'icon_alt'			=> $icon_data['icon_alt'],
+				'reaction_data'		=> $reaction_data,
+				'reacted_language'	=> $this->language->lang('ALREADY_REACTED'),
+				'user_data'			=> [
+					'username'		=> $this->user->data['username'],
+					'user_colour'	=> $this->user->data['user_colour'],
+				],
 			]);
 		}
 		else
 		{
-			return $this->send_json_response(false, $this->user->lang('NOT_INSERTED_VALUE'));
+			return $this->send_json_response(false, $this->language->lang('NOT_INSERTED_VALUE'));
 		}
 	}
 
 	private function get_reaction_data($post_id)
 	{
-		// Get reaction count
 		$sql_array = [
 			'SELECT'	=> 'r.icon_id, COUNT(*) as count',
-			'FROM'	  => [$this->table_prefix . 'sebo_postreact_table' => 'r'],
-			'WHERE'	 => 'r.post_id = ' . (int) $post_id,
-			'GROUP_BY'  => 'r.icon_id'
+			'FROM'		=> [$this->table_prefix . 'sebo_postreact_table' => 'r'],
+			'WHERE'		=> 'r.post_id = ' . (int) $post_id,
+			'GROUP_BY'	=> 'r.icon_id',
 		];
 
 		$sql = $this->db->sql_build_query('SELECT', $sql_array);
@@ -173,21 +175,20 @@
 		}
 		$this->db->sql_freeresult($result);
 
-		// get user detail by icon
 		$user_details = [];
 		foreach ($counts as $icon_id => $count)
 		{
 			$sql_array = [
 				'SELECT'	=> 'u.username, u.user_colour',
-				'FROM'	  => [$this->table_prefix . 'sebo_postreact_table' => 'r'],
-				'LEFT_JOIN' => [
+				'FROM'		=> [$this->table_prefix . 'sebo_postreact_table' => 'r'],
+				'LEFT_JOIN'	=> [
 					[
-						'FROM'  => [$this->table_prefix . 'users' => 'u'],
-						'ON'	=> 'r.user_id = u.user_id'
-					]
+						'FROM'	=> [$this->table_prefix . 'users' => 'u'],
+						'ON'	=> 'r.user_id = u.user_id',
+					],
 				],
-				'WHERE'	 => 'r.post_id = ' . (int) $post_id . ' AND r.icon_id = ' . (int) $icon_id,
-				'ORDER_BY'  => 'r.react_time ASC'
+				'WHERE'		=> 'r.post_id = ' . (int) $post_id . ' AND r.icon_id = ' . (int) $icon_id,
+				'ORDER_BY'	=> 'r.react_time ASC',
 			];
 
 			$sql = $this->db->sql_build_query('SELECT', $sql_array);
@@ -197,8 +198,8 @@
 			while ($row = $this->db->sql_fetchrow($result))
 			{
 				$users[] = [
-					'username'	  => $row['username'],
-					'user_colour'   => $row['user_colour']
+					'username'		=> $row['username'],
+					'user_colour'	=> $row['user_colour'],
 				];
 			}
 			$this->db->sql_freeresult($result);
@@ -207,8 +208,8 @@
 		}
 
 		return [
-			'counts' => $counts,
-			'user_details' => $user_details
+			'counts'		=> $counts,
+			'user_details'	=> $user_details,
 		];
 	}
 
@@ -216,8 +217,8 @@
 	{
 		$sql_array = [
 			'SELECT'	=> '*',
-			'FROM'	  => [$this->table_prefix . 'sebo_postreact_icon' => ''],
-			'WHERE'	 => 'icon_id = ' . (int) $icon_id,
+			'FROM'		=> [$this->table_prefix . 'sebo_postreact_icon' => ''],
+			'WHERE'		=> 'icon_id = ' . (int) $icon_id,
 		];
 
 		$sql = $this->db->sql_build_query('SELECT', $sql_array);
@@ -231,47 +232,43 @@
 	private function send_json_response($success, $message, $data = [])
 	{
 		$response_data = array_merge([
-			'success' => $success,
-			'message' => $message
+			'success'	=> $success,
+			'message'	=> $message,
 		], $data);
 
-		/* old way
-		$json_response = new json_response();
-		$json_response->send($response_data);
-		*/
 		return new JsonResponse($response_data);
 	}
-
-	// public
-	// ******
 
 	public function handle()
 	{
 		if (!$this->request->is_ajax())
 		{
-			trigger_error('NO_DIRECT_ACCESS');
+			throw new \phpbb\exception\http_exception(403, 'NO_DIRECT_ACCESS');
 		}
 
-		$post_id = $this->request->variable('post_id', 0);
-		$topic_id = $this->request->variable('topic_id', 0);
-		$icon_id = $this->request->variable('icon_id', 0);
-		$user_id = (int) $this->user->data['user_id'];
+		// Deny anonymous users
+		if ($this->user->data['user_id'] == ANONYMOUS)
+		{
+			return $this->send_json_response(false, $this->language->lang('LOGIN_REQUIRED'));
+		}
 
-		// already reacted?
+		$post_id	= $this->request->variable('post_id', 0);
+		$topic_id	= $this->request->variable('topic_id', 0);
+		$icon_id	= $this->request->variable('icon_id', 0);
+		$user_id	= (int) $this->user->data['user_id'];
+
 		$existing_reaction = $this->check_existing_reaction($user_id, $post_id);
 
 		if ($existing_reaction > 0)
 		{
-			// remove
 			return $this->remove_reaction($user_id, $post_id, $topic_id, $icon_id);
 		}
 		else
 		{
-			// self react check
 			$sql_array = [
-				'SELECT' => 'poster_id',
-				'FROM'   => [$this->table_prefix . 'posts' => ''],
-				'WHERE'  => 'post_id = ' . (int) $post_id,
+				'SELECT'	=> 'poster_id',
+				'FROM'		=> [$this->table_prefix . 'posts' => ''],
+				'WHERE'		=> 'post_id = ' . (int) $post_id,
 			];
 
 			$sql_check_poster = $this->db->sql_build_query('SELECT', $sql_array);
@@ -281,16 +278,13 @@
 
 			if ($row_check_poster)
 			{
-				// read config: default 0
 				$config_self_react = isset($this->config['sebo_postreact_self_react']) ? (int) $this->config['sebo_postreact_self_react'] : 0;
-				// if 1 (denied) user is poster
-				if ($config_self_react === 1 && (int) $row_check_poster['poster_id'] === (int) $user_id)
+				if ($config_self_react === 1 && (int) $row_check_poster['poster_id'] === $user_id)
 				{
-					// send response
-					return $this->send_json_response(false, $this->user->lang('CANNOT_SELF_REACT'));
+					return $this->send_json_response(false, $this->language->lang('CANNOT_SELF_REACT'));
 				}
 			}
-			// add
+
 			return $this->add_reaction($user_id, $post_id, $topic_id, $icon_id);
 		}
 	}

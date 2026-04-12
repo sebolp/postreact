@@ -3,7 +3,7 @@
  *
  * PostReaction. An extension for the phpBB Forum Software package.
  *
- * @copyright (c) 2024, sebo, https://www.fiatpandaclub.org
+ * @copyright (c) 2026, sebo, https://www.fiatpandaclub.org
  * @license GNU General Public License, version 2 (GPL-2.0)
  *
  */
@@ -79,4 +79,6 @@ $lang = array_merge($lang, [
 	'PR_PURGE_FOLDER_DONE'    => 'Files and directories deleted successfully.',
 	'PR_DIR_NOT_EXISTS_MSG' => 'The reaction folder does not exist on the server: <code class="inline">%s</code>. Please create it and upload your reaction images there to use PostReaction extension. Otherwise you have to completely uninstall this extension and reinstall it.',
 	'ICON_URL'				=> 'Directory/Name - link',
+	/* >2.4 */
+	'RETURN_ACP'			=> '<a href="%s">Back to the ACP module</a>',
 ]);
