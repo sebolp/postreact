@@ -175,7 +175,6 @@ class acp_controller
 							WHERE icon_id = ' . (int) $move_id;
 						$this->db->sql_query($sql);
 
-
 						// Prepare the array for the second update
 						$sql_ary_a =
 							[
