@@ -1,29 +1,32 @@
 <?php
-	/**
-		*
-		* PostReaction. An extension for the phpBB Forum Software package.
-		*
-		* @copyright (c) 2026, sebo, https://www.fiatpandaclub.org
-		* @license GNU General Public License, version 2 (GPL-2.0)
-		*
-	*/
+
+/**
+ *
+ * PostReaction. An extension for the phpBB Forum Software package.
+ *
+ * @copyright (c) 2026, sebo, https://www.fiatpandaclub.org
+ * @license GNU General Public License, version 2 (GPL-2.0)
+ *
+ */
+
 namespace sebo\postreact\event;
 
-	/**
-		* @ignore
-	*/
+/**
+ * @ignore
+ */
+
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
-	/**
-		* PostReaction Event listener.
-	*/
+/**
+ * PostReaction Event listener.
+ */
 class main_listener implements EventSubscriberInterface
+{
+	public static function getSubscribedEvents()
 	{
-		public static function getSubscribedEvents()
-		{
-			return [
+		return [
 			'core.user_setup'						   => 'load_language_on_setup',
-			'core.viewtopic_assign_template_vars_before'=> 'preload_icons',
+			'core.viewtopic_assign_template_vars_before' => 'preload_icons',
 			'core.viewtopic_modify_post_row'            => 'assign_to_template',
 			'core.viewforum_modify_page_title'          => 'preload_icons',
 			'core.viewforum_modify_topicrow'			=> 'viewforum_edit',
@@ -33,37 +36,37 @@ class main_listener implements EventSubscriberInterface
 			'core.memberlist_modify_view_profile_template_vars' => 'assign_edit_view_profile',
 			'core.search_modify_param_after'        => 'search_user_reactions_title',
 			'core.search_backend_search_after'      => 'search_user_reactions',
-			];
-		}
-		/* @var \phpbb\language\language */
-		protected $language;
-		/** @var \phpbb\db\driver\driver_interface */
-		protected $db;
-		/** @var */
-		protected $user;
-		/** @var \phpbb\request\request */
-		protected $request;
-		/** @var \phpbb\template\template */
-		protected $template;
-		protected $table_prefix;
-		/** @var auth */
-		protected $auth;
-		/** @var \phpbb\notification\manager */
-		protected $notification_manager;
-		/** @var php_ext */
-		protected $php_ext;
-		/** @var profile */
-		protected $profile_data;
-		/** @var config */
-		protected $config;
-		/** @var string phpBB root path */
-		protected $phpbb_root_path;
-		/** @var icons */
-		protected $icons_cache = null;
-		/**
-			* Constructor
-		*/
-		public function __construct(
+		];
+	}
+	/* @var \phpbb\language\language */
+	protected $language;
+	/** @var \phpbb\db\driver\driver_interface */
+	protected $db;
+	/** @var */
+	protected $user;
+	/** @var \phpbb\request\request */
+	protected $request;
+	/** @var \phpbb\template\template */
+	protected $template;
+	protected $table_prefix;
+	/** @var auth */
+	protected $auth;
+	/** @var \phpbb\notification\manager */
+	protected $notification_manager;
+	/** @var php_ext */
+	protected $php_ext;
+	/** @var profile */
+	protected $profile_data;
+	/** @var config */
+	protected $config;
+	/** @var string phpBB root path */
+	protected $phpbb_root_path;
+	/** @var icons */
+	protected $icons_cache = null;
+	/**
+	 * Constructor
+	 */
+	public function __construct(
 		\phpbb\language\language $language,
 		\phpbb\db\driver\driver_interface $db,
 		$user,
@@ -75,436 +78,437 @@ class main_listener implements EventSubscriberInterface
 		$php_ext,
 		\phpbb\config\config $config,
 		$phpbb_root_path
-		)
-		{
-			$this->language = $language;
-			$this->db	   = $db;
-			$this->user	 = $user;
-			$this->request  = $request;
-			$this->template = $template;
-			$this->table_prefix = $table_prefix;
-			$this->auth = $auth;
-			$this->notification_manager   = $notification_manager;
-			$this->php_ext = $php_ext;
-			$this->config = $config;
-			$this->phpbb_root_path = $phpbb_root_path;
-		}
-		/**
-			* Load common language files during user setup
-		*/
-		public function load_language_on_setup($event)
-		{
-			$lang_set_ext = $event['lang_set_ext'];
-			$lang_set_ext[] = [
+	)
+	{
+		$this->language = $language;
+		$this->db	   = $db;
+		$this->user	 = $user;
+		$this->request  = $request;
+		$this->template = $template;
+		$this->table_prefix = $table_prefix;
+		$this->auth = $auth;
+		$this->notification_manager   = $notification_manager;
+		$this->php_ext = $php_ext;
+		$this->config = $config;
+		$this->phpbb_root_path = $phpbb_root_path;
+	}
+	/**
+	 * Load common language files during user setup
+	 */
+	public function load_language_on_setup($event)
+	{
+		$lang_set_ext = $event['lang_set_ext'];
+		$lang_set_ext[] = [
 			'ext_name' => 'sebo/postreact',
 			'lang_set' => 'common',
-			];
-			$event['lang_set_ext'] = $lang_set_ext;
+		];
+		$event['lang_set_ext'] = $lang_set_ext;
+	}
+
+	/**
+	 * Handle custom search results injection
+	 *
+	 * @param \phpbb\event\data $event The event object
+	 */
+	public function search_user_reactions($event)
+	{
+		// We use request variable here because search_id might be reset in search.php logic
+		if ($this->request->variable('search_id', '') !== 'sebo_user_reactions')
+		{
+			return;
 		}
 
-		/**
-		 * Handle custom search results injection
-		 *
-		 * @param \phpbb\event\data $event The event object
-		 */
-		public function search_user_reactions($event)
+		$user_id = $this->request->variable('u', 0);
+		$icon_id = $this->request->variable('icon_id', 0);
+		$mode    = $this->request->variable('mode', 'sent');
+
+		if (!$user_id)
 		{
-			// We use request variable here because search_id might be reset in search.php logic
-			if ($this->request->variable('search_id', '') !== 'sebo_user_reactions')
-			{
-				return;
-			}
+			return;
+		}
 
-			$user_id = $this->request->variable('u', 0);
-			$icon_id = $this->request->variable('icon_id', 0);
-			$mode    = $this->request->variable('mode', 'sent');
-
-			if (!$user_id)
-			{
-				return;
-			}
-
-			$sql_array = [
-				'SELECT'    => 'pr.post_id',
-				'FROM'      => [
-					$this->table_prefix . 'sebo_postreact_table' => 'pr',
+		$sql_array = [
+			'SELECT'    => 'pr.post_id',
+			'FROM'      => [
+				$this->table_prefix . 'sebo_postreact_table' => 'pr',
+			],
+			'LEFT_JOIN' => [
+				[
+					'FROM'  => [$this->table_prefix . 'posts' => 'p'],
+					'ON'    => 'pr.post_id = p.post_id',
 				],
-				'LEFT_JOIN' => [
-					[
-						'FROM'  => [$this->table_prefix . 'posts' => 'p'],
-						'ON'    => 'pr.post_id = p.post_id',
-					],
-				],
-				'WHERE'     => 'p.post_id IS NOT NULL',
-				'ORDER_BY'  => 'p.post_time DESC',
-			];
+			],
+			'WHERE'     => 'p.post_id IS NOT NULL',
+			'ORDER_BY'  => 'p.post_time DESC',
+		];
 
-			if ($mode === 'received')
+		if ($mode === 'received')
+		{
+			$sql_array['WHERE'] .= ' AND p.poster_id = ' . (int) $user_id;
+		}
+		else
+		{
+			$sql_array['WHERE'] .= ' AND pr.user_id = ' . (int) $user_id;
+		}
+
+		if ($icon_id > 0)
+		{
+			$sql_array['WHERE'] .= ' AND pr.icon_id = ' . (int) $icon_id;
+		}
+
+		$sql = $this->db->sql_build_query('SELECT', $sql_array);
+		$result = $this->db->sql_query($sql);
+
+		$id_ary = [];
+		while ($row = $this->db->sql_fetchrow($result))
+		{
+			$id_ary[] = (int) $row['post_id'];
+		}
+		$this->db->sql_freeresult($result);
+
+		if (!empty($id_ary))
+		{
+			// Inject IDs into the event data
+			$event['id_ary'] = $id_ary;
+			$event['total_match_count'] = count($id_ary);
+			$event['show_results'] = 'posts';
+		}
+	}
+
+	/**
+	 * Set the page title for the custom search using the correct event
+	 *
+	 * @param \phpbb\event\data $event The event object
+	 */
+	public function search_user_reactions_title($event)
+	{
+		// Check the search_id from the event data
+		if ($event['search_id'] !== 'sebo_user_reactions')
+		{
+			return;
+		}
+
+		$mode    = $this->request->variable('mode', 'sent');
+		$user_id = $this->request->variable('u', 0);
+		$icon_id = $this->request->variable('icon_id', 0);
+
+		// Default username
+		$username = $this->language->lang('GUEST');
+		$icon_emoji = '';
+
+		// 1. Retrieve Username
+		if ($user_id > 0)
+		{
+			if ($user_id == $this->user->data['user_id'])
 			{
-				$sql_array['WHERE'] .= ' AND p.poster_id = ' . (int) $user_id;
+				$username = $this->user->data['username'];
 			}
 			else
 			{
-				$sql_array['WHERE'] .= ' AND pr.user_id = ' . (int) $user_id;
-			}
-
-			if ($icon_id > 0)
-			{
-				$sql_array['WHERE'] .= ' AND pr.icon_id = ' . (int) $icon_id;
-			}
-
-			$sql = $this->db->sql_build_query('SELECT', $sql_array);
-			$result = $this->db->sql_query($sql);
-
-			$id_ary = [];
-			while ($row = $this->db->sql_fetchrow($result))
-			{
-				$id_ary[] = (int) $row['post_id'];
-			}
-			$this->db->sql_freeresult($result);
-
-			if (!empty($id_ary))
-			{
-				// Inject IDs into the event data
-				$event['id_ary'] = $id_ary;
-				$event['total_match_count'] = count($id_ary);
-				$event['show_results'] = 'posts';
-			}
-		}
-
-		/**
-		 * Set the page title for the custom search using the correct event
-		 *
-		 * @param \phpbb\event\data $event The event object
-		 */
-		public function search_user_reactions_title($event)
-		{
-			// Check the search_id from the event data
-			if ($event['search_id'] !== 'sebo_user_reactions')
-			{
-				return;
-			}
-
-			$mode    = $this->request->variable('mode', 'sent');
-			$user_id = $this->request->variable('u', 0);
-			$icon_id = $this->request->variable('icon_id', 0);
-
-			// Default username
-			$username = $this->language->lang('GUEST');
-			$icon_emoji = '';
-
-			// 1. Retrieve Username
-			if ($user_id > 0)
-			{
-				if ($user_id == $this->user->data['user_id'])
-				{
-					$username = $this->user->data['username'];
-				}
-				else
-				{
-					$sql = 'SELECT username
+				$sql = 'SELECT username
 						FROM ' . USERS_TABLE . '
 						WHERE user_id = ' . (int) $user_id;
-					$result = $this->db->sql_query($sql);
-					$row = $this->db->sql_fetchrow($result);
-					$this->db->sql_freeresult($result);
-
-					if ($row)
-					{
-						$username = $row['username'];
-					}
-				}
-			}
-
-			// 2. Retrieve Emoji
-			if ($icon_id > 0)
-			{
-				$sql = 'SELECT icon_emoji
-					FROM ' . $this->table_prefix . 'sebo_postreact_icon
-					WHERE icon_id = ' . (int) $icon_id;
 				$result = $this->db->sql_query($sql);
 				$row = $this->db->sql_fetchrow($result);
 				$this->db->sql_freeresult($result);
 
 				if ($row)
 				{
-					$icon_emoji = html_entity_decode($row['icon_emoji']);
+					$username = $row['username'];
 				}
 			}
-
-			// 3. Set Title into the event variable
-			// FIX: Variable order swapped to match language string: "PostReact %s given by %s"
-			// 1st arg: Emoji, 2nd arg: Username
-			if ($mode === 'received')
-			{
-				$title = $this->language->lang('SEARCH_USER_REACTIONS_RECEIVED', $icon_emoji, $username);
-			}
-			else
-			{
-				$title = $this->language->lang('SEARCH_USER_REACTIONS', $icon_emoji, $username);
-			}
-
-			// Assign title to the event
-			$event['l_search_title'] = $title;
-
-			// edit last navlink
-			$this->template->alter_block_array('navlinks', [
-				'FORUM_NAME'		=> $title,
-				'U_VIEW_FORUM'		=> append_sid($this->phpbb_root_path . 'search.' . $this->php_ext, "search_id=sebo_user_reactions&u=$user_id&icon_id=$icon_id&mode=$mode"),
-			], true, 'change');
 		}
 
-		public function handle_postreact_notification($post_id, $topic_id, $icon_id, $action)
+		// 2. Retrieve Emoji
+		if ($icon_id > 0)
 		{
-			switch ($action)
+			$sql = 'SELECT icon_emoji
+					FROM ' . $this->table_prefix . 'sebo_postreact_icon
+					WHERE icon_id = ' . (int) $icon_id;
+			$result = $this->db->sql_query($sql);
+			$row = $this->db->sql_fetchrow($result);
+			$this->db->sql_freeresult($result);
+
+			if ($row)
 			{
-				case 'remove':
-					$this->remove_postreact_notification($post_id);
-					break;
-
-				case 'add':
-					$this->add_postreact_notification($post_id, $topic_id, $icon_id);
-					break;
-
-				default:
-					break;
+				$icon_emoji = html_entity_decode($row['icon_emoji']);
 			}
 		}
 
-		public function add_postreact_notification($post_id, $topic_id, $icon_id)
+		// 3. Set Title into the event variable
+		// FIX: Variable order swapped to match language string: "PostReact %s given by %s"
+		// 1st arg: Emoji, 2nd arg: Username
+		if ($mode === 'received')
 		{
-			$user_id_logged = (int) $this->user->data['user_id'];
+			$title = $this->language->lang('SEARCH_USER_REACTIONS_RECEIVED', $icon_emoji, $username);
+		}
+		else
+		{
+			$title = $this->language->lang('SEARCH_USER_REACTIONS', $icon_emoji, $username);
+		}
 
-			// get post infos
-			$sql_array = [
-				'SELECT'    => 'p.poster_id AS poster_id_clean, p.post_subject AS post_post_title, p.post_id, u.username_clean AS poster_name_clean, u.user_id, u.user_colour AS poster_user_colour',
-				'FROM'      => [$this->table_prefix . 'posts' => 'p'],
-				'LEFT_JOIN' => [
-					[
-						'FROM' => [USERS_TABLE => 'u'],
-						'ON'   => 'p.poster_id = u.user_id',
-					],
+		// Assign title to the event
+		$event['l_search_title'] = $title;
+
+		// edit last navlink
+		$this->template->alter_block_array('navlinks', [
+			'FORUM_NAME'		=> $title,
+			'U_VIEW_FORUM'		=> append_sid($this->phpbb_root_path . 'search.' . $this->php_ext, "search_id=sebo_user_reactions&u=$user_id&icon_id=$icon_id&mode=$mode"),
+		], true, 'change');
+	}
+
+	public function handle_postreact_notification($post_id, $topic_id, $icon_id, $action)
+	{
+		switch ($action)
+		{
+			case 'remove':
+				$this->remove_postreact_notification($post_id);
+				break;
+
+			case 'add':
+				$this->add_postreact_notification($post_id, $topic_id, $icon_id);
+				break;
+
+			default:
+				break;
+		}
+	}
+
+	public function add_postreact_notification($post_id, $topic_id, $icon_id)
+	{
+		$user_id_logged = (int) $this->user->data['user_id'];
+
+		// get post infos
+		$sql_array = [
+			'SELECT'    => 'p.poster_id AS poster_id_clean, p.post_subject AS post_post_title, p.post_id, u.username_clean AS poster_name_clean, u.user_id, u.user_colour AS poster_user_colour',
+			'FROM'      => [$this->table_prefix . 'posts' => 'p'],
+			'LEFT_JOIN' => [
+				[
+					'FROM' => [USERS_TABLE => 'u'],
+					'ON'   => 'p.poster_id = u.user_id',
 				],
-				'WHERE'     => 'p.post_id = ' . (int) $post_id,
-			];
-			$sql_post = $this->db->sql_build_query('SELECT', $sql_array);
-			$result_post = $this->db->sql_query($sql_post);
-			$row_post = $this->db->sql_fetchrow($result_post);
-			$this->db->sql_freeresult($result_post);
+			],
+			'WHERE'     => 'p.post_id = ' . (int) $post_id,
+		];
+		$sql_post = $this->db->sql_build_query('SELECT', $sql_array);
+		$result_post = $this->db->sql_query($sql_post);
+		$row_post = $this->db->sql_fetchrow($result_post);
+		$this->db->sql_freeresult($result_post);
 
-			if (!$row_post)
-			{
-				return;
-			}
-
-			// get icon infos
-			$sql_array = [
-				'SELECT' => '*',
-				'FROM'   => [$this->table_prefix . 'sebo_postreact_icon' => ''],
-				'WHERE'  => 'icon_id = ' . (int) $icon_id,
-			];
-			$sql_icon = $this->db->sql_build_query('SELECT', $sql_array);
-			$result_icon = $this->db->sql_query($sql_icon);
-			$row_icon = $this->db->sql_fetchrow($result_icon);
-			$this->db->sql_freeresult($result_icon);
-
-			if (!$row_icon)
-			{
-				return;
-			}
-
-			// make array
-			$pr_notification_data = [
-				'PR_N_item_id'    => (int) $post_id,
-				'PR_N_username'   => $row_post['poster_name_clean'],
-				'PR_N_post_title' => $row_post['post_post_title'],
-				'PR_N_user_id'    => (int) $row_post['poster_id_clean'],
-				'PR_N_sender_id'  => $user_id_logged,
-				'PR_N_post_id'    => (int) $post_id,
-				'PR_N_topic_id'   => (int) $topic_id,
-				'PR_N_icon'       => $row_icon['icon_url']
-			];
-
-			$this->add_notification($pr_notification_data);
+		if (!$row_post)
+		{
+			return;
 		}
 
-		public function remove_postreact_notification($post_id)
-		{
-			$user_id_logged = (int) $this->user->data['user_id'];
+		// get icon infos
+		$sql_array = [
+			'SELECT' => '*',
+			'FROM'   => [$this->table_prefix . 'sebo_postreact_icon' => ''],
+			'WHERE'  => 'icon_id = ' . (int) $icon_id,
+		];
+		$sql_icon = $this->db->sql_build_query('SELECT', $sql_array);
+		$result_icon = $this->db->sql_query($sql_icon);
+		$row_icon = $this->db->sql_fetchrow($result_icon);
+		$this->db->sql_freeresult($result_icon);
 
-			$this->notification_manager->delete_notifications(
-				'sebo.postreact.notification.type.postreact_notification',
-				(int) $post_id,
-				false,
-				$user_id_logged
-			);
+		if (!$row_icon)
+		{
+			return;
 		}
 
-		public function add_notification($notification_data, $notification_type_name = 'sebo.postreact.notification.type.postreact_notification')
-		{
-			$result = $this->notification_manager->add_notifications($notification_type_name, $notification_data);
-		}
+		// make array
+		$pr_notification_data = [
+			'PR_N_item_id'    => (int) $post_id,
+			'PR_N_username'   => $row_post['poster_name_clean'],
+			'PR_N_post_title' => $row_post['post_post_title'],
+			'PR_N_user_id'    => (int) $row_post['poster_id_clean'],
+			'PR_N_sender_id'  => $user_id_logged,
+			'PR_N_post_id'    => (int) $post_id,
+			'PR_N_topic_id'   => (int) $topic_id,
+			'PR_N_icon'       => $row_icon['icon_url']
+		];
 
-		/**
-		 * Preload icons cache on page init events
-		 */
-		public function preload_icons($event)
-		{
-			$this->grab_icons();
-		}
+		$this->add_notification($pr_notification_data);
+	}
 
-		public function grab_icons()
-		{
-			// ##
-			// grab icons from cache
-			if ($this->icons_cache !== null)
-			{
-				return $this->icons_cache;
-			}
+	public function remove_postreact_notification($post_id)
+	{
+		$user_id_logged = (int) $this->user->data['user_id'];
 
-			// take the line corresponds to post_id
-			$data_ico = [];
-			$sql_array = [
-				'SELECT'    => '*',
-				'FROM'      => [$this->table_prefix . 'sebo_postreact_icon' => ''],
-			];
-			$sql_ico = $this->db->sql_build_query('SELECT', $sql_array);
-			$result_ico = $this->db->sql_query($sql_ico);
-			if ($result_ico)
-			{
-				while ($my_icons = $this->db->sql_fetchrow($result_ico))
-				{
-					$data_ico[] = $my_icons;
-				}
-				$this->db->sql_freeresult($result_ico);
-			}
-			$this->icons_cache = $data_ico;
+		$this->notification_manager->delete_notifications(
+			'sebo.postreact.notification.type.postreact_notification',
+			(int) $post_id,
+			false,
+			$user_id_logged
+		);
+	}
+
+	public function add_notification($notification_data, $notification_type_name = 'sebo.postreact.notification.type.postreact_notification')
+	{
+		$result = $this->notification_manager->add_notifications($notification_type_name, $notification_data);
+	}
+
+	/**
+	 * Preload icons cache on page init events
+	 */
+	public function preload_icons($event)
+	{
+		$this->grab_icons();
+	}
+
+	public function grab_icons()
+	{
+		// ##
+		// grab icons from cache
+		if ($this->icons_cache !== null)
+		{
 			return $this->icons_cache;
 		}
-		public function assign_to_template($event)
-		{
-			$postrow = $event['postrow'];
-			$row = $event['row'];
-			// ##
-			//
-			$my_pid = $row['post_id'];
-			$my_tid = $row['topic_id'];
-			// take the line corresponds to post_id
-			$sql_array = [
-				'SELECT'    => '*',
-				'FROM'      => [$this->table_prefix . 'sebo_postreact_table' => ''],
-				'WHERE'     => 'post_id = ' . (int) $my_pid,
-			];
-			$sql = $this->db->sql_build_query('SELECT', $sql_array);
 
-			$data = [];
-			if ($sql)
+		// take the line corresponds to post_id
+		$data_ico = [];
+		$sql_array = [
+			'SELECT'    => '*',
+			'FROM'      => [$this->table_prefix . 'sebo_postreact_icon' => ''],
+			'ORDER_BY'	=> 'icon_order ASC',
+		];
+		$sql_ico = $this->db->sql_build_query('SELECT', $sql_array);
+		$result_ico = $this->db->sql_query($sql_ico);
+		if ($result_ico)
+		{
+			while ($my_icons = $this->db->sql_fetchrow($result_ico))
 			{
-				// do it
-				$result = $this->db->sql_query($sql);
-				if ($result)
-				{
-					while ($my_row = $this->db->sql_fetchrow($result))
-					{
-						$data[] = $my_row;
-					}
-					$this->db->sql_freeresult($result);
-				}
+				$data_ico[] = $my_icons;
 			}
-			// total reaction count
-			$total_match_count = count($data);
-			// ##
-			// count icon_id and users_ids
-			$icon_counts = [];
-			$user_ids_list = [];
-			foreach ($data as $record)
+			$this->db->sql_freeresult($result_ico);
+		}
+		$this->icons_cache = $data_ico;
+		return $this->icons_cache;
+	}
+	public function assign_to_template($event)
+	{
+		$postrow = $event['postrow'];
+		$row = $event['row'];
+		// ##
+		//
+		$my_pid = $row['post_id'];
+		$my_tid = $row['topic_id'];
+		// take the line corresponds to post_id
+		$sql_array = [
+			'SELECT'    => '*',
+			'FROM'      => [$this->table_prefix . 'sebo_postreact_table' => ''],
+			'WHERE'     => 'post_id = ' . (int) $my_pid,
+		];
+		$sql = $this->db->sql_build_query('SELECT', $sql_array);
+
+		$data = [];
+		if ($sql)
+		{
+			// do it
+			$result = $this->db->sql_query($sql);
+			if ($result)
 			{
-				$icon_id = $record['icon_id'];
-				$user_id = $record['user_id'];
-				$post_id = $record['post_id'];
-				if (!isset($icon_counts[$icon_id]))
+				while ($my_row = $this->db->sql_fetchrow($result))
 				{
-					$icon_counts[$icon_id] = 0;
-					$user_ids_list[$icon_id] = [];
+					$data[] = $my_row;
 				}
-				$icon_counts[$icon_id]++;
-				// Create an associative array for each entry with user_id and post_id
-				$user_ids_list[$icon_id][] = [
+				$this->db->sql_freeresult($result);
+			}
+		}
+		// total reaction count
+		$total_match_count = count($data);
+		// ##
+		// count icon_id and users_ids
+		$icon_counts = [];
+		$user_ids_list = [];
+		foreach ($data as $record)
+		{
+			$icon_id = $record['icon_id'];
+			$user_id = $record['user_id'];
+			$post_id = $record['post_id'];
+			if (!isset($icon_counts[$icon_id]))
+			{
+				$icon_counts[$icon_id] = 0;
+				$user_ids_list[$icon_id] = [];
+			}
+			$icon_counts[$icon_id]++;
+			// Create an associative array for each entry with user_id and post_id
+			$user_ids_list[$icon_id][] = [
 				'user_id' => $user_id,
 				'post_id' => $post_id
-				];
-			}
-			// ##
-			// search users_table information from user_id
-			$user_data_detailed = [];
-			foreach ($user_ids_list as $icon_id => $entries)
+			];
+		}
+		// ##
+		// search users_table information from user_id
+		$user_data_detailed = [];
+		foreach ($user_ids_list as $icon_id => $entries)
+		{
+			foreach ($entries as $entry)
 			{
-				foreach ($entries as $entry)
+				$user_id = $entry['user_id'];
+				if (!isset($user_data_detailed[$user_id]))
 				{
-					$user_id = $entry['user_id'];
-					if (!isset($user_data_detailed[$user_id]))
+					$sql_array = [
+						'SELECT'    => 'group_id, username, user_colour',
+						'FROM'      => [USERS_TABLE => ''],
+						'WHERE'     => 'user_id = ' . (int) $user_id,
+					];
+					$query = $this->db->sql_build_query('SELECT', $sql_array);
+					$result = $this->db->sql_query($query);
+					if ($row_user = $this->db->sql_fetchrow($result))
 					{
-						$sql_array = [
-							'SELECT'    => 'group_id, username, user_colour',
-							'FROM'      => [USERS_TABLE => ''],
-							'WHERE'     => 'user_id = ' . (int) $user_id,
-						];
-						$query = $this->db->sql_build_query('SELECT', $sql_array);
-						$result = $this->db->sql_query($query);
-						if ($row_user = $this->db->sql_fetchrow($result))
-						{
-							$user_data_detailed[$user_id] = [
+						$user_data_detailed[$user_id] = [
 							'group_id' => $row_user['group_id'],
 							'username' => $row_user['username'],
 							'user_colour' => $row_user['user_colour'],
 						];
-						}
-						$this->db->sql_freeresult($result);
 					}
+					$this->db->sql_freeresult($result);
 				}
 			}
-			// merge username, colour and group to user_id
-			$user_ids_with_details = [];
-			foreach ($user_ids_list as $icon_id => $entries)
+		}
+		// merge username, colour and group to user_id
+		$user_ids_with_details = [];
+		foreach ($user_ids_list as $icon_id => $entries)
+		{
+			foreach ($entries as $entry)
 			{
-				foreach ($entries as $entry)
+				$user_id = $entry['user_id'];
+				if (isset($user_data_detailed[$user_id]))
 				{
-					$user_id = $entry['user_id'];
-					if (isset($user_data_detailed[$user_id]))
-					{
-						$user_ids_with_details[$icon_id][] = [
+					$user_ids_with_details[$icon_id][] = [
 						'user_id' => $user_id,
 						'username' => $user_data_detailed[$user_id]['username'],
 						'group_id' => $user_data_detailed[$user_id]['group_id'],
 						'user_colour' => $user_data_detailed[$user_id]['user_colour'],
 						'post_id' => $entry['post_id'],  // Include post_id
-						];
-					}
+					];
 				}
 			}
-			// ##
-			// mark your choise
-			$check = [];
-			$user_id_logged = $this->user->data['user_id'];
+		}
+		// ##
+		// mark your choise
+		$check = [];
+		$user_id_logged = $this->user->data['user_id'];
 
-			$sql_array = [
-							'SELECT'    => 'post_id, icon_id',
-							'FROM'      => [$this->table_prefix . 'sebo_postreact_table' => ''],
-							'WHERE'     => 'user_id = ' . (int) $user_id_logged . ' AND post_id = ' . (int) $my_pid,
-						];
-			$sql_check = $this->db->sql_build_query('SELECT', $sql_array);
-			$result_check = $this->db->sql_query($sql_check);
-			while ($row_check = $this->db->sql_fetchrow($result_check))
-			{
-				$check[] = [
+		$sql_array = [
+			'SELECT'    => 'post_id, icon_id',
+			'FROM'      => [$this->table_prefix . 'sebo_postreact_table' => ''],
+			'WHERE'     => 'user_id = ' . (int) $user_id_logged . ' AND post_id = ' . (int) $my_pid,
+		];
+		$sql_check = $this->db->sql_build_query('SELECT', $sql_array);
+		$result_check = $this->db->sql_query($sql_check);
+		while ($row_check = $this->db->sql_fetchrow($result_check))
+		{
+			$check[] = [
 				'post_id' => $row_check['post_id'],
 				'icon_id' => $row_check['icon_id']
-				];
-			}
-			$this->db->sql_freeresult($result_check);
-			// ##
-			// template
-			$event['post_row'] = array_merge($event['post_row'], [
+			];
+		}
+		$this->db->sql_freeresult($result_check);
+		// ##
+		// template
+		$event['post_row'] = array_merge($event['post_row'], [
 			'POSTREACT_FLOAT_CLASS' => ((int) $this->config['sebo_postreact_display_position'] === 1) ? 'left' : 'right',
 			'PERM_W'		=> $this->auth->acl_get('u_new_sebo_postreact'),
 			'PERM_R'		=> $this->auth->acl_get('u_new_sebo_postreact_view'),
@@ -516,270 +520,270 @@ class main_listener implements EventSubscriberInterface
 			'ICON_CHECK'	=> $check,
 			'REACTORS'	  	=> $user_ids_with_details,
 			'SELF_REACT'	=> $this->config['sebo_postreact_self_react'],
-			]);
-		}
+		]);
+	}
 
-		public function viewforum_edit($event)
+	public function viewforum_edit($event)
+	{
+		$topicrow = $event['topicrow'];
+		$row = $event['row'];
+		$topic_id = $row['topic_id'];
+		$data = [];
+
+		$sql_array = [
+			'SELECT'    => '*',
+			'FROM'      => [$this->table_prefix . 'sebo_postreact_table' => ''],
+			'WHERE'     => 'topic_id = ' . (int) $topic_id,
+		];
+		$sql = $this->db->sql_build_query('SELECT', $sql_array);
+		// do it
+		$result = $this->db->sql_query($sql);
+		// Array starts for data and IDs
+		$filtered_rows = [];
+		$post_ids = [];
+		while ($my_row = $this->db->sql_fetchrow($result))
 		{
-			$topicrow = $event['topicrow'];
-			$row = $event['row'];
-			$topic_id = $row['topic_id'];
-			$data = [];
-
+			$post_id = (int) $my_row['post_id'];
+			// save the entire row of the post_ids
+			$filtered_rows[$post_id] = $my_row;
+			// save only post_id
+			$post_ids[] = $post_id;
+		}
+		// if IDs, check
+		if (!empty($post_ids))
+		{
 			$sql_array = [
-								'SELECT'    => '*',
-								'FROM'      => [$this->table_prefix . 'sebo_postreact_table' => ''],
-								'WHERE'     => 'topic_id = ' . (int) $topic_id,
-							];
-			$sql = $this->db->sql_build_query('SELECT', $sql_array);
-			// do it
-			$result = $this->db->sql_query($sql);
-			// Array starts for data and IDs
-			$filtered_rows = [];
-			$post_ids = [];
-			while ($my_row = $this->db->sql_fetchrow($result))
-			{
-				$post_id = (int) $my_row['post_id'];
-				// save the entire row of the post_ids
-				$filtered_rows[$post_id] = $my_row;
-				// save only post_id
-				$post_ids[] = $post_id;
-			}
-			// if IDs, check
-			if (!empty($post_ids))
-			{
-				$sql_array = [
-					'SELECT' => 'post_id',
-					'FROM'   => [$this->table_prefix . 'posts' => ''],
-					'WHERE'  => $this->db->sql_in_set('post_id', $post_ids),
-				];
+				'SELECT' => 'post_id',
+				'FROM'   => [$this->table_prefix . 'posts' => ''],
+				'WHERE'  => $this->db->sql_in_set('post_id', $post_ids),
+			];
 
-				$sql_post_exist = $this->db->sql_build_query('SELECT', $sql_array);
-				$result_post_exist = $this->db->sql_query($sql_post_exist);
-				$existing_posts = [];
-				while ($row = $this->db->sql_fetchrow($result_post_exist))
+			$sql_post_exist = $this->db->sql_build_query('SELECT', $sql_array);
+			$result_post_exist = $this->db->sql_query($sql_post_exist);
+			$existing_posts = [];
+			while ($row = $this->db->sql_fetchrow($result_post_exist))
+			{
+				$existing_posts[$row['post_id']] = true;
+			}
+			$this->db->sql_freeresult($result_post_exist);
+			// Filter
+			$data = [];
+			foreach ($filtered_rows as $post_id => $row)
+			{
+				if (isset($existing_posts[$post_id]))
 				{
-					$existing_posts[$row['post_id']] = true;
-				}
-				$this->db->sql_freeresult($result_post_exist);
-				// Filter
-				$data = [];
-				foreach ($filtered_rows as $post_id => $row)
-				{
-					if (isset($existing_posts[$post_id]))
-					{
-						// save row
-						$data[] = $row;
-					}
+					// save row
+					$data[] = $row;
 				}
 			}
-			$this->db->sql_freeresult($result);
-			// numb check icon_id
-			$icon_counts = [];
-			foreach ($data as $record)
+		}
+		$this->db->sql_freeresult($result);
+		// numb check icon_id
+		$icon_counts = [];
+		foreach ($data as $record)
+		{
+			$icon_id = $record['icon_id'];
+			if (!isset($icon_counts[$icon_id]))
 			{
-				$icon_id = $record['icon_id'];
-				if (!isset($icon_counts[$icon_id]))
-				{
-					$icon_counts[$icon_id] = 0;
-				}
-				$icon_counts[$icon_id]++;
+				$icon_counts[$icon_id] = 0;
 			}
-			// ##
-			// sort by number
-			$icons_with_counts = [];
-			foreach ($this->grab_icons() as $icon)
+			$icon_counts[$icon_id]++;
+		}
+		// ##
+		// sort by number
+		$icons_with_counts = [];
+		foreach ($this->grab_icons() as $icon)
+		{
+			$icon_id = $icon['icon_id'];
+			if (isset($icon_counts[$icon_id]))
 			{
-				$icon_id = $icon['icon_id'];
-				if (isset($icon_counts[$icon_id]))
-				{
-					$icons_with_counts[] = [
+				$icons_with_counts[] = [
 					'icon_url' => $icon['icon_url'],
 					'icon_alt' => $icon['icon_alt'],
 					'icon_id' => $icon_id,
 					'count' => $icon_counts[$icon_id]
-					];
-				}
+				];
 			}
-			// sort for count DESC
-			usort($icons_with_counts, function ($a, $b)
-			{
-				return $b['count'] - $a['count'];
-			});
-			// ##
-			// template
-			$event['topic_row'] = array_merge($event['topic_row'], [
+		}
+		// sort for count DESC
+		usort($icons_with_counts, function ($a, $b)
+		{
+			return $b['count'] - $a['count'];
+		});
+		// ##
+		// template
+		$event['topic_row'] = array_merge($event['topic_row'], [
 			'ICONS'		 => $icons_with_counts,
 			'PERM_W'		=> $this->auth->acl_get('u_new_sebo_postreact'),
 			'PERM_R'		=> $this->auth->acl_get('u_new_sebo_postreact_view')
-			]);
-		}
-		public function search_edit($event)
+		]);
+	}
+	public function search_edit($event)
+	{
+		$row = $event['row'];
+		// sql_escape because of potential inject (?)
+		$topic_id = isset($row['topic_id']) ? (int) $row['topic_id'] : 0;
+		$sql_array = [
+			'SELECT' => '*',
+			'FROM'   => [$this->table_prefix . 'sebo_postreact_table' => ''],
+			'WHERE'  => 'topic_id = ' . (int) $topic_id,
+		];
+		$sql = $this->db->sql_build_query('SELECT', $sql_array);
+		$result = $this->db->sql_query($sql);
+		$filtered_rows = [];
+		$post_ids = [];
+		while ($my_row = $this->db->sql_fetchrow($result))
 		{
-			$row = $event['row'];
-			// sql_escape because of potential inject (?)
-			$topic_id = isset($row['topic_id']) ? (int) $row['topic_id'] : 0;
+			$post_id = (int) $my_row['post_id'];
+			$filtered_rows[$post_id] = $my_row;
+			$post_ids[] = $post_id;
+		}
+		$this->db->sql_freeresult($result);
+		$data = [];
+		if (!empty($post_ids))
+		{
 			$sql_array = [
-					'SELECT' => '*',
-					'FROM'   => [$this->table_prefix . 'sebo_postreact_table' => ''],
-					'WHERE'  => 'topic_id = ' . (int) $topic_id,
-				];
-			$sql = $this->db->sql_build_query('SELECT', $sql_array);
-			$result = $this->db->sql_query($sql);
-			$filtered_rows = [];
-			$post_ids = [];
-			while ($my_row = $this->db->sql_fetchrow($result))
+				'SELECT' => 'post_id',
+				'FROM'   => [$this->table_prefix . 'posts' => ''],
+				'WHERE'  => $this->db->sql_in_set('post_id', $post_ids),
+			];
+			$sql_post_exist = $this->db->sql_build_query('SELECT', $sql_array);
+			$result_post_exist = $this->db->sql_query($sql_post_exist);
+			$existing_posts = [];
+			while ($row = $this->db->sql_fetchrow($result_post_exist))
 			{
-				$post_id = (int) $my_row['post_id'];
-				$filtered_rows[$post_id] = $my_row;
-				$post_ids[] = $post_id;
+				$existing_posts[$row['post_id']] = true;
 			}
-			$this->db->sql_freeresult($result);
-			$data = [];
-			if (!empty($post_ids))
+			$this->db->sql_freeresult($result_post_exist);
+			foreach ($filtered_rows as $post_id => $row)
 			{
-				$sql_array = [
-					'SELECT' => 'post_id',
-					'FROM'   => [$this->table_prefix . 'posts' => ''],
-					'WHERE'  => $this->db->sql_in_set('post_id', $post_ids),
-				];
-				$sql_post_exist = $this->db->sql_build_query('SELECT', $sql_array);
-				$result_post_exist = $this->db->sql_query($sql_post_exist);
-				$existing_posts = [];
-				while ($row = $this->db->sql_fetchrow($result_post_exist))
+				if (isset($existing_posts[$post_id]))
 				{
-					$existing_posts[$row['post_id']] = true;
-				}
-				$this->db->sql_freeresult($result_post_exist);
-				foreach ($filtered_rows as $post_id => $row)
-				{
-					if (isset($existing_posts[$post_id]))
-					{
-						$data[] = $row;
-					}
+					$data[] = $row;
 				}
 			}
-			// ##
-			// numb check icon_id
-			$topic_id_count = 0;
-			foreach ($data as $record)
+		}
+		// ##
+		// numb check icon_id
+		$topic_id_count = 0;
+		foreach ($data as $record)
+		{
+			if ($record['topic_id'] == $topic_id)
 			{
-				if ($record['topic_id'] == $topic_id)
+				$topic_id_count++;
+			}
+		}
+		// start the counter
+		$topic_id_count = 0;
+		$data_ico = $this->grab_icons();
+		// Step 1: make a new array with icon_id key
+		$data_ico_assoc = [];
+		foreach ($data_ico as $icon)
+		{
+			$data_ico_assoc[$icon['icon_id']] = $icon;
+		}
+		// Step 2: count icon_id occurrences for topic_id
+		$icon_counts = [];
+		foreach ($data as $rec)
+		{
+			$icon_id = $rec['icon_id'];
+			$topic_id = $rec['topic_id'];
+			if (!isset($icon_counts[$topic_id]))
+			{
+				$icon_counts[$topic_id] = [];
+			}
+			if (!isset($icon_counts[$topic_id][$icon_id]))
+			{
+				$icon_counts[$topic_id][$icon_id] = 0;
+			}
+			$icon_counts[$topic_id][$icon_id]++;
+		}
+		// Step 3: make new array with icon info and count, ensuring each icon_id is unique
+		$new_array = [];
+		foreach ($data as $rec)
+		{
+			$icon_id = $rec['icon_id'];
+			$topic_id = $rec['topic_id'];
+			if (isset($data_ico_assoc[$icon_id]))
+			{
+				$count = isset($icon_counts[$topic_id][$icon_id]) ? (string) $icon_counts[$topic_id][$icon_id] : '0';
+				if (!isset($new_array[$icon_id]))
 				{
-					$topic_id_count++;
+					$icon_info = $data_ico_assoc[$icon_id];
+					$new_array[$icon_id] = [
+						'icon_id'  => $icon_info['icon_id'],
+						'icon_url' => $icon_info['icon_url'],
+						'icon_alt' => $icon_info['icon_alt'],
+						'topic_id' => $topic_id,
+						'count'    => $count,
+					];
+				}
+				else
+				{
+					$new_array[$icon_id]['count'] = (string) max($new_array[$icon_id]['count'], $count);
 				}
 			}
-			// start the counter
-			$topic_id_count = 0;
-			$data_ico = $this->grab_icons();
-			// Step 1: make a new array with icon_id key
-			$data_ico_assoc = [];
-			foreach ($data_ico as $icon)
-			{
-				$data_ico_assoc[$icon['icon_id']] = $icon;
-			}
-			// Step 2: count icon_id occurrences for topic_id
-			$icon_counts = [];
-			foreach ($data as $rec)
-			{
-				$icon_id = $rec['icon_id'];
-				$topic_id = $rec['topic_id'];
-				if (!isset($icon_counts[$topic_id]))
-				{
-					$icon_counts[$topic_id] = [];
-				}
-				if (!isset($icon_counts[$topic_id][$icon_id]))
-				{
-					$icon_counts[$topic_id][$icon_id] = 0;
-				}
-				$icon_counts[$topic_id][$icon_id]++;
-			}
-			// Step 3: make new array with icon info and count, ensuring each icon_id is unique
-			$new_array = [];
-			foreach ($data as $rec)
-			{
-				$icon_id = $rec['icon_id'];
-				$topic_id = $rec['topic_id'];
-				if (isset($data_ico_assoc[$icon_id]))
-				{
-					$count = isset($icon_counts[$topic_id][$icon_id]) ? (string) $icon_counts[$topic_id][$icon_id] : '0';
-					if (!isset($new_array[$icon_id]))
-					{
-						$icon_info = $data_ico_assoc[$icon_id];
-						$new_array[$icon_id] = [
-							'icon_id'  => $icon_info['icon_id'],
-							'icon_url' => $icon_info['icon_url'],
-							'icon_alt' => $icon_info['icon_alt'],
-							'topic_id' => $topic_id,
-							'count'    => $count,
-						];
-					}
-					else
-					{
-						$new_array[$icon_id]['count'] = (string) max($new_array[$icon_id]['count'], $count);
-					}
-				}
-			}
-			// Remove the associative key and reset the numeric index
-			$array_with_counts = array_values($new_array);
-			// ##
-			// template
-			$event['tpl_ary'] = array_merge($event['tpl_ary'], [
+		}
+		// Remove the associative key and reset the numeric index
+		$array_with_counts = array_values($new_array);
+		// ##
+		// template
+		$event['tpl_ary'] = array_merge($event['tpl_ary'], [
 			'ICONS'		 => $array_with_counts,
 			'PERM_W'		=> $this->auth->acl_get('u_new_sebo_postreact'),
 			'PERM_R'		=> $this->auth->acl_get('u_new_sebo_postreact_view')
-			]);
-		}
+		]);
+	}
 
-		public function add_permissions($event)
+	public function add_permissions($event)
+	{
+		$permissions = $event['permissions'];
+		$permissions['u_new_sebo_postreact'] = ['lang' => 'ACL_U_NEW_SEBO_POSTREACT', 'cat' => 'post'];
+		$permissions['u_new_sebo_postreact_view'] = ['lang' => 'ACL_U_NEW_SEBO_POSTREACT_VIEW', 'cat' => 'post'];
+		$event['permissions'] = $permissions;
+	}
+	/**
+	 * Edit profile for reaction count
+	 */
+	public function edit_view_profile($event)
+	{
+		$user_id = (int) $event['member']['user_id'];
+		$this->profile_data['user_id'] = $user_id;
+		// *
+		// Reactions sent
+		$sql_array = [
+			'SELECT' => 'icon_id, COUNT(*) AS icon_count',
+			'FROM'   => [$this->table_prefix . 'sebo_postreact_table' => ''],
+			'WHERE'  => 'user_id = ' . (int) $user_id,
+			'GROUP_BY' => 'icon_id',
+		];
+		$sql = $this->db->sql_build_query('SELECT', $sql_array);
+		$result = $this->db->sql_query($sql);
+		$icon_counts = [];
+		$icon_ids = [];
+		while ($row = $this->db->sql_fetchrow($result))
 		{
-			$permissions = $event['permissions'];
-			$permissions['u_new_sebo_postreact'] = ['lang' => 'ACL_U_NEW_SEBO_POSTREACT', 'cat' => 'post'];
-			$permissions['u_new_sebo_postreact_view'] = ['lang' => 'ACL_U_NEW_SEBO_POSTREACT_VIEW', 'cat' => 'post'];
-			$event['permissions'] = $permissions;
+			$icon_counts[$row['icon_id']] = $row['icon_count'];
+			$icon_ids[] = (int) $row['icon_id'];
 		}
-		/**
-			* Edit profile for reaction count
-		*/
-		public function edit_view_profile($event)
+		$this->db->sql_freeresult($result);
+		$icons = [];
+		if (!empty($icon_ids))
 		{
-			$user_id = (int) $event['member']['user_id'];
-			$this->profile_data['user_id'] = $user_id;
-			// *
-			// Reactions sent
+			// Query for active icons (status = 1)
 			$sql_array = [
-					'SELECT' => 'icon_id, COUNT(*) AS icon_count',
-					'FROM'   => [$this->table_prefix . 'sebo_postreact_table' => ''],
-					'WHERE'  => 'user_id = ' . (int) $user_id,
-					'GROUP_BY' => 'icon_id',
-				];
+				'SELECT'   => 'icon_id, icon_url, icon_width, icon_height, icon_alt',
+				'FROM'     => [$this->table_prefix . 'sebo_postreact_icon' => ''],
+				'WHERE'    => $this->db->sql_in_set('icon_id', $icon_ids) . ' AND status = 1',
+			];
 			$sql = $this->db->sql_build_query('SELECT', $sql_array);
 			$result = $this->db->sql_query($sql);
-			$icon_counts = [];
-			$icon_ids = [];
 			while ($row = $this->db->sql_fetchrow($result))
 			{
-				$icon_counts[$row['icon_id']] = $row['icon_count'];
-				$icon_ids[] = (int) $row['icon_id'];
-			}
-			$this->db->sql_freeresult($result);
-			$icons = [];
-			if (!empty($icon_ids))
-			{
-				// Query for active icons (status = 1)
-				$sql_array = [
-					'SELECT'   => 'icon_id, icon_url, icon_width, icon_height, icon_alt',
-					'FROM'     => [$this->table_prefix . 'sebo_postreact_icon' => ''],
-					'WHERE'    => $this->db->sql_in_set('icon_id', $icon_ids) . ' AND status = 1',
-				];
-				$sql = $this->db->sql_build_query('SELECT', $sql_array);
-				$result = $this->db->sql_query($sql);
-				while ($row = $this->db->sql_fetchrow($result))
+				$id = (int) $row['icon_id'];
+				if (isset($icon_counts[$id]))
 				{
-					$id = (int) $row['icon_id'];
-					if (isset($icon_counts[$id]))
-					{
-						$icons[] = [
+					$icons[] = [
 						'ICON_ID'	 => $id,
 						'ICON_COUNT'  => $icon_counts[$id],
 						'ICON_URL'	=> $row['icon_url'],
@@ -787,55 +791,55 @@ class main_listener implements EventSubscriberInterface
 						'ICON_HEIGHT' => $row['icon_height'],
 						'ICON_ALT'	=> $row['icon_alt'],
 						'USER_ID'     => $this->profile_data['user_id'],
-						];
-					}
+					];
 				}
-				$this->db->sql_freeresult($result);
-			}
-			// assign
-			$this->profile_data['icons'] = $icons;
-			// *
-			// Reactions received
-			$sql_array = [
-				'SELECT'   => 'pr.icon_id, COUNT(*) AS icon_count',
-				'FROM'     => [$this->table_prefix . 'sebo_postreact_table' => 'pr'],
-				'LEFT_JOIN' => [
-					[
-						'FROM' => [$this->table_prefix . 'posts' => 'p'],
-						'ON'   => 'pr.post_id = p.post_id',
-					],
-				],
-				'WHERE'    => 'p.poster_id = ' . (int) $user_id,
-				'GROUP_BY' => 'pr.icon_id',
-			];
-			$sql = $this->db->sql_build_query('SELECT', $sql_array);
-			$result = $this->db->sql_query($sql);
-			$received_icon_counts = [];
-			$received_icon_ids = [];
-			while ($row = $this->db->sql_fetchrow($result))
-			{
-				$received_icon_counts[$row['icon_id']] = $row['icon_count'];
-				$received_icon_ids[] = (int) $row['icon_id'];
 			}
 			$this->db->sql_freeresult($result);
-			// grab
-			$received_icons = [];
-			if (!empty($received_icon_ids))
-			{
-				$sql_array = [
-					'SELECT' => 'icon_id, icon_url, icon_width, icon_height, icon_alt',
-					'FROM'   => [$this->table_prefix . 'sebo_postreact_icon' => ''],
-					'WHERE'  => $this->db->sql_in_set('icon_id', $received_icon_ids) . ' AND status = 1',
-				];
+		}
+		// assign
+		$this->profile_data['icons'] = $icons;
+		// *
+		// Reactions received
+		$sql_array = [
+			'SELECT'   => 'pr.icon_id, COUNT(*) AS icon_count',
+			'FROM'     => [$this->table_prefix . 'sebo_postreact_table' => 'pr'],
+			'LEFT_JOIN' => [
+				[
+					'FROM' => [$this->table_prefix . 'posts' => 'p'],
+					'ON'   => 'pr.post_id = p.post_id',
+				],
+			],
+			'WHERE'    => 'p.poster_id = ' . (int) $user_id,
+			'GROUP_BY' => 'pr.icon_id',
+		];
+		$sql = $this->db->sql_build_query('SELECT', $sql_array);
+		$result = $this->db->sql_query($sql);
+		$received_icon_counts = [];
+		$received_icon_ids = [];
+		while ($row = $this->db->sql_fetchrow($result))
+		{
+			$received_icon_counts[$row['icon_id']] = $row['icon_count'];
+			$received_icon_ids[] = (int) $row['icon_id'];
+		}
+		$this->db->sql_freeresult($result);
+		// grab
+		$received_icons = [];
+		if (!empty($received_icon_ids))
+		{
+			$sql_array = [
+				'SELECT' => 'icon_id, icon_url, icon_width, icon_height, icon_alt',
+				'FROM'   => [$this->table_prefix . 'sebo_postreact_icon' => ''],
+				'WHERE'  => $this->db->sql_in_set('icon_id', $received_icon_ids) . ' AND status = 1',
+			];
 
-				$sql = $this->db->sql_build_query('SELECT', $sql_array);
-				$result = $this->db->sql_query($sql);
-				while ($row = $this->db->sql_fetchrow($result))
+			$sql = $this->db->sql_build_query('SELECT', $sql_array);
+			$result = $this->db->sql_query($sql);
+			while ($row = $this->db->sql_fetchrow($result))
+			{
+				$id = (int) $row['icon_id'];
+				if (isset($received_icon_counts[$id]))
 				{
-					$id = (int) $row['icon_id'];
-					if (isset($received_icon_counts[$id]))
-					{
-						$received_icons[] = [
+					$received_icons[] = [
 						'ICON_ID'	 => $id,
 						'ICON_COUNT'  => $received_icon_counts[$id],
 						'ICON_URL'	=> $row['icon_url'],
@@ -843,24 +847,24 @@ class main_listener implements EventSubscriberInterface
 						'ICON_HEIGHT' => $row['icon_height'],
 						'ICON_ALT'	=> $row['icon_alt'],
 						'USER_ID'     => $this->profile_data['user_id'],
-						];
-					}
+					];
 				}
-				$this->db->sql_freeresult($result);
 			}
-			// Assign
-			$this->profile_data['icons_received'] = $received_icons;
+			$this->db->sql_freeresult($result);
 		}
-		public function assign_edit_view_profile($event)
+		// Assign
+		$this->profile_data['icons_received'] = $received_icons;
+	}
+	public function assign_edit_view_profile($event)
+	{
+		if (!empty($this->profile_data))
 		{
-			if (!empty($this->profile_data))
+			// Assign reaction sent
+			if (!empty($this->profile_data['icons']))
 			{
-				// Assign reaction sent
-				if (!empty($this->profile_data['icons']))
+				foreach ($this->profile_data['icons'] as $icon)
 				{
-					foreach ($this->profile_data['icons'] as $icon)
-					{
-						$this->template->assign_block_vars('user_reactions', [
+					$this->template->assign_block_vars('user_reactions', [
 						'ICON_ID'	 => $icon['ICON_ID'],
 						'ICON_COUNT'  => $icon['ICON_COUNT'],
 						'ICON_URL'	=> $icon['ICON_URL'],
@@ -868,15 +872,15 @@ class main_listener implements EventSubscriberInterface
 						'ICON_HEIGHT' => $icon['ICON_HEIGHT'],
 						'ICON_ALT'	=> $icon['ICON_ALT'],
 						'USER_ID'     => $this->profile_data['user_id'],
-						]);
-					}
+					]);
 				}
-				// Assign reaction received
-				if (!empty($this->profile_data['icons_received']))
+			}
+			// Assign reaction received
+			if (!empty($this->profile_data['icons_received']))
+			{
+				foreach ($this->profile_data['icons_received'] as $icon)
 				{
-					foreach ($this->profile_data['icons_received'] as $icon)
-					{
-						$this->template->assign_block_vars('user_reactions_received', [
+					$this->template->assign_block_vars('user_reactions_received', [
 						'ICON_ID'	 => $icon['ICON_ID'],
 						'ICON_COUNT'  => $icon['ICON_COUNT'],
 						'ICON_URL'	=> $icon['ICON_URL'],
@@ -884,9 +888,9 @@ class main_listener implements EventSubscriberInterface
 						'ICON_HEIGHT' => $icon['ICON_HEIGHT'],
 						'ICON_ALT'	=> $icon['ICON_ALT'],
 						'USER_ID'     => $this->profile_data['user_id'],
-						]);
-					}
+					]);
 				}
 			}
 		}
 	}
+}

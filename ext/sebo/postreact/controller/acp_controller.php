@@ -1,4 +1,5 @@
 <?php
+
 /**
  *
  * PostReaction. An extension for the phpBB Forum Software package.
@@ -7,6 +8,7 @@
  * @license GNU General Public License, version 2 (GPL-2.0)
  *
  */
+
 namespace sebo\postreact\controller;
 
 /**
@@ -54,7 +56,7 @@ class acp_controller
 		$php_ext,
 		\phpbb\config\config $config,
 		$phpbb_root_path
-		)
+	)
 	{
 		$this->language	= $language;
 		$this->request	= $request;
@@ -117,32 +119,103 @@ class acp_controller
 		$this->language->add_lang('permissions_postreact', 'sebo/postreact');
 		$sid_pr = $this->request->variable('user_sid', \phpbb\request\request_interface::COOKIE);
 		// ##
+		// handle move_up / move_down
+		$action = $this->request->variable('action', '');
+		if ($action === 'move_up' || $action === 'move_down')
+		{
+			$move_id = $this->request->variable('id', 0);
+
+			// Load all icons ordered by icon_order
+			$sql = 'SELECT icon_id, icon_order FROM ' . $this->table_prefix . 'sebo_postreact_icon ORDER BY icon_order ASC, icon_id ASC';
+			$result = $this->db->sql_query($sql);
+			$icons = [];
+			while ($row = $this->db->sql_fetchrow($result))
+			{
+				$icons[] = $row;
+			}
+			$this->db->sql_freeresult($result);
+
+			// Find current position and swap with neighbour
+			foreach ($icons as $i => $icon)
+			{
+				if ((int) $icon['icon_id'] === $move_id)
+				{
+					$swap_index = ($action === 'move_up') ? $i - 1 : $i + 1;
+					if (isset($icons[$swap_index]))
+					{
+						$order_a = (int) $icons[$i]['icon_order'];
+						$order_b = (int) $icons[$swap_index]['icon_order'];
+
+						// If orders are identical, just assign sequential values
+						if ($order_a === $order_b)
+						{
+							$order_a = $i + 1;
+							$order_b = $swap_index + 1;
+						}
+
+						$this->db->sql_query('UPDATE ' . $this->table_prefix . 'sebo_postreact_icon
+							SET icon_order = ' . $order_b . '
+							WHERE icon_id = ' . $move_id);
+
+						$this->db->sql_query('UPDATE ' . $this->table_prefix . 'sebo_postreact_icon
+							SET icon_order = ' . $order_a . '
+							WHERE icon_id = ' . (int) $icons[$swap_index]['icon_id']);
+					}
+					break;
+				}
+			}
+
+			if ($this->request->is_ajax())
+			{
+				$json_response = new \phpbb\json_response();
+				$json_response->send(['success' => true]);
+			}
+
+			redirect($this->u_action);
+		}
+		// ##
 		// check if adding icon
 		$add_pr = $this->request->variable('add_pr', 0, false);
 		if ($add_pr === 1)
 		{
 			$sql_array = [
-							'SELECT'    => 'icon_id',
-							'FROM'      => [$this->table_prefix . 'sebo_postreact_icon' => ''],
-							'ORDER_BY'     => 'icon_id DESC',
-						];
+				'SELECT'    => 'icon_id',
+				'FROM'      => [$this->table_prefix . 'sebo_postreact_icon' => ''],
+				'ORDER_BY'     => 'icon_id DESC',
+			];
 			$sql_last = $this->db->sql_build_query('SELECT', $sql_array);
 			$result_last = $this->db->sql_query_limit($sql_last, 1);
 			$last_id = $this->db->sql_fetchrow($result_last);
 			$this->db->sql_freeresult($result_last);
 			$new_id = $last_id['icon_id'] + 1;
+			// Get max icon_order for new icon
+			// Build the query array to fetch the maximum icon_order value
+			$sql_array = [
+				'SELECT'	=> 'MAX(icon_order) AS max_order',
+				'FROM'		=> [
+					$this->table_prefix . 'sebo_postreact_icon'	=> ''
+				]
+			];
+
+			// Compile the SQL statement using phpBB DBAL method
+			$sql_max_order = $this->db->sql_build_query('SELECT', $sql_array);
+			$result_max = $this->db->sql_query($sql_max_order);
+			$max_order_row = $this->db->sql_fetchrow($result_max);
+			$this->db->sql_freeresult($result_max);
+			$new_order = (int) $max_order_row['max_order'] + 1;
 			// Default array creating
 			$data = [
 				'icon_id'    => $new_id, // icon_id
 				'icon_url'   => $this->url_reactions_path . 'default.svg', // icon_url
 				'icon_width' => 32, // icon_width
-				'icon_height'=> 32, // icon_height
+				'icon_height' => 32, // icon_height
 				'icon_alt'   => '', // icon_alt
 				'status'     => 0,  // status
 				'icon_emoji' => '', // emoji
+				'icon_order' => $new_order, // order
 			];
 			$sql_insert = 'INSERT INTO ' . $this->table_prefix . 'sebo_postreact_icon ' .
-						  $this->db->sql_build_array('INSERT', $data);
+				$this->db->sql_build_array('INSERT', $data);
 			$this->db->sql_query($sql_insert);
 		}
 		//##
@@ -165,21 +238,32 @@ class acp_controller
 		// take the line corresponds to post_id
 		$data_ico = [];
 		$sql_array = [
-				'SELECT'    => '*',
-				'FROM'      => [$this->table_prefix . 'sebo_postreact_icon' => ''],
-			];
+			'SELECT'    => '*',
+			'FROM'      => [$this->table_prefix . 'sebo_postreact_icon' => ''],
+			'ORDER_BY'  => 'icon_order ASC, icon_id ASC',
+		];
 		$sql_ico = $this->db->sql_build_query('SELECT', $sql_array);
 		$result_ico = $this->db->sql_query($sql_ico);
 		if ($result_ico)
 		{
 			while ($my_icons = $this->db->sql_fetchrow($result_ico))
 			{
-				// Decodifichiamo l'entità per mostrare l'emoji vera nel campo di input
+				// Decode to show emoji
 				$my_icons['icon_emoji'] = html_entity_decode($my_icons['icon_emoji']);
 				$data_ico[] = $my_icons;
 			}
 			$this->db->sql_freeresult($result_ico);
 		}
+		// Build move URLs for each icon
+		$total_icons = count($data_ico);
+		foreach ($data_ico as $idx => &$ico)
+		{
+			$ico['S_FIRST_ROW'] = ($idx === 0);
+			$ico['S_LAST_ROW']  = ($idx === $total_icons - 1);
+			$ico['U_MOVE_UP']   = $this->u_action . '&action=move_up&id=' . $ico['icon_id'];
+			$ico['U_MOVE_DOWN'] = $this->u_action . '&action=move_down&id=' . $ico['icon_id'];
+		}
+		unset($ico);
 		// ## main one
 		add_form_key('sebo_postreact_acp');
 		$errors = [];
@@ -260,7 +344,8 @@ class acp_controller
 				if ($all_queries_successful)
 				{
 					trigger_error($this->language->lang('ACP_POSTREACT_SETTING_SAVED') . adm_back_link($this->u_action));
-				} else
+				}
+				else
 				{
 					$error_message = $this->language->lang('ACP_POSTREACT_SETTING_NOT_SAVED');
 					if (!empty($failed_icon_urls))
@@ -289,7 +374,7 @@ class acp_controller
 			'CREATE_PR_URL' => $create_url,
 			'U_ACTION'		=> $this->u_action,
 			'LINK_DONATE'	=> 'https://www.paypal.com/donate/?hosted_button_id=GS3T9MFDJJGT4',
-			'PR_FOLDER_PATH'=> $this->url_reactions_path,
+			'PR_FOLDER_PATH' => $this->url_reactions_path,
 			'EMOJI_JS_PATH' => $this->phpbb_root_path . 'ext/sebo/postreact/adm/style/emoji_picker.js'
 		]);
 

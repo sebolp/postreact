@@ -1,4 +1,5 @@
 <?php
+
 /**
  *
  * PostReaction. An extension for the phpBB Forum Software package.
@@ -58,7 +59,7 @@ $lang = array_merge($lang, [
 	'PURGE_IT'				=> 'Cancella i dati',
 	'SYNC_IT'				=> 'Sincronizza i dati',
 	'PR_SYNCSYSTEM_UPDATED'	=> 'Sincronizzazione del database riuscita!<br>Sono state rimosse <strong>%d</strong> reazioni.<br><em>La query ha impiegato %s secondi.</em>',
-	'PR_PURGESYSTEM_UPDATED'=> 'Il database è stato svuotato con successo.<br>Sono state rimosse <strong>%d</strong> reazioni.<br><em>La query ha impiegato %s secondi.</em>',
+	'PR_PURGESYSTEM_UPDATED' => 'Il database è stato svuotato con successo.<br>Sono state rimosse <strong>%d</strong> reazioni.<br><em>La query ha impiegato %s secondi.</em>',
 	'PR_PURGEICOSYSTEM_UPDATED'	=> 'Il database è stato svuotato con successo.<br>Sono state rimosse <strong>%d</strong> icone.<br><em>La query ha impiegato %s secondi.</em>',
 	/* > 2.1 */
 	'CONFIG_SETTINGS'		=> 'Impostazioni generali',
@@ -71,7 +72,7 @@ $lang = array_merge($lang, [
 	'SAVING_REQUIRED'		=> 'Ricorda di inviare il form per salvare le impostazioni',
 	/* >2.3 */
 	'ICON_EMOJI'			=> 'Emoji',
-	'HOW_TO'				=> '<strong>Per installare una nuova reazione (anche animata!):</strong><br>&#8226; Cliccare sul pulsante "Aggiungi PostReaction"<br>&#8226; aggiungere il file alla cartella <code class="inline">%s</code><br>&#8226; Inserire il nome del file comprensivo della sua estensione: esempio <code class="inline">icona.png</code> o delle sottocartelle esempio <code class="inline">cartella/icona.png</code><br>&#8226; aggiungi una emoji per notifiche web-push (facoltativo)<br>&#8226; Abilitare l\'icona',
+	'HOW_TO'				=> '<strong>Per installare una nuova reazione (anche animata!):</strong><br>&#8226; Cliccare sul pulsante "Aggiungi PostReaction"<br>&#8226; aggiungere il file alla cartella <code class="inline">%s</code><br>&#8226; Inserire il nome del file comprensivo della sua estensione: esempio <code class="inline">icona.png</code> o delle sottocartelle esempio <code class="inline">cartella/icona.png</code><br>&#8226; aggiungi una emoji per notifiche web-push e pagine di ricerca (facoltativo)<br>&#8226; Abilitare l\'icona',
 	'FREE_EM_EX'            => '<strong>Collezione di emoji gratuite di esempio:</strong> (link esterno)',
 	'PR_PURGE_REACTION_FOLDER'    => 'Elimina i file delle reazioni',
 	'PR_PURGE_REACTION_FOLDER_EXPLAIN' => 'Elimina tutti i file delle immagini delle reazioni dalla cartella del server. Questa operazione non eliminerà le voci del database, quindi usala dopo aver svuotato il database, prima di disinstallare questa estensione. Questa azione non può essere annullata!',
@@ -82,4 +83,8 @@ $lang = array_merge($lang, [
 	'ICON_URL'				=> 'Directory/Nome - link',
 	/* >2.4 */
 	'RETURN_ACP'			=> '<a href="%s">Torna al modulo PCA</a>',
+	/* >2.5 */
+	'MOVE'			=> 'Posizione',
+	'MOVE_UP'		=> 'Sposta Su',
+	'MOVE_DOWN'		=> 'Sposta Giù'
 ]);

@@ -29,10 +29,10 @@
 			<dt>
 			{{ lang('PP_ME_EXT_PR') }}
 			</dt>
-			<dd><img src="{{ POSTREACT_ADM_PATH }}wink_beer.png" width="32px" height="32px"> <a href="{LINK_DONATE}" target="_blank" rel="noreferrer noopener"><img src="https://www.paypalobjects.com/webstatic/en_US/i/btn/png/silver-pill-paypal-26px.png" alt="{{ lang('PP_ME_EXT_ALT') }}"></a></dd>
+			<dd><img src="{{ POSTREACT_ADM_PATH }}wink_beer.png" width="32px" height="32px"> <a href="{LINK_DONATE}" target="_blank" rel="noreferrer noopener"><img src="https://www.paypalobjects.com/webstatic/en_US/i/btn/png/silver-pill-paypal-26px.png" alt="{{ lang('PR_PP_ME_EXT_ALT') }}"></a></dd>
 		</dl>
 	</fieldset>
-	
+
 	<fieldset>
 		<legend>{{ lang('MEMORANDUM') }}</legend>
 		<dl>
@@ -52,7 +52,7 @@
 			<dt>
 				<label for="config_self_react">{{ lang('ENABLE_SELF_REACTING') }}</label>
 			</dt>
-			
+
 			<dd>
 				<div>
 					<label class="switch" title="{{ lang('ENABLE_DISABLE') }}">
@@ -65,7 +65,7 @@
 		<dl>
 			<dt>
 				<label for="config_display_position">
-					{{ lang('DISPLAY_POSITION') }}: 
+					{{ lang('DISPLAY_POSITION') }}:
 					<strong id="dynamic_position_text" style="text-transform: uppercase;">
 						{% if DISPLAY_OPTION_VAL == 0 %}
 							{{ lang('DISPLAY_POSITION_R') }}
@@ -82,7 +82,7 @@
 			<dd>
 				<div style="display: flex; align-items: center;">
 					<label class="switch fixed-blue" title="{{ lang('ENABLE_DISABLE') }}">
-						<input type="checkbox" id="config_display_position" name="config_display_position" 
+						<input type="checkbox" id="config_display_position" name="config_display_position"
 							   {% if DISPLAY_OPTION_VAL == 0 %}checked{% endif %}
 							   data-lang-checked="{{ lang('DISPLAY_POSITION_R') }}"
 							   data-lang-unchecked="{{ lang('DISPLAY_POSITION_L') }}">
@@ -126,6 +126,7 @@
 					<th style="text-align: center; width: 50px;">{{ lang('PREVIEW') }}</th>
 					<th>{{ lang('ICON_URL') }}</th>
 					<th>{{ lang('ICON_ALT') }}</th>
+					<th style="text-align: center; width: 60px;">{{ lang('MOVE') }}</th>
 					<th style="text-align: center;">{{ lang('ICON_WIDTH') }} x {{ lang('ICON_HEIGHT') }}</th>
 					<th style="text-align: center;">{{ lang('ICON_EMOJI') }}</th>
 					<th style="text-align: center;">{{ lang('ENABLE_DISABLE') }}</th>
@@ -148,9 +149,29 @@
 						<input class="inputbox pr-input-text" type="text" id="icon_alt_{{ icon.icon_id }}" name="icon_alt_{{ icon.icon_id }}" value="{{ icon.icon_alt }}">
 					</td>
 
+					<td class="actions" style="text-align: center; white-space: nowrap;">
+						<span class="up-disabled">
+							<i class="icon acp-icon acp-icon-disabled fa-arrow-circle-up fa-fw" title="{{ lang('MOVE_UP') }}"></i>
+						</span>
+						<span class="up">
+							<a href="{{ icon.U_MOVE_UP }}" data-ajax="row_up">
+								<i class="icon acp-icon acp-icon-move-up fa-arrow-circle-up fa-fw" title="{{ lang('MOVE_UP') }}"></i>
+							</a>
+						</span>
+
+						<span class="down-disabled">
+							<i class="icon acp-icon acp-icon-disabled fa-arrow-circle-down fa-fw" title="{{ lang('MOVE_DOWN') }}"></i>
+						</span>
+						<span class="down">
+							<a href="{{ icon.U_MOVE_DOWN }}" data-ajax="row_down">
+								<i class="icon acp-icon acp-icon-move-down fa-arrow-circle-down fa-fw" title="{{ lang('MOVE_DOWN') }}"></i>
+							</a>
+						</span>
+					</td>
+
 					<td style="text-align: center; white-space: nowrap;">
 						<input class="inputbox tiny pr-input-tiny" type="text" id="icon_width_{{ icon.icon_id }}" name="icon_width_{{ icon.icon_id }}" value="{{ icon.icon_width }}" size="3">
-						x 
+						x
 						<input class="inputbox tiny pr-input-tiny" type="text" id="icon_height_{{ icon.icon_id }}" name="icon_height_{{ icon.icon_id }}" value="{{ icon.icon_height }}" size="3">
 					</td>
 

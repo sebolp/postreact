@@ -1,4 +1,5 @@
 <?php
+
 /**
  *
  * PostReaction. An extension for the phpBB Forum Software package.
@@ -57,8 +58,8 @@ $lang = array_merge($lang, [
 	'PURGE_IT'				=> 'Delete data',
 	'SYNC_IT'				=> 'Synchronize data',
 	'PR_SYNCSYSTEM_UPDATED'	=> 'Database synchronization successful!<br>Removed <strong>%d</strong> reactions.<br><em>The query took %s seconds.</em>',
-	'PR_PURGESYSTEM_UPDATED'=> 'Database was succefully purged.<br>Removed <strong>%d</strong> reactions.<br><em>The query took %s seconds.</em>',
-	'PR_PURGEICOSYSTEM_UPDATED'=> 'Database was succefully purged.<br>Removed <strong>%d</strong> icons.<br><em>The query took %s seconds.</em>',
+	'PR_PURGESYSTEM_UPDATED' => 'Database was succefully purged.<br>Removed <strong>%d</strong> reactions.<br><em>The query took %s seconds.</em>',
+	'PR_PURGEICOSYSTEM_UPDATED' => 'Database was succefully purged.<br>Removed <strong>%d</strong> icons.<br><em>The query took %s seconds.</em>',
 	/* > 2.1 */
 	'CONFIG_SETTINGS'		=> 'General Settings',
 	'ICON_SETTINGS'			=> 'Icon settings',
@@ -70,7 +71,7 @@ $lang = array_merge($lang, [
 	'SAVING_REQUIRED'		=> 'Remember to submit form to save this config',
 	/* >2.3 */
 	'ICON_EMOJI'			=> 'Emoji',
-	'HOW_TO'				=> '<strong>To install a new reaction (animated too!):</strong><br>&#8226; Click the "Add PostReaction" button<br>&#8226; Add the file to the folder <code class="inline">%s</code> <br>&#8226; Enter the file name including its extension: e.g., <code class="inline">icon.png</code> and path if needed e.g. <code class="inline">folder/icon.png</code><br>&#8226; add an emoji for web-push notification (optional)<br>&#8226; Enable the reaction',
+	'HOW_TO'				=> '<strong>To install a new reaction (animated too!):</strong><br>&#8226; Click the "Add PostReaction" button<br>&#8226; Add the file to the folder <code class="inline">%s</code> <br>&#8226; Enter the file name including its extension: e.g., <code class="inline">icon.png</code> and path if needed e.g. <code class="inline">folder/icon.png</code><br>&#8226; add an emoji for web-push notification and search pages (optional)<br>&#8226; Enable the reaction',
 	'FREE_EM_EX'            => '<strong>Free emoji collection example:</strong> (external link)',
 	'PR_PURGE_REACTION_FOLDER'    => 'Purge reaction files folder',
 	'PR_PURGE_REACTION_FOLDER_EXPLAIN' => 'Delete all reaction image files from the server folder. This will not delete the database entries, so use it after purging the database, before uninstalling this extension. This action cannot be undone!',
@@ -81,4 +82,9 @@ $lang = array_merge($lang, [
 	'ICON_URL'				=> 'Directory/Name - link',
 	/* >2.4 */
 	'RETURN_ACP'			=> '<a href="%s">Back to the ACP module</a>',
+	/* >2.5 */
+	/* for translators: edited in 2.5.0 'HOW_TO' lang key line 74, added "and search pages" for emojis use */
+	'MOVE'			=> 'Order',
+	'MOVE_UP'		=> 'Move Up',
+	'MOVE_DOWN'		=> 'Move Down'
 ]);
