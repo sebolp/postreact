@@ -126,7 +126,17 @@ class acp_controller
 			$move_id = $this->request->variable('id', 0);
 
 			// Load all icons ordered by icon_order
-			$sql = 'SELECT icon_id, icon_order FROM ' . $this->table_prefix . 'sebo_postreact_icon ORDER BY icon_order ASC, icon_id ASC';
+			$sql_array = [
+				'SELECT'	=> 'icon_id, icon_order',
+				'FROM'		=> [
+					$this->table_prefix . 'sebo_postreact_icon'	=> ''
+				],
+				'ORDER_BY'	=> 'icon_order ASC, icon_id ASC',
+			];
+
+			// Compile the SQL statement using phpBB DBAL method
+			$sql = $this->db->sql_build_query('SELECT', $sql_array);
+			// Execute the query
 			$result = $this->db->sql_query($sql);
 			$icons = [];
 			while ($row = $this->db->sql_fetchrow($result))
@@ -153,13 +163,30 @@ class acp_controller
 							$order_b = $swap_index + 1;
 						}
 
-						$this->db->sql_query('UPDATE ' . $this->table_prefix . 'sebo_postreact_icon
-							SET icon_order = ' . $order_b . '
-							WHERE icon_id = ' . $move_id);
+						// Prepare the array for the first update
+						$sql_ary_b =
+							[
+								'icon_order'	=> (int) $order_b,
+							];
 
-						$this->db->sql_query('UPDATE ' . $this->table_prefix . 'sebo_postreact_icon
-							SET icon_order = ' . $order_a . '
-							WHERE icon_id = ' . (int) $icons[$swap_index]['icon_id']);
+						// Build and execute the first UPDATE query
+						$sql = 'UPDATE ' . $this->table_prefix . 'sebo_postreact_icon
+							SET ' . $this->db->sql_build_array('UPDATE', $sql_ary_b) . '
+							WHERE icon_id = ' . (int) $move_id;
+						$this->db->sql_query($sql);
+
+
+						// Prepare the array for the second update
+						$sql_ary_a =
+							[
+								'icon_order'	=> (int) $order_a,
+							];
+
+						// Build and execute the second UPDATE query
+						$sql = 'UPDATE ' . $this->table_prefix . 'sebo_postreact_icon
+							SET ' . $this->db->sql_build_array('UPDATE', $sql_ary_a) . '
+							WHERE icon_id = ' . (int) $icons[$swap_index]['icon_id'];
+						$this->db->sql_query($sql);
 					}
 					break;
 				}
