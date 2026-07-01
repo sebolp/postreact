@@ -68,9 +68,9 @@ class install_data_2_5 extends \phpbb\db\migration\migration
 		// Fetch all icon IDs into an array to avoid executing queries inside the fetch loop
 		while ($row = $this->db->sql_fetchrow($result))
 		{
-			$icon_ids[] = (int) $row['icon_id'];
+			$icon_ids[] = $row['icon_id'];
 		}
-
+		
 		// Free the result set immediately after fetching
 		$this->db->sql_freeresult($result);
 
@@ -87,8 +87,8 @@ class install_data_2_5 extends \phpbb\db\migration\migration
 
 				$sql = 'UPDATE ' . $this->table_prefix . 'sebo_postreact_icon
 					SET ' . $this->db->sql_build_array('UPDATE', $sql_ary) . '
-					WHERE icon_id = ' . $icon_id;
-
+					WHERE icon_id = ' . (int) $icon_id;
+					
 				$this->db->sql_query($sql);
 
 				$order++;
