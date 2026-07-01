@@ -34,9 +34,9 @@ $lang = array_merge($lang, [
 	'ICON_HEIGHT'			=> 'Alt. (px)',
 	'ICON_WIDTH'			=> 'Largh. (px)',
 	'MEMORANDUM'			=> 'Attenzione',
-	'PP_ME_PR'				=> 'Offrimi una birra per questa estensione',
-	'PP_ME_EXT_PR'			=> '<label>Fai una donazione per questa estensione:</label><br><span>Questa estensione è completamente gratuita. E\' un progetto su cui ho speso del tempo per imparare e condividere con la community phpBB. Se ti piace questa estensione, o ha migliorato il tuo forum, prendi in considerazione l\'idea di <a href="https://www.paypal.com/donate/?hosted_button_id=GS3T9MFDJJGT4" target="_blank" rel="noreferrer noopener">offrirmi una birra</a>. Grazie mille anche solo per aver scaricato PostReaction!</span>',
-	'PP_ME_EXT_ALT'			=> 'Dona con PayPal',
+	'PR_PP_ME'				=> 'Offrimi una birra per questa estensione',
+	'PR_PP_ME_EXT'			=> '<label>Fai una donazione per questa estensione:</label><br><span>Questa estensione è completamente gratuita. E\' un progetto su cui ho speso del tempo per imparare e condividere con la community phpBB. Se ti piace questa estensione, o ha migliorato il tuo forum, prendi in considerazione l\'idea di <a href="https://www.paypal.com/donate/?hosted_button_id=GS3T9MFDJJGT4" target="_blank" rel="noreferrer noopener">offrirmi una birra</a>. Grazie mille anche solo per aver scaricato PostReaction!</span>',
+	'PR_PP_ME_EXT_ALT'		=> 'Dona con PayPal',
 	'ACP_POSTREACT_SETTING_SAVED'		=> 'Impostazioni salvate con successo.',
 	'ACP_POSTREACT_SETTING_NOT_SAVED'	=> 'OOPSSS! Qualcosa è andato storto.',
 	'LOG_ACP_POSTREACT_SETTINGS'		=> '<strong>PostReaction settings updated</strong>',
@@ -79,12 +79,15 @@ $lang = array_merge($lang, [
 	'PR_PURGE_REACTION_FOLDER_EXPLAIN_AVOID' => 'Puoi evitare questa operazione se elimini manualmente i file delle reazioni (e le cartelle) dal server tramite FTP o file manager: da <code class="inline">%s</code> a <code class="inline">images/</code>',
 	'PR_PURGE_FOLDER_BUTTON'    => 'Elimina file e cartelle',
 	'PR_PURGE_FOLDER_DONE'    => 'Files e directory eliminate con successo.',
-	'PR_DIR_NOT_EXISTS_MSG' => 'La cartella delle reazioni non esiste sul server: <code class="inline">%s</code>. Per favore crea questa cartella e carica le immagini delle reazioni al suo interno per utilizzare l\'estensione PostReaction. Altrimenti dovrai disinstallare completamente questa estensione e reinstallarla.',
+	'PR_DIR_NOT_EXISTS_MSG' => 'La cartella delle reazioni non esiste sul server: <code class="inline">%s</code>. Per favore crea questa cartella e carica le immagini delle reazioni al suo interno per utilizzare l\'estensione PostReaction. Altrimenti dovrai disinstallare completamente questa estensione e reinstallarla con i file scaricati nuovamente.',
 	'ICON_URL'				=> 'Directory/Nome - link',
 	/* >2.4 */
 	'RETURN_ACP'			=> '<a href="%s">Torna al modulo PCA</a>',
 	/* >2.5 */
 	'MOVE'			=> 'Posizione',
 	'MOVE_UP'		=> 'Sposta Su',
-	'MOVE_DOWN'		=> 'Sposta Giù'
+	'MOVE_DOWN'		=> 'Sposta Giù',
+	/* >2.5.1 */
+	'PR_PURGE_CONFIRM_OPERATION' => 'Sicuro? Questa azione non puo essere cancellata!',
+	'PR_IF_NOT_PURGE_BEFORE' => 'Se non utilizzi il modulo di pulizia dell\'estensione, i dati non verranno cancellati dal database.',
 ]);

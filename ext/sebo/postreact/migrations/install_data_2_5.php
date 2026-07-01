@@ -63,14 +63,36 @@ class install_data_2_5 extends \phpbb\db\migration\migration
 		$sql = 'SELECT icon_id FROM ' . $this->table_prefix . 'sebo_postreact_icon ORDER BY icon_id ASC';
 		$result = $this->db->sql_query($sql);
 
-		$order = 1;
+		$icon_ids = [];
+
+		// Fetch all icon IDs into an array to avoid executing queries inside the fetch loop
 		while ($row = $this->db->sql_fetchrow($result))
 		{
-			$this->db->sql_query('UPDATE ' . $this->table_prefix . 'sebo_postreact_icon
-				SET icon_order = ' . $order . '
-				WHERE icon_id = ' . (int) $row['icon_id']);
-			$order++;
+			$icon_ids[] = (int) $row['icon_id'];
 		}
+		
+		// Free the result set immediately after fetching
 		$this->db->sql_freeresult($result);
+
+		if (!empty($icon_ids))
+		{
+			$order = 1;
+
+			// Iterate through the array in memory and update records using sql_build_array
+			foreach ($icon_ids as $icon_id)
+			{
+				$sql_ary = [
+					'icon_order'	=> $order,
+				];
+
+				$sql = 'UPDATE ' . $this->table_prefix . 'sebo_postreact_icon
+					SET ' . $this->db->sql_build_array('UPDATE', $sql_ary) . '
+					WHERE icon_id = ' . $icon_id;
+					
+				$this->db->sql_query($sql);
+
+				$order++;
+			}
+		}
 	}
 }
