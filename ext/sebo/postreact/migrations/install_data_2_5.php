@@ -70,7 +70,7 @@ class install_data_2_5 extends \phpbb\db\migration\migration
 		{
 			$icon_ids[] = (int) $row['icon_id'];
 		}
-		
+
 		// Free the result set immediately after fetching
 		$this->db->sql_freeresult($result);
 
@@ -88,7 +88,7 @@ class install_data_2_5 extends \phpbb\db\migration\migration
 				$sql = 'UPDATE ' . $this->table_prefix . 'sebo_postreact_icon
 					SET ' . $this->db->sql_build_array('UPDATE', $sql_ary) . '
 					WHERE icon_id = ' . $icon_id;
-					
+
 				$this->db->sql_query($sql);
 
 				$order++;
