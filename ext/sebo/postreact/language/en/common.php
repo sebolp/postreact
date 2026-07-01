@@ -40,5 +40,9 @@ $lang = array_merge($lang, [
 	/* > 2.3 */
 	'SEARCH_USER_REACTIONS_RECEIVED' => 'PostReact(ions) %s received by %s',
 	'SEARCH_USER_REACTIONS'     => 'PostReact(ions) %s given by %s',
+	/* > 2.5.1 */
+	'PR_NO_REACTION_TO_REMOVE' => 'No reaction to remove',
+	'PR_ERROR_REMOVING_REACTION' => 'Error removing reaction',
+	'PR_CLOSE' => 'Close',
 
 ]);

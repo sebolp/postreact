@@ -24,12 +24,12 @@
 <form id="sebo_postreact_acp" name="sebo_postreact_acp" method="post" action="{{ U_ACTION }}">
 
 	<fieldset>
-	<legend>{{ lang('PP_ME_PR') }}</legend>
+	<legend>{{ lang('PR_PP_ME') }}</legend>
 		<dl>
 			<dt>
-			{{ lang('PP_ME_EXT_PR') }}
+			{{ lang('PR_PP_ME_EXT') }}
 			</dt>
-			<dd><img src="{{ POSTREACT_ADM_PATH }}wink_beer.png" width="32px" height="32px"> <a href="{LINK_DONATE}" target="_blank" rel="noreferrer noopener"><img src="https://www.paypalobjects.com/webstatic/en_US/i/btn/png/silver-pill-paypal-26px.png" alt="{{ lang('PR_PP_ME_EXT_ALT') }}"></a></dd>
+			<dd><img src="{{ POSTREACT_ADM_PATH }}wink_beer.png" width="32px" height="32px"> <a href="{{ LINK_DONATE }}" target="_blank" rel="noreferrer noopener"><img src="https://www.paypalobjects.com/webstatic/en_US/i/btn/png/silver-pill-paypal-26px.png" alt="{{ lang('PR_PP_ME_EXT_ALT') }}"></a></dd>
 		</dl>
 	</fieldset>
 
@@ -43,7 +43,10 @@
 			</ul>
 		</dl>
 		<dl>
-			<i class="fa fa-exclamation-triangle fa-2x" style="color:red;vertical-align:middle;" aria-hidden="true"></i><strong> {{ lang('PURGE_EXPLAIN') }} </strong>
+			<div class="errorbox">
+				<i class="fa fa-exclamation-triangle fa-2x" style="color:rgb(255, 255, 255);vertical-align:middle;" aria-hidden="true"></i><strong> {{ lang('PURGE_EXPLAIN') }} </strong><br />
+				<i>{{ lang('PR_IF_NOT_PURGE_BEFORE') }}</i>
+			</div>
 		</dl>
 	</fieldset>
 	<fieldset>
@@ -207,6 +210,6 @@
 </form>
 
 <!-- Emoji Picker Container -->
-<div id="emoji-picker-container" style="display: none; position: fixed; z-index: 9999; margin: 0; padding: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.15);"></div>
+<div id="emoji-picker-container" data-lang="{{ S_USER_LANG }}" style="display: none; position: fixed; z-index: 9999; margin: 0; padding: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.15);"></div>
 
 {% include 'overall_footer.html' %}

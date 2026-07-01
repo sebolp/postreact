@@ -480,7 +480,7 @@ class acp_controller
 		if ($this->request->is_set_post('purge_ico'))
 		{
 			// Test if the submitted form is valid
-			if (!check_form_key('sebo_postreact_purge'))
+			if (!check_form_key('sebo_postreact_acp'))
 			{
 				$errors[] = $this->language->lang('FORM_INVALID');
 			}

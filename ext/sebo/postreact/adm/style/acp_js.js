@@ -1,60 +1,128 @@
-document.addEventListener("DOMContentLoaded", function () {
-    let deleteLinks = document.querySelectorAll(".delete-reaction");
-    let popup = document.getElementById("confirm-delete-reaction");
-    let confirmBtn = document.getElementById("confirm-delete");
-    let cancelBtn = document.getElementById("cancel-delete");
+document.addEventListener("DOMContentLoaded", function ()
+{
+	let popup = document.getElementById("confirm-delete-reaction");
 
-    let deleteUrl = ""; // Salva l'URL di eliminazione
+	// Stop execution if the popup HTML element is not present on this specific page
+	if (!popup)
+	{
+		return;
+	}
 
-    deleteLinks.forEach(link => {
-        link.addEventListener("click", function (event) {
-            event.preventDefault(); // Blocca il comportamento predefinito del link
+	let deleteLinks = document.querySelectorAll(".delete-reaction");
+	
+	// Select buttons using the new specific class instead of the data attribute
+	let formButtons = document.querySelectorAll(".js-trigger-popup");
+	
+	let confirmBtn = document.getElementById("confirm-delete");
+	let cancelBtn = document.getElementById("cancel-delete");
 
-            deleteUrl = this.getAttribute("data-url"); // Prende l'URL di eliminazione
-            popup.style.display = "flex"; // Mostra il popup
-        });
-    });
+	// Variables to store the pending action
+	let pendingDeleteUrl = "";
+	let pendingForm = null;
+	let pendingButton = null;
 
-    confirmBtn.addEventListener("click", function () {
-        if (deleteUrl) {
-            window.location.href = deleteUrl; // Esegue la cancellazione
-        }
-    });
+	// Handle reaction links
+	deleteLinks.forEach(link =>
+	{
+		link.addEventListener("click", function (event)
+		{
+			event.preventDefault(); // Block default link behavior
 
-    cancelBtn.addEventListener("click", function () {
-        popup.style.display = "none"; // Chiude il popup
-    });
+			pendingDeleteUrl = this.getAttribute("data-url"); // Get deletion URL
+			
+			// Reset form variables to avoid conflicts
+			pendingForm = null;
+			pendingButton = null;
 
-    // Chiude il popup se clicchi fuori dal box
-    popup.addEventListener("click", function (event) {
-        if (event.target === popup) {
-            popup.style.display = "none";
-        }
-    });
+			popup.style.display = "flex"; // Show popup
+		});
+	});
+
+	// Handle purge form buttons
+	formButtons.forEach(button =>
+	{
+		button.addEventListener("click", function (event)
+		{
+			event.preventDefault(); // Block default form submission
+
+			pendingButton = this;
+			pendingForm = this.closest("form");
+			
+			// Reset URL variable to avoid conflicts
+			pendingDeleteUrl = ""; 
+
+			popup.style.display = "flex"; // Show popup
+		});
+	});
+
+	// Action on confirm
+	confirmBtn.addEventListener("click", function ()
+	{
+		if (pendingDeleteUrl)
+		{
+			// Execute link redirection
+			window.location.href = pendingDeleteUrl; 
+		}
+		else if (pendingForm && pendingButton)
+		{
+			// Execute form submission
+			let hiddenInput = document.createElement("input");
+			
+			hiddenInput.type = "hidden";
+			hiddenInput.name = pendingButton.name;
+			hiddenInput.value = pendingButton.value;
+			
+			// Append the clicked button data and submit
+			pendingForm.appendChild(hiddenInput);
+			pendingForm.submit();
+		}
+	});
+
+	// Action on cancel
+	cancelBtn.addEventListener("click", function ()
+	{
+		popup.style.display = "none"; // Close popup
+	});
+
+	// Close popup if clicking outside the box
+	popup.addEventListener("click", function (event)
+	{
+		if (event.target === popup)
+		{
+			popup.style.display = "none";
+		}
+	});
 });
 
-(function($) {
-    'use strict';
-    $(function() {
-        $('#config_display_position').on('change', function() {
-            var textContainer = $('#dynamic_position_text');
-            var alertContainer = $('#save_alert');
-            
-            // Mostra alert
-            alertContainer.fadeIn();
+(function($)
+{
+	'use strict';
+	
+	$(function()
+	{
+		$('#config_display_position').on('change', function()
+		{
+			var textContainer = $('#dynamic_position_text');
+			var alertContainer = $('#save_alert');
+			
+			// Show alert
+			alertContainer.fadeIn();
 
-            // Leggi traduzioni
-            var textChecked = $(this).attr('data-lang-checked');     // DESTRA
-            var textUnchecked = $(this).attr('data-lang-unchecked'); // SINISTRA
+			// Read translations
+			var textChecked = $(this).attr('data-lang-checked');     // RIGHT
+			var textUnchecked = $(this).attr('data-lang-unchecked'); // LEFT
 
-            // Applica testo
-            if ($(this).is(':checked')) {
-                // Selezionato (Valore 0) -> DESTRA
-                textContainer.text(textChecked);
-            } else {
-                // Non Selezionato (Valore 1) -> SINISTRA
-                textContainer.text(textUnchecked);
-            }
-        });
-    });
+			// Apply text
+			if ($(this).is(':checked'))
+			{
+				// Checked (Value 0) -> RIGHT
+				textContainer.text(textChecked);
+			}
+			else
+			{
+				// Unchecked (Value 1) -> LEFT
+				textContainer.text(textUnchecked);
+			}
+		});
+	});
 })(jQuery);

@@ -6,10 +6,29 @@ document.addEventListener('DOMContentLoaded', () =>
 	initEmojiPicker(Picker);
 });
 
+
 function initEmojiPicker(PickerClass)
 {
 	const pickerContainer = document.getElementById('emoji-picker-container');
 	let currentInput = null;
+
+	/*
+	 * Get language from phpBB Twig data attribute
+	 */
+	let langCode = pickerContainer.getAttribute('data-lang');
+
+	/*
+	 * Fallback to browser/OS language if phpBB language is missing
+	 */
+	if (!langCode)
+	{
+		langCode = navigator.language || navigator.userLanguage || 'en';
+	}
+
+	/*
+	 * Extract the first 2 characters (e.g., 'en-gb' becomes 'en', 'it' remains 'it')
+	 */
+	const shortLang = langCode.substring(0, 2);
 
 	/*
 	 * Configuration for the picker instance.
@@ -23,15 +42,15 @@ function initEmojiPicker(PickerClass)
 				// Insert the selected emoji (native character) into the input
 				currentInput.value = selection.native;
 
-				// Optional: Trigger a change event if phpBB needs to detect changes
+				// Trigger a change event if phpBB needs to detect changes
 				currentInput.dispatchEvent(new Event('change'));
 
 				// Hide the picker after selection
 				hidePicker();
 			}
 		},
-		locale: 'it', // Optional: Set language to Italian
-		previewPosition: 'none' // Optional: Hide the big preview bar at bottom to save space
+		locale: shortLang,
+		previewPosition: 'none'
 	};
 
 	// Create the picker instance once

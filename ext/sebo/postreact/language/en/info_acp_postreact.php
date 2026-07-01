@@ -33,9 +33,9 @@ $lang = array_merge($lang, [
 	'ICON_HEIGHT'			=> 'Height (px)',
 	'ICON_WIDTH'			=> 'Width (px)',
 	'MEMORANDUM'			=> 'Watchout',
-	'PP_ME_PR'				=> 'Buy me a beer for creating this extension',
-	'PP_ME_EXT_PR'			=> '<label>Make a donation for this extension:</label><br><span>This extension is completely free. It is a project that I spend my time on for the enjoyment and use of the phpBB community. If you enjoy using this extension, or if it has benefited your forum, please consider <a href="https://www.paypal.com/donate/?hosted_button_id=GS3T9MFDJJGT4" target="_blank" rel="noreferrer noopener">buying me a beer</a>. It would be greatly appreciated. Thank you for downloading PostReaction!</span>',
-	'PP_ME_EXT_ALT'			=> 'Donate via PayPal',
+	'PR_PP_ME'				=> 'Buy me a beer for creating this extension',
+	'PR_PP_ME_EXT'			=> '<label>Make a donation for this extension:</label><br><span>This extension is completely free. It is a project that I spend my time on for the enjoyment and use of the phpBB community. If you enjoy using this extension, or if it has benefited your forum, please consider <a href="https://www.paypal.com/donate/?hosted_button_id=GS3T9MFDJJGT4" target="_blank" rel="noreferrer noopener">buying me a beer</a>. It would be greatly appreciated. Thank you for downloading PostReaction!</span>',
+	'PR_PP_ME_EXT_ALT'			=> 'Donate via PayPal',
 	'ACP_POSTREACT_SETTING_SAVED'		=> 'Settings saved.',
 	'ACP_POSTREACT_SETTING_NOT_SAVED'	=> 'OOPSSS! something wrong.',
 	'LOG_ACP_POSTREACT_SETTINGS'		=> '<strong>PostReaction settings updated</strong>',
@@ -78,7 +78,7 @@ $lang = array_merge($lang, [
 	'PR_PURGE_REACTION_FOLDER_EXPLAIN_AVOID' => 'You can avoid this operation if you manually delete the reaction files (and folders) from the server via FTP or file manager: from <code class="inline">%s</code> to <code class="inline">images/</code>',
 	'PR_PURGE_FOLDER_BUTTON'    => 'Delete files and folders',
 	'PR_PURGE_FOLDER_DONE'    => 'Files and directories deleted successfully.',
-	'PR_DIR_NOT_EXISTS_MSG' => 'The reaction folder does not exist on the server: <code class="inline">%s</code>. Please create it and upload your reaction images there to use PostReaction extension. Otherwise you have to completely uninstall this extension and reinstall it.',
+	'PR_DIR_NOT_EXISTS_MSG' => 'The reaction folder does not exist on the server: <code class="inline">%s</code>. Please create it and upload your reaction images there to use PostReaction extension. Otherwise, you will need to completely uninstall this extension and perform a fresh installation using the original extension files..',
 	'ICON_URL'				=> 'Directory/Name - link',
 	/* >2.4 */
 	'RETURN_ACP'			=> '<a href="%s">Back to the ACP module</a>',
@@ -86,5 +86,8 @@ $lang = array_merge($lang, [
 	/* for translators: edited in 2.5.0 'HOW_TO' lang key line 74, added "and search pages" for emojis use */
 	'MOVE'			=> 'Order',
 	'MOVE_UP'		=> 'Move Up',
-	'MOVE_DOWN'		=> 'Move Down'
+	'MOVE_DOWN'		=> 'Move Down',
+	/* >2.5.1 */
+	'PR_PURGE_CONFIRM_OPERATION' => 'Are you sure? This action cannot be undone!',
+	'PR_IF_NOT_PURGE_BEFORE' => 'If you don\'t use the "PR Purge System", the data in the database will not be deleted to prevent unwanted uninstallations.',
 ]);

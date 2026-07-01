@@ -29,7 +29,7 @@ class install_acp_module_1_3_5 extends \phpbb\db\migration\migration
 		];
 	}
 
-	public function revert_schema()
+	public function revert_data()
 	{
 		return [
 			['module.remove', ['acp', 'ACP_POSTREACT_TITLE', [

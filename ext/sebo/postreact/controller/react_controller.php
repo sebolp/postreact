@@ -74,7 +74,7 @@ class react_controller
 
 		if (!$existing_reaction)
 		{
-			return $this->send_json_response(false, 'No reaction to remove');
+			return $this->send_json_response(false, 'PR_NO_REACTION_TO_REMOVE');
 		}
 
 		$removed_icon_id = $existing_reaction['icon_id'];
@@ -105,7 +105,7 @@ class react_controller
 		}
 		else
 		{
-			return $this->send_json_response(false, 'Error removing reaction');
+			return $this->send_json_response(false, 'PR_ERROR_REMOVING_REACTION');
 		}
 	}
 

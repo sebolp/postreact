@@ -51,20 +51,42 @@ class install_schema extends \phpbb\db\migration\migration
 
 	public function revert_schema()
 	{
-		$sql = 'SELECT COUNT(*) AS total_rows
-			FROM ' . $this->table_prefix . 'sebo_postreact_table';
-		$result = $this->db->sql_query($sql);
-		$total_rows = (int) $this->db->sql_fetchfield('total_rows');
-		$this->db->sql_freeresult($result);
-
-		if ($total_rows === 0)
+		// Removal logic: remove tables only IF are empty (with PR Purge System).
+		// Otherwise do not remove for accridental unistall
+		// Table sebo_postreact_table
+		if ($this->db_tools->sql_table_exists($this->table_prefix . 'sebo_postreact_table'))
 		{
-			return [
-				'remove_tables' => [
-					$this->table_prefix . 'sebo_postreact_table',
-					$this->table_prefix . 'sebo_postreact_icon',
-				],
+			$sql_ary = [
+				'SELECT'	=> 'COUNT(*) AS total_rows',
+				'FROM'		=> [$this->table_prefix . 'sebo_postreact_table' => ''],
 			];
+			$sql = $this->db->sql_build_query('SELECT', $sql_ary);
+			$result = $this->db->sql_query($sql);
+			$total_rows = (int) $this->db->sql_fetchfield('total_rows');
+			$this->db->sql_freeresult($result);
+
+			if ($total_rows === 0)
+			{
+				$this->db->sql_query('DROP TABLE ' . $this->table_prefix . 'sebo_postreact_table');
+			}
+		}
+
+		// Table sebo_postreact_icon
+		if ($this->db_tools->sql_table_exists($this->table_prefix . 'sebo_postreact_icon'))
+		{
+			$sql_ary = [
+				'SELECT'	=> 'COUNT(*) AS total_rows',
+				'FROM'		=> [$this->table_prefix . 'sebo_postreact_icon' => ''],
+			];
+			$sql = $this->db->sql_build_query('SELECT', $sql_ary);
+			$result = $this->db->sql_query($sql);
+			$total_rows = (int) $this->db->sql_fetchfield('total_rows');
+			$this->db->sql_freeresult($result);
+
+			if ($total_rows === 0)
+			{
+				$this->db->sql_query('DROP TABLE ' . $this->table_prefix . 'sebo_postreact_icon');
+			}
 		}
 
 		return [];

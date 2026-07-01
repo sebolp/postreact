@@ -441,31 +441,40 @@ class main_listener implements EventSubscriberInterface
 		// ##
 		// search users_table information from user_id
 		$user_data_detailed = [];
+		$unique_user_ids = [];
+
+		// gather all user IDs
 		foreach ($user_ids_list as $icon_id => $entries)
 		{
 			foreach ($entries as $entry)
 			{
-				$user_id = $entry['user_id'];
-				if (!isset($user_data_detailed[$user_id]))
-				{
-					$sql_array = [
-						'SELECT'    => 'group_id, username, user_colour',
-						'FROM'      => [USERS_TABLE => ''],
-						'WHERE'     => 'user_id = ' . (int) $user_id,
-					];
-					$query = $this->db->sql_build_query('SELECT', $sql_array);
-					$result = $this->db->sql_query($query);
-					if ($row_user = $this->db->sql_fetchrow($result))
-					{
-						$user_data_detailed[$user_id] = [
-							'group_id' => $row_user['group_id'],
-							'username' => $row_user['username'],
-							'user_colour' => $row_user['user_colour'],
-						];
-					}
-					$this->db->sql_freeresult($result);
-				}
+				$unique_user_ids[] = (int) $entry['user_id'];
 			}
+		}
+
+		// remove duplicates
+		$unique_user_ids = array_unique($unique_user_ids);
+
+		// fetch all users in one query
+		if (!empty($unique_user_ids))
+		{
+			$sql_array = [
+				'SELECT'	=> 'user_id, group_id, username, user_colour',
+				'FROM'		=> [USERS_TABLE => ''],
+				'WHERE'		=> $this->db->sql_in_set('user_id', $unique_user_ids),
+			];
+			$query = $this->db->sql_build_query('SELECT', $sql_array);
+			$result = $this->db->sql_query($query);
+
+			while ($row_user = $this->db->sql_fetchrow($result))
+			{
+				$user_data_detailed[$row_user['user_id']] = [
+					'group_id'		=> $row_user['group_id'],
+					'username'		=> $row_user['username'],
+					'user_colour'	=> $row_user['user_colour'],
+				];
+			}
+			$this->db->sql_freeresult($result);
 		}
 		// merge username, colour and group to user_id
 		$user_ids_with_details = [];
