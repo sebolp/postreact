@@ -1,34 +1,36 @@
+/* disable responsive button up */
 .no-responsive {
 	display: block;
 }
-.post_react_display.right {
-    float: right;
-}
-.post_react_display.left {
-    float: left;
-}
-#post_react_display {
+/* emoji line view */
+.post_react_display {
 	display: flex;
-	flex-direction: row-reverse;
 	width: 100%;
 	margin: 10px 0;
 	overflow: hidden;
 	justify-content: flex-start;
 }
-a.button.react-toggle:hover #pr_smile_svg {
-	fill: #0A8ED0 !important;
+.post_react_display.right {
+	flex-direction: row-reverse;
 }
-a.button.react-toggle:hover #pr_smile_svg_plus {
+.post_react_display.left {
+	flex-direction: row;
+}
+/* colour change button while hovering */
+a.react-toggle:hover .pr_smile_svg_plus {
 	fill: #0A8ED0 !important;
 	stroke: #0ad00e !important;
 }
+a.react-toggle:hover .pr_smile_svg {
+	fill: #0A8ED0 !important;
+}
+/* */
 .img_post_react_display_memberlist {
 	float: left;
 	position: relative;
 	margin-right: 5px;
 }
 .img_post_react_display {
-	float: right;
 	position: relative;
 	margin-right: -8px;
 	transition: margin-right 0.5s ease;
@@ -39,38 +41,25 @@ a.button.react-toggle:hover #pr_smile_svg_plus {
 .post_react_display:hover .img_post_react_display {
 	margin-right: 8px;
 }
-.bubble_post_react_display {
-	position: absolute;
-	top: 0;
-	right: 0;
-	background-color: red;
-	border: 1px solid #ffffff;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	z-index: 2;
-	width: 12px;
-	height: 12px;
-	border-radius: 50%;
-	color: white;
-	font-size: 8px;	
+
+.img_post_react_display.left {
+	margin-right: 0;
+	margin-left: -8px;
+	transition: margin-left 0.5s ease;
 }
-.bubble_post_react_display_b {
-	position: absolute;
-	top: 0;
-	right: 0;
-	background-color: red;
-	border: 1px solid #ffffff;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	z-index: 2;
-	width: 16px;
-	height: 14px;
-	border-radius: 50%;
-	color: white;
-	font-size: 8px;	
+.img_post_react_display.left:first-child {
+	margin-left: 0;
 }
+.post_react_display:hover .img_post_react_display.left {
+	margin-right: 0;
+}
+/* hide the container when it has no icons to show, so it doesn't reserve vertical space */
+.post_react_display.pr-empty {
+	display: none;
+}
+
+.bubble_post_react_display,
+.bubble_post_react_display_b,
 .bubble_post_react_display_bb {
 	position: absolute;
 	top: 0;
@@ -81,12 +70,14 @@ a.button.react-toggle:hover #pr_smile_svg_plus {
 	align-items: center;
 	justify-content: center;
 	z-index: 2;
-	width: 18px;
-	height: 14px;
 	border-radius: 50%;
 	color: white;
-	font-size: 8px;	
+	font-size: 8px;
 }
+.bubble_post_react_display    { width: 12px; height: 12px; }
+.bubble_post_react_display_b  { width: 16px; height: 14px; }
+.bubble_post_react_display_bb { width: 18px; height: 14px; }
+
 .already_reacted_pr {
 	position: relative;
 	display: inline-block;
@@ -216,4 +207,57 @@ a.button.react-toggle:hover #pr_smile_svg_plus {
 
 .post_react_list {
     flex: 1 1 auto; 
+}
+
+.post_react_button.right {
+	float: right;
+}
+
+/* Prepare the text for a smooth transition */
+.postreact-button-hover-text
+{
+	display: inline-block;
+	max-width: 0;
+	opacity: 0;
+	overflow: hidden;
+	white-space: nowrap;
+	vertical-align: middle;
+	margin-left: 0;
+	transition: max-width 0.3s ease-in-out, opacity 0.3s ease-in-out, margin-left 0.3s ease-in-out;
+}
+
+/* Expand and fade in the text when the user hovers over the button */
+.react-toggle:hover .postreact-button-hover-text
+{
+	max-width: 50px;
+	opacity: 1;
+	margin-left: 5px;
+}
+
+/* Set the button to inline-flex to remove HTML whitespace gaps */
+.react-toggle
+{
+	display: inline-flex;
+	align-items: flex-end;
+}
+/* br line between low button and emoji-line */
+.clear_pr {
+	clear: both;
+	margin-bottom: 5px;
+}
+/* big button emoji-inline*/
+.pr-svg-style-big {
+	box-sizing: border-box;
+	width: 32px;
+	height: 32px;
+	vertical-align: middle;
+	background-color: rgba(255, 255, 255, 0.3);
+	padding: 1px 2px 0 2px;
+	border: 2px dashed #a0a0a0;
+	border-radius: 8px;
+	cursor: pointer;
+}
+.pr-svg-style-big:hover {
+	background-color: rgba(255, 255, 255, 0.6);
+	cursor: pointer;
 }

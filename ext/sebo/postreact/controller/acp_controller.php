@@ -323,6 +323,11 @@ class acp_controller
 				$this->config->set('sebo_postreact_display_position', $new_display_position_value);
 				// end
 
+				// save button_position config
+				$button_position_status = $this->request->variable('config_button_position', '');
+				$this->config->set('sebo_postreact_butt_position', $button_position_status);
+				// end
+
 				$update_data = [];
 				$icon_ids = $this->request->variable('icon_ids', [0]);
 				if (!is_array($icon_ids))
@@ -391,6 +396,7 @@ class acp_controller
 			'POSTREACT_ADM_PATH' => '../ext/sebo/postreact/adm/style/',
 			'DISPLAY_OPTION_VAL' => (int) $this->config['sebo_postreact_display_position'],
 			'SELF_REACT_VAL' => (int) $this->config['sebo_postreact_self_react'],
+			'BUTT_POSITION' => $this->config['sebo_postreact_butt_position'],
 			'ICONS' 		=> $data_ico,
 			'SID'			=> $sid_pr,
 			'ARROW' 		=> '<i class="fa icon fa-chevron-right fa-fw" aria-hidden="true"></i>',

@@ -529,6 +529,7 @@ class main_listener implements EventSubscriberInterface
 			'ICON_CHECK'	=> $check,
 			'REACTORS'	  	=> $user_ids_with_details,
 			'SELF_REACT'	=> $this->config['sebo_postreact_self_react'],
+			'BUTT_POSITION' => $this->config['sebo_postreact_butt_position'] ?? 'up',
 		]);
 	}
 

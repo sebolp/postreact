@@ -44,5 +44,13 @@ $lang = array_merge($lang, [
 	'PR_NO_REACTION_TO_REMOVE' => 'Nessuna reazione da rimuovere',
 	'PR_ERROR_REMOVING_REACTION' => 'Errore rimuovendo la reazione',
 	'PR_CLOSE' => 'Chiudi',
+	/* > 2.5.2 */
+	'PR_BUTTON_TEXT' => 'Reagisci',
+	'PR_DISPLAY_BUTTON_POSITION'  => 'Posizione del pulsante per inserire le reazioni nel post',
+	'BUTT_POSITION_UP' => 'In alto, con altri pulsanti',
+	'BUTT_POSITION_LOW' => 'In basso',
+	'BUTT_POSITION_EMOJI_LEVEL' => 'Vicino le reazioni',
+	'PR_MEMBERLIST_NO_REACTIONS_SENT' => 'Nessuna reazione inviata da questo utente',
+	'PR_MEMBERLIST_NO_REACTIONS_RECEIVED' => 'Nessuna reazione ricevuta da questo utente',
 
 ]);

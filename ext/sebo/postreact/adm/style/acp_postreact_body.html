@@ -94,6 +94,22 @@
 				</div>
 			</dd>
 		</dl>
+		<dl>
+			<dt>
+				<label for="config_button_position">
+					{{ lang('PR_DISPLAY_BUTTON_POSITION') }}:
+				</label>
+			</dt>
+			<dd>
+				<div style="display: flex; align-items: center;">
+					<select name="config_button_position" id="config_button_position">
+						<option value="up" {% if BUTT_POSITION == 'up' %}selected="selected"{% endif %}>{{ lang('BUTT_POSITION_UP') }}</option>
+						<option value="low" {% if BUTT_POSITION == 'low' %}selected="selected"{% endif %}>{{ lang('BUTT_POSITION_LOW') }}</option>
+						<option value="emoji-level" {% if BUTT_POSITION == 'emoji-level' %}selected="selected"{% endif %}>{{ lang('BUTT_POSITION_EMOJI_LEVEL') }}</option>
+					</select>
+				</div>
+			</dd>
+		</dl>
 	</fieldset>
 	<fieldset>
 		<legend>{{ lang('ICON_SETTINGS') }}</legend>

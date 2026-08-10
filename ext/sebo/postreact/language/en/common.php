@@ -44,5 +44,12 @@ $lang = array_merge($lang, [
 	'PR_NO_REACTION_TO_REMOVE' => 'No reaction to remove',
 	'PR_ERROR_REMOVING_REACTION' => 'Error removing reaction',
 	'PR_CLOSE' => 'Close',
-
+	/* > 2.5.2 */
+	'PR_BUTTON_TEXT' => 'React',
+	'PR_DISPLAY_BUTTON_POSITION'  => 'Define button position into the post to react',
+	'BUTT_POSITION_UP' => 'Up, inline with post buttons',
+	'BUTT_POSITION_LOW' => 'Low, button style',
+	'BUTT_POSITION_EMOJI_LEVEL' => 'Inline with reactions',
+	'PR_MEMBERLIST_NO_REACTIONS_SENT' => 'No reaction sent by this user',
+	'PR_MEMBERLIST_NO_REACTIONS_RECEIVED' => 'No reaction received by this user',
 ]);
