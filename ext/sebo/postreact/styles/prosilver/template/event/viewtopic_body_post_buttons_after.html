@@ -3,7 +3,7 @@
 		<!-- no react button -->
 	{% else %}
 		<li class="no-responsive">
-			<a href="#" class="button button-icon-only react-toggle" title="{{ lang('REACT_TO_POST') }}" data-target="popup-{{ postrow.MY_PID }}">
+			<a href="#" class="button button-icon-only react-toggle{% for check in postrow.ICON_CHECK %}{% if check.post_id == postrow.MY_PID %} has-reacted{% endif %}{% endfor %}" title="{{ lang('REACT_TO_POST') }}" data-target="popup-{{ postrow.MY_PID }}">
 				<!-- SVG ICON -->
 				<svg
 				viewBox="0 0 512 512"

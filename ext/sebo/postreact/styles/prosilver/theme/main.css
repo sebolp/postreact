@@ -21,6 +21,13 @@ a.react-toggle:hover .pr_smile_svg_plus {
 	fill: #0A8ED0 !important;
 	stroke: #0ad00e !important;
 }
+a.button.react-toggle.has-reacted .pr_smile_svg {
+	fill: #0A8ED0 !important;
+}
+a.button.react-toggle.has-reacted .pr_smile_svg_plus {
+	fill: #0A8ED0 !important;
+	stroke: #0ad00e !important;
+}
 a.react-toggle:hover .pr_smile_svg {
 	fill: #0A8ED0 !important;
 }
