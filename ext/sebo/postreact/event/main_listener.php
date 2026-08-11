@@ -36,6 +36,8 @@ class main_listener implements EventSubscriberInterface
 			'core.memberlist_modify_view_profile_template_vars' => 'assign_edit_view_profile',
 			'core.search_modify_param_after'        => 'search_user_reactions_title',
 			'core.search_backend_search_after'      => 'search_user_reactions',
+			'core.ucp_notifications_output_notification_types_modify_template_vars' => 'ucp_notifications_display',
+			'core.ucp_notifications_submit_notification_is_set' => 'ucp_notifications_save',
 		];
 	}
 	/* @var \phpbb\language\language */
@@ -257,16 +259,16 @@ class main_listener implements EventSubscriberInterface
 		], true, 'change');
 	}
 
-	public function handle_postreact_notification($post_id, $topic_id, $icon_id, $action)
+	public function handle_postreact_notification($post_id, $topic_id, $icon_id, $action, $postreact_id = 0)
 	{
 		switch ($action)
 		{
 			case 'remove':
-				$this->remove_postreact_notification($post_id);
+				$this->remove_postreact_notification($post_id, $postreact_id);
 				break;
 
 			case 'add':
-				$this->add_postreact_notification($post_id, $topic_id, $icon_id);
+				$this->add_postreact_notification($post_id, $topic_id, $icon_id, $postreact_id);
 				break;
 
 			default:
@@ -274,13 +276,13 @@ class main_listener implements EventSubscriberInterface
 		}
 	}
 
-	public function add_postreact_notification($post_id, $topic_id, $icon_id)
+	public function add_postreact_notification($post_id, $topic_id, $icon_id, $postreact_id = 0)
 	{
 		$user_id_logged = (int) $this->user->data['user_id'];
 
-		// get post infos
+		// get post infos including author's notification preference
 		$sql_array = [
-			'SELECT'    => 'p.poster_id AS poster_id_clean, p.post_subject AS post_post_title, p.post_id, u.username_clean AS poster_name_clean, u.user_id, u.user_colour AS poster_user_colour',
+			'SELECT'    => 'p.poster_id AS poster_id_clean, p.post_subject AS post_post_title, p.post_id, u.username_clean AS poster_name_clean, u.user_id, u.user_colour AS poster_user_colour, u.user_postreact_notify_mode',
 			'FROM'      => [$this->table_prefix . 'posts' => 'p'],
 			'LEFT_JOIN' => [
 				[
@@ -316,8 +318,17 @@ class main_listener implements EventSubscriberInterface
 			return;
 		}
 
+		// Check the post author's notification preference
+		// 0 = every reaction (default), 1 = single per post
+		$notify_mode = isset($row_post['user_postreact_notify_mode']) ? (int) $row_post['user_postreact_notify_mode'] : 0;
+
+		// In single mode, use post_id as the item_id so phpBB deduplicates per post.
+		// In every mode, use the actual postreact_id for unique notifications.
+		$notification_item_id = ($notify_mode === 1) ? (int) $post_id : (int) $postreact_id;
+
 		// make array
 		$pr_notification_data = [
+			'postreact_id'    => $notification_item_id,
 			'PR_N_item_id'    => (int) $post_id,
 			'PR_N_username'   => $row_post['poster_name_clean'],
 			'PR_N_post_title' => $row_post['post_post_title'],
@@ -331,15 +342,38 @@ class main_listener implements EventSubscriberInterface
 		$this->add_notification($pr_notification_data);
 	}
 
-	public function remove_postreact_notification($post_id)
+	public function remove_postreact_notification($post_id, $postreact_id)
 	{
-		$user_id_logged = (int) $this->user->data['user_id'];
+		// Look up the post author's notification preference
+		$sql_array = [
+			'SELECT' => 'u.user_postreact_notify_mode',
+			'FROM'   => [$this->table_prefix . 'posts' => 'p'],
+			'LEFT_JOIN' => [
+				[
+					'FROM' => [USERS_TABLE => 'u'],
+					'ON'   => 'p.poster_id = u.user_id',
+				],
+			],
+			'WHERE'  => 'p.post_id = ' . (int) $post_id,
+		];
+		$sql = $this->db->sql_build_query('SELECT', $sql_array);
+		$result = $this->db->sql_query($sql);
+		$row = $this->db->sql_fetchrow($result);
+		$this->db->sql_freeresult($result);
 
+		$notify_mode = ($row && isset($row['user_postreact_notify_mode'])) ? (int) $row['user_postreact_notify_mode'] : 0;
+
+		if ($notify_mode === 1)
+		{
+			// Single mode: notification is keyed by post_id, don't delete
+			// as other reactions on the same post still exist
+			return;
+		}
+
+		// Every mode: delete the specific notification by postreact_id
 		$this->notification_manager->delete_notifications(
 			'sebo.postreact.notification.type.postreact_notification',
-			(int) $post_id,
-			false,
-			$user_id_logged
+			(int) $postreact_id
 		);
 	}
 
@@ -743,6 +777,35 @@ class main_listener implements EventSubscriberInterface
 			'PERM_W'		=> $this->auth->acl_get('u_new_sebo_postreact'),
 			'PERM_R'		=> $this->auth->acl_get('u_new_sebo_postreact_view')
 		]);
+	}
+
+	private $notify_mode_assigned = false;
+
+	public function ucp_notifications_display($event)
+	{
+		if (!$this->notify_mode_assigned)
+		{
+			$this->notify_mode_assigned = true;
+			$this->template->assign_vars([
+				'S_POSTREACT_NOTIFY_MODE' => (int) $this->user->data['user_postreact_notify_mode'],
+			]);
+		}
+	}
+
+	private $notify_mode_saved = false;
+
+	public function ucp_notifications_save($event)
+	{
+		if (!$this->notify_mode_saved)
+		{
+			$this->notify_mode_saved = true;
+			$mode = $this->request->variable('postreact_notify_mode', (int) $this->user->data['user_postreact_notify_mode']);
+
+			$sql = 'UPDATE ' . USERS_TABLE . '
+				SET user_postreact_notify_mode = ' . (int) $mode . '
+				WHERE user_id = ' . (int) $this->user->data['user_id'];
+			$this->db->sql_query($sql);
+		}
 	}
 
 	public function add_permissions($event)

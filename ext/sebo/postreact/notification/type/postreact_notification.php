@@ -56,12 +56,13 @@ class postreact_notification extends \phpbb\notification\type\base
 	}
 
 	/**
-	 * ID Item
-	 * must be (INT), otherwise ajax error
+	 * Use the reaction table's auto-increment postreact_id as the
+	 * notification item_id. Guaranteed unique per reaction, no packing
+	 * or overflow concerns.
 	 */
 	public static function get_item_id($data)
 	{
-		return isset($data['item_id']) ? (int) $data['item_id'] : (isset($data['PR_N_item_id']) ? (int) $data['PR_N_item_id'] : 0);
+		return isset($data['postreact_id']) ? (int) $data['postreact_id'] : 0;
 	}
 
 	public static function get_item_parent_id($data)

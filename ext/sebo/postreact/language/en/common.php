@@ -52,4 +52,6 @@ $lang = array_merge($lang, [
 	'BUTT_POSITION_EMOJI_LEVEL' => 'Inline with reactions',
 	'PR_MEMBERLIST_NO_REACTIONS_SENT' => 'No reaction sent by this user',
 	'PR_MEMBERLIST_NO_REACTIONS_RECEIVED' => 'No reaction received by this user',
+	'POSTREACT_NOTIFY_MODE'         => 'Only notify me once per post',
+	'POSTREACT_NOTIFY_MODE_EXPLAIN' => 'When enabled, you will only receive one reaction notification per post. When disabled, you receive a separate notification for every reaction.',
 ]);

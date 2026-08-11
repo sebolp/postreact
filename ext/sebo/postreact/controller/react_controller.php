@@ -65,7 +65,7 @@ class react_controller
 
 	private function remove_reaction($user_id, $post_id, $topic_id, $icon_id)
 	{
-		$sql = 'SELECT icon_id, react_time FROM ' . $this->table_prefix . 'sebo_postreact_table
+		$sql = 'SELECT postreact_id, icon_id, react_time FROM ' . $this->table_prefix . 'sebo_postreact_table
 				WHERE user_id = ' . (int) $user_id . '
 				AND post_id = ' . (int) $post_id;
 		$result = $this->db->sql_query($sql);
@@ -86,7 +86,7 @@ class react_controller
 
 		if ($result)
 		{
-			$this->main_listener->handle_postreact_notification($post_id, $topic_id, $icon_id, 'remove');
+			$this->main_listener->handle_postreact_notification($post_id, $topic_id, $icon_id, 'remove', (int) $existing_reaction['postreact_id']);
 
 			$reaction_data = $this->get_reaction_data($post_id);
 			$new_count = isset($reaction_data['counts'][$removed_icon_id]) ? $reaction_data['counts'][$removed_icon_id] : 0;
@@ -127,7 +127,9 @@ class react_controller
 
 		if ($result)
 		{
-			$this->main_listener->handle_postreact_notification($post_id, $topic_id, $icon_id, 'add');
+			$postreact_id = (int) $this->db->sql_nextid();
+
+			$this->main_listener->handle_postreact_notification($post_id, $topic_id, $icon_id, 'add', $postreact_id);
 
 			$reaction_data = $this->get_reaction_data($post_id);
 			$icon_data = $this->get_icon_data($icon_id);

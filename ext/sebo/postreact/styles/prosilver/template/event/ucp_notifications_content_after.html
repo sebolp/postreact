@@ -1,0 +1,14 @@
+<!-- IF MODE == 'notification_options' -->
+<div class="panel">
+	<div class="inner">
+		<h3>{L_PR_EXTENSION_NAME}</h3>
+		<dl>
+			<dt><label for="postreact_notify_mode">{L_POSTREACT_NOTIFY_MODE}</label><br /><span>{L_POSTREACT_NOTIFY_MODE_EXPLAIN}</span></dt>
+			<dd>
+				<input type="hidden" name="postreact_notify_mode" value="0" />
+				<input type="checkbox" name="postreact_notify_mode" id="postreact_notify_mode" value="1"<!-- IF S_POSTREACT_NOTIFY_MODE --> checked="checked"<!-- ENDIF --> />
+			</dd>
+		</dl>
+	</div>
+</div>
+<!-- ENDIF -->
