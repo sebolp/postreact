@@ -87,6 +87,7 @@ class react_controller
 		if ($result)
 		{
 			$this->main_listener->handle_postreact_notification($post_id, $topic_id, $icon_id, 'remove');
+			$this->main_listener->purge_topic_counts($topic_id);
 
 			$reaction_data = $this->get_reaction_data($post_id);
 			$new_count = isset($reaction_data['counts'][$removed_icon_id]) ? $reaction_data['counts'][$removed_icon_id] : 0;
@@ -128,6 +129,7 @@ class react_controller
 		if ($result)
 		{
 			$this->main_listener->handle_postreact_notification($post_id, $topic_id, $icon_id, 'add');
+			$this->main_listener->purge_topic_counts($topic_id);
 
 			$reaction_data = $this->get_reaction_data($post_id);
 			$icon_data = $this->get_icon_data($icon_id);

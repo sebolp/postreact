@@ -11,6 +11,7 @@ services:
             - '%core.php_ext%'
             - '@config'
             - '%core.root_path%'
+            - '@sebo.postreact.listener'
 
     sebo.postreact.controller.react_controller:
         class: sebo\postreact\controller\react_controller
@@ -40,6 +41,7 @@ services:
             - '%core.php_ext%'
             - '@config'
             - '%core.root_path%'
+            - '@cache.driver'
         tags:
             - { name: event.listener }
 

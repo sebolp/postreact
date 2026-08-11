@@ -27,10 +27,12 @@ class main_listener implements EventSubscriberInterface
 		return [
 			'core.user_setup'						   => 'load_language_on_setup',
 			'core.viewtopic_assign_template_vars_before' => 'preload_icons',
+			'core.viewtopic_get_post_data'             => 'preload_reactions',
 			'core.viewtopic_modify_post_row'            => 'assign_to_template',
 			'core.viewforum_modify_page_title'          => 'preload_icons',
 			'core.viewforum_modify_topicrow'			=> 'viewforum_edit',
 			'core.search_modify_tpl_ary'				=> 'search_edit',
+			'core.search_modify_rowset'                 => 'preload_search_reactions',
 			'core.permissions'						  => 'add_permissions',
 			'core.memberlist_view_profile'			  => 'edit_view_profile',
 			'core.memberlist_modify_view_profile_template_vars' => 'assign_edit_view_profile',
@@ -63,6 +65,16 @@ class main_listener implements EventSubscriberInterface
 	protected $phpbb_root_path;
 	/** @var icons */
 	protected $icons_cache = null;
+	protected $reactions_loaded = false;
+	protected $reactions_cache = [];
+	protected $users_cache = [];
+	protected $my_reactions_cache = [];
+	protected $cache;
+	protected $topic_counts_cache = [];
+
+	const CACHE_PREFIX = '_sebo_postreact_topic_counts_';
+	const CACHE_REGISTRY_KEY = '_sebo_postreact_cached_topics';
+	const CACHE_TTL = 300;
 	/**
 	 * Constructor
 	 */
@@ -77,7 +89,8 @@ class main_listener implements EventSubscriberInterface
 		\phpbb\notification\manager $notification_manager,
 		$php_ext,
 		\phpbb\config\config $config,
-		$phpbb_root_path
+		$phpbb_root_path,
+		\phpbb\cache\driver\driver_interface $cache
 	)
 	{
 		$this->language = $language;
@@ -91,6 +104,7 @@ class main_listener implements EventSubscriberInterface
 		$this->php_ext = $php_ext;
 		$this->config = $config;
 		$this->phpbb_root_path = $phpbb_root_path;
+		$this->cache = $cache;
 	}
 	/**
 	 * Load common language files during user setup
@@ -385,36 +399,111 @@ class main_listener implements EventSubscriberInterface
 		$this->icons_cache = $data_ico;
 		return $this->icons_cache;
 	}
+	/**
+	 * Batch-load reactions for the whole page of posts (one query per data
+	 * set instead of one per post).
+	 *
+	 * @param \phpbb\event\data $event The event object
+	 */
+	public function preload_reactions($event)
+	{
+		$post_list = $event['post_list'];
+		if (!empty($post_list))
+		{
+			$this->load_reactions($post_list);
+		}
+	}
+
+	/**
+	 * Load reactions, reactor user details and the current user's own
+	 * reactions for a set of post IDs into the per-request caches.
+	 *
+	 * @param array $post_ids
+	 */
+	protected function load_reactions(array $post_ids)
+	{
+		if ($this->reactions_loaded)
+		{
+			return;
+		}
+		$this->reactions_loaded = true;
+
+		$post_ids = array_values(array_unique(array_filter(array_map('intval', $post_ids))));
+		if (empty($post_ids))
+		{
+			return;
+		}
+
+		$in_set = $this->db->sql_in_set('post_id', $post_ids);
+
+		// 1. All reactions for the page's posts (one query instead of one per post)
+		$sql = 'SELECT *
+			FROM ' . $this->table_prefix . 'sebo_postreact_table
+			WHERE ' . $in_set . '
+			ORDER BY postreact_id ASC';
+		$result = $this->db->sql_query($sql);
+
+		$user_ids = [];
+		while ($row = $this->db->sql_fetchrow($result))
+		{
+			$this->reactions_cache[(int) $row['post_id']][] = $row;
+			$user_ids[(int) $row['user_id']] = true;
+		}
+		$this->db->sql_freeresult($result);
+
+		// 2. Reactor user details, one query for the whole page
+		if (!empty($user_ids))
+		{
+			$sql = 'SELECT user_id, group_id, username, user_colour
+				FROM ' . USERS_TABLE . '
+				WHERE ' . $this->db->sql_in_set('user_id', array_keys($user_ids));
+			$result = $this->db->sql_query($sql);
+			while ($row = $this->db->sql_fetchrow($result))
+			{
+				$this->users_cache[(int) $row['user_id']] = $row;
+			}
+			$this->db->sql_freeresult($result);
+		}
+
+		// 3. Which reactions the logged-in user has given. Skipped for
+		// guests/bots (ANONYMOUS) — the original code ran this query for them
+		// pointlessly.
+		$user_id_logged = (int) $this->user->data['user_id'];
+		if ($user_id_logged > ANONYMOUS)
+		{
+			$sql = 'SELECT post_id, icon_id
+				FROM ' . $this->table_prefix . 'sebo_postreact_table
+				WHERE user_id = ' . $user_id_logged . ' AND ' . $in_set;
+			$result = $this->db->sql_query($sql);
+			while ($row = $this->db->sql_fetchrow($result))
+			{
+				$this->my_reactions_cache[(int) $row['post_id']][] = [
+					'post_id' => (int) $row['post_id'],
+					'icon_id' => (int) $row['icon_id'],
+				];
+			}
+			$this->db->sql_freeresult($result);
+		}
+	}
+
 	public function assign_to_template($event)
 	{
 		$postrow = $event['postrow'];
 		$row = $event['row'];
 		// ##
 		//
-		$my_pid = $row['post_id'];
-		$my_tid = $row['topic_id'];
-		// take the line corresponds to post_id
-		$sql_array = [
-			'SELECT'    => '*',
-			'FROM'      => [$this->table_prefix . 'sebo_postreact_table' => ''],
-			'WHERE'     => 'post_id = ' . (int) $my_pid,
-		];
-		$sql = $this->db->sql_build_query('SELECT', $sql_array);
+		$my_pid = (int) $row['post_id'];
+		$my_tid = (int) $row['topic_id'];
 
-		$data = [];
-		if ($sql)
+		// Batched load (page-scoped via core.viewtopic_get_post_data); lazy
+		// single-post fallback covers any other caller of this event.
+		if (!$this->reactions_loaded)
 		{
-			// do it
-			$result = $this->db->sql_query($sql);
-			if ($result)
-			{
-				while ($my_row = $this->db->sql_fetchrow($result))
-				{
-					$data[] = $my_row;
-				}
-				$this->db->sql_freeresult($result);
-			}
+			$this->load_reactions([$my_pid]);
 		}
+
+		// Reactions on this post, read from the page-wide cache
+		$data = isset($this->reactions_cache[$my_pid]) ? $this->reactions_cache[$my_pid] : [];
 		// total reaction count
 		$total_match_count = count($data);
 		// ##
@@ -439,42 +528,18 @@ class main_listener implements EventSubscriberInterface
 			];
 		}
 		// ##
-		// search users_table information from user_id
+		// search users_table information from user_id (preloaded for the page)
 		$user_data_detailed = [];
-		$unique_user_ids = [];
-
-		// gather all user IDs
 		foreach ($user_ids_list as $icon_id => $entries)
 		{
 			foreach ($entries as $entry)
 			{
-				$unique_user_ids[] = (int) $entry['user_id'];
+				$user_id = $entry['user_id'];
+				if (!isset($user_data_detailed[$user_id]) && isset($this->users_cache[$user_id]))
+				{
+					$user_data_detailed[$user_id] = $this->users_cache[$user_id];
+				}
 			}
-		}
-
-		// remove duplicates
-		$unique_user_ids = array_unique($unique_user_ids);
-
-		// fetch all users in one query
-		if (!empty($unique_user_ids))
-		{
-			$sql_array = [
-				'SELECT'	=> 'user_id, group_id, username, user_colour',
-				'FROM'		=> [USERS_TABLE => ''],
-				'WHERE'		=> $this->db->sql_in_set('user_id', $unique_user_ids),
-			];
-			$query = $this->db->sql_build_query('SELECT', $sql_array);
-			$result = $this->db->sql_query($query);
-
-			while ($row_user = $this->db->sql_fetchrow($result))
-			{
-				$user_data_detailed[$row_user['user_id']] = [
-					'group_id'		=> $row_user['group_id'],
-					'username'		=> $row_user['username'],
-					'user_colour'	=> $row_user['user_colour'],
-				];
-			}
-			$this->db->sql_freeresult($result);
 		}
 		// merge username, colour and group to user_id
 		$user_ids_with_details = [];
@@ -496,25 +561,8 @@ class main_listener implements EventSubscriberInterface
 			}
 		}
 		// ##
-		// mark your choise
-		$check = [];
-		$user_id_logged = $this->user->data['user_id'];
-
-		$sql_array = [
-			'SELECT'    => 'post_id, icon_id',
-			'FROM'      => [$this->table_prefix . 'sebo_postreact_table' => ''],
-			'WHERE'     => 'user_id = ' . (int) $user_id_logged . ' AND post_id = ' . (int) $my_pid,
-		];
-		$sql_check = $this->db->sql_build_query('SELECT', $sql_array);
-		$result_check = $this->db->sql_query($sql_check);
-		while ($row_check = $this->db->sql_fetchrow($result_check))
-		{
-			$check[] = [
-				'post_id' => $row_check['post_id'],
-				'icon_id' => $row_check['icon_id']
-			];
-		}
-		$this->db->sql_freeresult($result_check);
+		// mark your choice (preloaded for the page; empty for guests/bots)
+		$check = isset($this->my_reactions_cache[$my_pid]) ? $this->my_reactions_cache[$my_pid] : [];
 		// ##
 		// template
 		$event['post_row'] = array_merge($event['post_row'], [
@@ -533,78 +581,213 @@ class main_listener implements EventSubscriberInterface
 		]);
 	}
 
-	public function viewforum_edit($event)
+	/**
+	 * Batch-load per-topic reaction counts for a set of topic IDs.
+	 *
+	 * Reads are served from the per-request cache first, then the phpBB cache
+	 * (per-topic, invalidated on react add/remove), and only falls through to
+	 * the database for topics seen for the first time — two queries total for
+	 * all missing topics, not two per topic.
+	 *
+	 * @param array $topic_ids
+	 */
+	protected function load_topic_counts(array $topic_ids)
 	{
-		$topicrow = $event['topicrow'];
-		$row = $event['row'];
-		$topic_id = $row['topic_id'];
-		$data = [];
-
-		$sql_array = [
-			'SELECT'    => '*',
-			'FROM'      => [$this->table_prefix . 'sebo_postreact_table' => ''],
-			'WHERE'     => 'topic_id = ' . (int) $topic_id,
-		];
-		$sql = $this->db->sql_build_query('SELECT', $sql_array);
-		// do it
-		$result = $this->db->sql_query($sql);
-		// Array starts for data and IDs
-		$filtered_rows = [];
-		$post_ids = [];
-		while ($my_row = $this->db->sql_fetchrow($result))
+		$missing = [];
+		foreach ($topic_ids as $topic_id)
 		{
-			$post_id = (int) $my_row['post_id'];
-			// save the entire row of the post_ids
-			$filtered_rows[$post_id] = $my_row;
-			// save only post_id
-			$post_ids[] = $post_id;
+			$topic_id = (int) $topic_id;
+			if (isset($this->topic_counts_cache[$topic_id]))
+			{
+				continue;
+			}
+
+			$cached = $this->cache->get(self::CACHE_PREFIX . $topic_id);
+			if ($cached !== false)
+			{
+				$this->topic_counts_cache[$topic_id] = $cached;
+				continue;
+			}
+
+			$missing[] = $topic_id;
 		}
-		// if IDs, check
-		if (!empty($post_ids))
-		{
-			$sql_array = [
-				'SELECT' => 'post_id',
-				'FROM'   => [$this->table_prefix . 'posts' => ''],
-				'WHERE'  => $this->db->sql_in_set('post_id', $post_ids),
-			];
 
-			$sql_post_exist = $this->db->sql_build_query('SELECT', $sql_array);
-			$result_post_exist = $this->db->sql_query($sql_post_exist);
-			$existing_posts = [];
-			while ($row = $this->db->sql_fetchrow($result_post_exist))
-			{
-				$existing_posts[$row['post_id']] = true;
-			}
-			$this->db->sql_freeresult($result_post_exist);
-			// Filter
-			$data = [];
-			foreach ($filtered_rows as $post_id => $row)
-			{
-				if (isset($existing_posts[$post_id]))
-				{
-					// save row
-					$data[] = $row;
-				}
-			}
+		if (empty($missing))
+		{
+			return;
+		}
+
+		// All reactions for the missing topics, one query
+		$sql = 'SELECT topic_id, post_id, icon_id
+			FROM ' . $this->table_prefix . 'sebo_postreact_table
+			WHERE ' . $this->db->sql_in_set('topic_id', $missing);
+		$result = $this->db->sql_query($sql);
+
+		$rows_by_topic = [];
+		$post_ids = [];
+		while ($row = $this->db->sql_fetchrow($result))
+		{
+			$rows_by_topic[(int) $row['topic_id']][] = $row;
+			$post_ids[(int) $row['post_id']] = true;
 		}
 		$this->db->sql_freeresult($result);
-		// numb check icon_id
-		$icon_counts = [];
-		foreach ($data as $record)
+
+		// Existence check for the referenced posts, one query
+		$existing_posts = [];
+		if (!empty($post_ids))
 		{
-			$icon_id = $record['icon_id'];
-			if (!isset($icon_counts[$icon_id]))
+			$sql = 'SELECT post_id
+				FROM ' . $this->table_prefix . 'posts
+				WHERE ' . $this->db->sql_in_set('post_id', array_keys($post_ids));
+			$result = $this->db->sql_query($sql);
+			while ($row = $this->db->sql_fetchrow($result))
 			{
-				$icon_counts[$icon_id] = 0;
+				$existing_posts[(int) $row['post_id']] = true;
 			}
-			$icon_counts[$icon_id]++;
+			$this->db->sql_freeresult($result);
 		}
-		// ##
-		// sort by number
+
+		// Count per icon per topic (same semantics as the old per-topic code:
+		// reactions on hard-deleted posts are excluded)
+		foreach ($rows_by_topic as $topic_id => $rows)
+		{
+			$icon_counts = [];
+			foreach ($rows as $row)
+			{
+				if (!isset($existing_posts[(int) $row['post_id']]))
+				{
+					continue;
+				}
+				$icon_id = (int) $row['icon_id'];
+				$icon_counts[$icon_id] = isset($icon_counts[$icon_id]) ? $icon_counts[$icon_id] + 1 : 1;
+			}
+
+			$this->topic_counts_cache[$topic_id] = $icon_counts;
+			$this->cache->put(self::CACHE_PREFIX . $topic_id, $icon_counts, self::CACHE_TTL);
+			$this->remember_cached_topic($topic_id);
+		}
+
+		// Topics with no reactions must be cached too — otherwise every page
+		// load re-queries all of them
+		foreach ($missing as $topic_id)
+		{
+			if (!isset($this->topic_counts_cache[$topic_id]))
+			{
+				$this->topic_counts_cache[$topic_id] = [];
+				$this->cache->put(self::CACHE_PREFIX . $topic_id, [], self::CACHE_TTL);
+				$this->remember_cached_topic($topic_id);
+			}
+		}
+	}
+
+	/**
+	 * Per-topic reaction counts, [icon_id => count]. Lazy single-topic load
+	 * for any caller that bypassed a preload hook.
+	 *
+	 * @param int $topic_id
+	 * @return array
+	 */
+	protected function get_topic_counts($topic_id)
+	{
+		$topic_id = (int) $topic_id;
+		if (!isset($this->topic_counts_cache[$topic_id]))
+		{
+			$this->load_topic_counts([$topic_id]);
+		}
+
+		return isset($this->topic_counts_cache[$topic_id]) ? $this->topic_counts_cache[$topic_id] : [];
+	}
+
+	/**
+	 * Invalidate the cached counts for one topic (called when a reaction is
+	 * added or removed).
+	 *
+	 * @param int $topic_id
+	 */
+	public function purge_topic_counts($topic_id)
+	{
+		$topic_id = (int) $topic_id;
+
+		$this->cache->destroy(self::CACHE_PREFIX . $topic_id);
+		unset($this->topic_counts_cache[$topic_id]);
+
+		$registry = $this->cache->get(self::CACHE_REGISTRY_KEY);
+		if (is_array($registry))
+		{
+			$registry = array_values(array_diff($registry, [$topic_id]));
+			$this->cache->put(self::CACHE_REGISTRY_KEY, $registry, 0);
+		}
+	}
+
+	/**
+	 * Invalidate every cached topic count (called by the ACP sync/purge
+	 * actions, which delete reaction rows wholesale).
+	 */
+	public function purge_all_topic_counts()
+	{
+		$registry = $this->cache->get(self::CACHE_REGISTRY_KEY);
+		if (is_array($registry))
+		{
+			foreach ($registry as $topic_id)
+			{
+				$this->cache->destroy(self::CACHE_PREFIX . (int) $topic_id);
+			}
+		}
+
+		$this->cache->destroy(self::CACHE_REGISTRY_KEY);
+		$this->topic_counts_cache = [];
+	}
+
+	protected function remember_cached_topic($topic_id)
+	{
+		$registry = $this->cache->get(self::CACHE_REGISTRY_KEY);
+		if (!is_array($registry))
+		{
+			$registry = [];
+		}
+
+		if (!in_array($topic_id, $registry, true))
+		{
+			$registry[] = $topic_id;
+			$this->cache->put(self::CACHE_REGISTRY_KEY, $registry, 0);
+		}
+	}
+
+	/**
+	 * Batch-load reaction counts for every topic in a search result rowset
+	 * (fires once per results page, before the per-row template loop).
+	 *
+	 * @param \phpbb\event\data $event The event object
+	 */
+	public function preload_search_reactions($event)
+	{
+		$topic_ids = [];
+		foreach ($event['rowset'] as $row)
+		{
+			if (!empty($row['topic_id']))
+			{
+				$topic_ids[(int) $row['topic_id']] = true;
+			}
+		}
+
+		if (!empty($topic_ids))
+		{
+			$this->load_topic_counts(array_keys($topic_ids));
+		}
+	}
+
+	public function viewforum_edit($event)
+	{
+		$topic_id = (int) $event['row']['topic_id'];
+
+		// Per-topic icon counts, served from the page/cache layer — zero
+		// queries on a warm path (was two queries per topic row).
+		$icon_counts = $this->get_topic_counts($topic_id);
+
 		$icons_with_counts = [];
 		foreach ($this->grab_icons() as $icon)
 		{
-			$icon_id = $icon['icon_id'];
+			$icon_id = (int) $icon['icon_id'];
 			if (isset($icon_counts[$icon_id]))
 			{
 				$icons_with_counts[] = [
@@ -631,60 +814,12 @@ class main_listener implements EventSubscriberInterface
 	public function search_edit($event)
 	{
 		$row = $event['row'];
-		// sql_escape because of potential inject (?)
 		$topic_id = isset($row['topic_id']) ? (int) $row['topic_id'] : 0;
-		$sql_array = [
-			'SELECT' => '*',
-			'FROM'   => [$this->table_prefix . 'sebo_postreact_table' => ''],
-			'WHERE'  => 'topic_id = ' . (int) $topic_id,
-		];
-		$sql = $this->db->sql_build_query('SELECT', $sql_array);
-		$result = $this->db->sql_query($sql);
-		$filtered_rows = [];
-		$post_ids = [];
-		while ($my_row = $this->db->sql_fetchrow($result))
-		{
-			$post_id = (int) $my_row['post_id'];
-			$filtered_rows[$post_id] = $my_row;
-			$post_ids[] = $post_id;
-		}
-		$this->db->sql_freeresult($result);
-		$data = [];
-		if (!empty($post_ids))
-		{
-			$sql_array = [
-				'SELECT' => 'post_id',
-				'FROM'   => [$this->table_prefix . 'posts' => ''],
-				'WHERE'  => $this->db->sql_in_set('post_id', $post_ids),
-			];
-			$sql_post_exist = $this->db->sql_build_query('SELECT', $sql_array);
-			$result_post_exist = $this->db->sql_query($sql_post_exist);
-			$existing_posts = [];
-			while ($row = $this->db->sql_fetchrow($result_post_exist))
-			{
-				$existing_posts[$row['post_id']] = true;
-			}
-			$this->db->sql_freeresult($result_post_exist);
-			foreach ($filtered_rows as $post_id => $row)
-			{
-				if (isset($existing_posts[$post_id]))
-				{
-					$data[] = $row;
-				}
-			}
-		}
-		// ##
-		// numb check icon_id
-		$topic_id_count = 0;
-		foreach ($data as $record)
-		{
-			if ($record['topic_id'] == $topic_id)
-			{
-				$topic_id_count++;
-			}
-		}
-		// start the counter
-		$topic_id_count = 0;
+
+		// Per-topic icon counts, preloaded for the whole result rowset via
+		// core.search_modify_rowset (zero queries per result row).
+		$icon_counts = $this->get_topic_counts($topic_id);
+
 		$data_ico = $this->grab_icons();
 		// Step 1: make a new array with icon_id key
 		$data_ico_assoc = [];
@@ -692,46 +827,20 @@ class main_listener implements EventSubscriberInterface
 		{
 			$data_ico_assoc[$icon['icon_id']] = $icon;
 		}
-		// Step 2: count icon_id occurrences for topic_id
-		$icon_counts = [];
-		foreach ($data as $rec)
-		{
-			$icon_id = $rec['icon_id'];
-			$topic_id = $rec['topic_id'];
-			if (!isset($icon_counts[$topic_id]))
-			{
-				$icon_counts[$topic_id] = [];
-			}
-			if (!isset($icon_counts[$topic_id][$icon_id]))
-			{
-				$icon_counts[$topic_id][$icon_id] = 0;
-			}
-			$icon_counts[$topic_id][$icon_id]++;
-		}
-		// Step 3: make new array with icon info and count, ensuring each icon_id is unique
+		// Step 2: build one entry per icon with its count for this topic
 		$new_array = [];
-		foreach ($data as $rec)
+		foreach ($icon_counts as $icon_id => $count)
 		{
-			$icon_id = $rec['icon_id'];
-			$topic_id = $rec['topic_id'];
 			if (isset($data_ico_assoc[$icon_id]))
 			{
-				$count = isset($icon_counts[$topic_id][$icon_id]) ? (string) $icon_counts[$topic_id][$icon_id] : '0';
-				if (!isset($new_array[$icon_id]))
-				{
-					$icon_info = $data_ico_assoc[$icon_id];
-					$new_array[$icon_id] = [
-						'icon_id'  => $icon_info['icon_id'],
-						'icon_url' => $icon_info['icon_url'],
-						'icon_alt' => $icon_info['icon_alt'],
-						'topic_id' => $topic_id,
-						'count'    => $count,
-					];
-				}
-				else
-				{
-					$new_array[$icon_id]['count'] = (string) max($new_array[$icon_id]['count'], $count);
-				}
+				$icon_info = $data_ico_assoc[$icon_id];
+				$new_array[$icon_id] = [
+					'icon_id'  => $icon_info['icon_id'],
+					'icon_url' => $icon_info['icon_url'],
+					'icon_alt' => $icon_info['icon_alt'],
+					'topic_id' => $topic_id,
+					'count'    => (string) $count,
+				];
 			}
 		}
 		// Remove the associative key and reset the numeric index
@@ -744,6 +853,7 @@ class main_listener implements EventSubscriberInterface
 			'PERM_R'		=> $this->auth->acl_get('u_new_sebo_postreact_view')
 		]);
 	}
+
 
 	public function add_permissions($event)
 	{

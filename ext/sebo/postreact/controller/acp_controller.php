@@ -33,6 +33,7 @@ class acp_controller
 	protected $php_ext;
 	/** @var \phpbb\config\config */
 	protected $config;
+	protected $main_listener;
 	/** @var string phpBB root path */
 	protected $phpbb_root_path;
 	/** @var string Path to reaction images */
@@ -55,7 +56,8 @@ class acp_controller
 		\phpbb\db\driver\driver_interface $db,
 		$php_ext,
 		\phpbb\config\config $config,
-		$phpbb_root_path
+		$phpbb_root_path,
+		\sebo\postreact\event\main_listener $main_listener
 	)
 	{
 		$this->language	= $language;
@@ -67,6 +69,7 @@ class acp_controller
 		$this->php_ext = $php_ext;
 		$this->config   = $config;
 		$this->phpbb_root_path = $phpbb_root_path;
+		$this->main_listener = $main_listener;
 	}
 
 	/**
@@ -441,6 +444,7 @@ class acp_controller
 								   ON s.post_id = p.post_id
 							   WHERE p.post_id IS NULL';
 				$this->db->sql_query($sql_delete);
+				$this->main_listener->purge_all_topic_counts();
 
 				// Stop time
 				$execution_pr_sync_time = microtime(true) - $start_pr_sync_time;
@@ -473,6 +477,7 @@ class acp_controller
 				// do it
 				$sql_truncate = 'TRUNCATE TABLE ' . $this->table_prefix . 'sebo_postreact_table';
 				$this->db->sql_query($sql_truncate);
+				$this->main_listener->purge_all_topic_counts();
 
 				// Stop time
 				$execution_pr_purge_time = microtime(true) - $start_pr_purge_time;
@@ -506,6 +511,7 @@ class acp_controller
 				// do it
 				$sql_truncate = 'TRUNCATE TABLE ' . $this->table_prefix . 'sebo_postreact_icon';
 				$this->db->sql_query($sql_truncate);
+				$this->main_listener->purge_all_topic_counts();
 
 				// Stop time
 				$execution_pr_purge_time = microtime(true) - $start_pr_purge_time;
