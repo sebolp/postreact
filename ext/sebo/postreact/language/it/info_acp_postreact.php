@@ -39,6 +39,7 @@ $lang = array_merge($lang, [
 	'PR_PP_ME_EXT_ALT'		=> 'Dona con PayPal',
 	'ACP_POSTREACT_SETTING_SAVED'		=> 'Impostazioni salvate con successo.',
 	'ACP_POSTREACT_SETTING_NOT_SAVED'	=> 'OOPSSS! Qualcosa è andato storto.',
+	'POSTREACT_FAILED_ICONS'			=> 'Icone non salvate correttamente',
 	'LOG_ACP_POSTREACT_SETTINGS'		=> '<strong>PostReaction settings updated</strong>',
 	'NOT_AVAILABLE'						=> 'Non disponibile',
 	'DELETE_WARNING'					=> 'Sicuro che vuoi cancellare questa icona? Questa azione non può essere annullata.',

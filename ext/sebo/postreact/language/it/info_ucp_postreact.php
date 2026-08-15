@@ -20,4 +20,6 @@ if (empty($lang) || !is_array($lang))
 
 $lang = array_merge($lang, [
 	'NOTIFICATION_TYPE_POSTREACT'	=> 'Qualcuno ha reagito a un tuo post',
+	'UCP_POSTREACT_TITLE'			=> 'PostReaction',
+	'UCP_POSTREACT_EXPLAIN'		=> 'Scegli come PostReaction ti avvisa quando qualcuno reagisce ai tuoi post.',
 ]);

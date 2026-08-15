@@ -261,3 +261,12 @@ a.react-toggle:hover .pr_smile_svg {
 	background-color: rgba(255, 255, 255, 0.6);
 	cursor: pointer;
 }
+/* highlight the react-toggle button when the user has already reacted to this post */
+a.react-toggle.has-reacted .pr_smile_svg {
+	fill: #0A8ED0 !important;
+	border-color: #0A8ED0 !important;
+}
+a.react-toggle.has-reacted .pr_smile_svg_plus {
+	fill: #0A8ED0 !important;
+	stroke: #0ad00e !important;
+}

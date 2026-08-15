@@ -1,0 +1,39 @@
+{% include 'ucp_header.html' %}
+
+<form id="sebo_postreact_ucp" method="post" action="{{ U_ACTION }}">
+
+<h2>{{ lang('UCP_POSTREACT_TITLE') }}</h2>
+
+<div class="panel">
+    <div class="inner">
+
+        <p>{{ TITLE_EXPLAIN }}</p>
+
+            <fieldset>
+                <dl>
+                    <dt>
+                        <label for="postreact_notify_mode">{{ lang('POSTREACT_NOTIFY_MODE') }}</label>
+                        <br>
+                        <p>{{ lang('POSTREACT_NOTIFY_MODE_EXPLAIN') }}</p>
+                        <p>{{ lang('POSTREACT_NOTIFY_MODE_EXPLAIN_BOTTOM') }}</p>
+                    </dt>
+                    <dd>
+                        <label>
+                            <input type="checkbox" name="postreact_notify_mode" id="postreact_notify_mode" value="1" {% if S_POSTREACT_NOTIFY_MODE %}checked="checked"{% endif %}>
+                        </label>
+                    </dd>
+                </dl>
+            </fieldset>
+
+    </div>
+</div>
+
+<fieldset class="submit-buttons">
+    <input class="button1" type="submit" id="submit" name="submit" value="{{ lang('SUBMIT') }}" />
+    {{ S_FORM_TOKEN }}
+</fieldset>
+
+</form>
+
+
+{% include 'ucp_footer.html' %}

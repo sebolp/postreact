@@ -11,6 +11,17 @@ services:
             - '%core.php_ext%'
             - '@config'
             - '%core.root_path%'
+            - '@sebo.postreact.service.icon_manager'
+            - '@sebo.postreact.service.reaction_count_cache'
+
+    sebo.postreact.controller.ucp:
+        class: sebo\postreact\controller\ucp_controller
+        arguments:
+            - '@dbal.conn'
+            - '@user'
+            - '@language'
+            - '@request'
+            - '@template'
 
     sebo.postreact.controller.react_controller:
         class: sebo\postreact\controller\react_controller
@@ -22,12 +33,71 @@ services:
             - '%core.table_prefix%'
             - '%core.php_ext%'
             - '@notification_manager'
-            - '@sebo.postreact.listener'
+            - '@sebo.postreact.service.notification_helper'
             - '@config'
+            - '@sebo.postreact.service.reaction_count_cache'
+            - '@auth'
         public: true
 
-    sebo.postreact.listener:
-        class: sebo\postreact\event\main_listener
+    # --- Services ---------------------------------------------------------
+
+    sebo.postreact.service.icon_manager:
+        class: sebo\postreact\service\icon_manager
+        arguments:
+            - '@dbal.conn'
+            - '%core.table_prefix%'
+
+    sebo.postreact.service.notification_helper:
+        class: sebo\postreact\service\notification_helper
+        arguments:
+            - '@dbal.conn'
+            - '%core.table_prefix%'
+            - '@user'
+            - '@notification_manager'
+
+    sebo.postreact.service.reaction_count_cache:
+        class: sebo\postreact\service\reaction_count_cache
+        arguments:
+            - '@dbal.conn'
+            - '%core.table_prefix%'
+            - '@cache.driver'
+
+    # --- Event listeners ----------------------------------------------------
+    # Split by responsibility (was previously a single main_listener.php)
+
+    sebo.postreact.listener.language:
+        class: sebo\postreact\event\language_listener
+        tags:
+            - { name: event.listener }
+
+    sebo.postreact.listener.permissions:
+        class: sebo\postreact\event\permissions_listener
+        tags:
+            - { name: event.listener }
+
+    sebo.postreact.listener.viewtopic:
+        class: sebo\postreact\event\viewtopic_listener
+        arguments:
+            - '@dbal.conn'
+            - '@user'
+            - '%core.table_prefix%'
+            - '@auth'
+            - '@config'
+            - '@sebo.postreact.service.icon_manager'
+        tags:
+            - { name: event.listener }
+
+    sebo.postreact.listener.viewforum:
+        class: sebo\postreact\event\viewforum_listener
+        arguments:
+            - '@auth'
+            - '@sebo.postreact.service.icon_manager'
+            - '@sebo.postreact.service.reaction_count_cache'
+        tags:
+            - { name: event.listener }
+
+    sebo.postreact.listener.search:
+        class: sebo\postreact\event\search_listener
         arguments:
             - '@language'
             - '@dbal.conn'
@@ -36,10 +106,20 @@ services:
             - '@template'
             - '%core.table_prefix%'
             - '@auth'
-            - '@notification_manager'
             - '%core.php_ext%'
-            - '@config'
             - '%core.root_path%'
+            - '@sebo.postreact.service.icon_manager'
+            - '@sebo.postreact.service.reaction_count_cache'
+            - '@config'
+        tags:
+            - { name: event.listener }
+
+    sebo.postreact.listener.profile:
+        class: sebo\postreact\event\profile_listener
+        arguments:
+            - '@dbal.conn'
+            - '%core.table_prefix%'
+            - '@template'
         tags:
             - { name: event.listener }
 

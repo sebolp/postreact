@@ -200,12 +200,14 @@ $(document).ready(function() {
 						var container = $('#post_react_display_' + post_id);
 						var existingIcon = container.find('.img_post_react_display[data-icon-id="' + icon_id + '"]');
 						var bubble = existingIcon.find('.bubble_post_react_display');
+						var toggleBtn = $('a.react-toggle[data-target="popup-' + post_id + '"]');
 
 						// -------------------------
 						// ADD_REACTION logic
 						// -------------------------
 						if(res.action === 'added') {
 
+							toggleBtn.addClass('has-reacted');
 							if(existingIcon.length) {
 								// Icon already exists - only update the counter
 								if(bubble.length) {
@@ -275,6 +277,7 @@ $(document).ready(function() {
 						// -------------------------
 						else if(res.action === 'removed') {
 
+							toggleBtn.removeClass('has-reacted');
 							// Use res.icon_id (the icon actually removed) instead of icon_id (the icon clicked)
 							var removedIconId = res.icon_id;
 							var removedIcon = container.find('.img_post_react_display[data-icon-id="' + removedIconId + '"]');

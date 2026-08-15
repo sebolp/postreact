@@ -11,6 +11,9 @@
 
 namespace sebo\postreact\controller;
 
+use sebo\postreact\service\icon_manager;
+use sebo\postreact\service\reaction_count_cache;
+
 /**
  * PostReaction ACP controller.
  */
@@ -35,6 +38,10 @@ class acp_controller
 	protected $config;
 	/** @var string phpBB root path */
 	protected $phpbb_root_path;
+	/** @var icon_manager */
+	protected $icon_manager;
+	/** @var reaction_count_cache */
+	protected $reaction_count_cache;
 	/** @var string Path to reaction images */
 	protected $url_reactions_path = 'images/sebo_postreact/reactions/';
 	/**
@@ -55,7 +62,9 @@ class acp_controller
 		\phpbb\db\driver\driver_interface $db,
 		$php_ext,
 		\phpbb\config\config $config,
-		$phpbb_root_path
+		$phpbb_root_path,
+		icon_manager $icon_manager,
+		reaction_count_cache $reaction_count_cache
 	)
 	{
 		$this->language	= $language;
@@ -67,6 +76,8 @@ class acp_controller
 		$this->php_ext = $php_ext;
 		$this->config   = $config;
 		$this->phpbb_root_path = $phpbb_root_path;
+		$this->icon_manager = $icon_manager;
+		$this->reaction_count_cache = $reaction_count_cache;
 	}
 
 	/**
@@ -243,6 +254,8 @@ class acp_controller
 			$sql_insert = 'INSERT INTO ' . $this->table_prefix . 'sebo_postreact_icon ' .
 				$this->db->sql_build_array('INSERT', $data);
 			$this->db->sql_query($sql_insert);
+
+			$this->icon_manager->reset_cache();
 		}
 		//##
 		// check if deleting icon
@@ -252,6 +265,8 @@ class acp_controller
 			$sql_remove = 'DELETE FROM ' . $this->table_prefix . 'sebo_postreact_icon
 								WHERE icon_id = ' . (int) $remove_pr;
 			$result_remove = $this->db->sql_query($sql_remove);
+
+			$this->icon_manager->reset_cache();
 		}
 		// ##
 		// display error if directory not exists
@@ -260,26 +275,9 @@ class acp_controller
 			$this->template->assign_var('PR_DIR_NOT_EXISTS', true);
 		}
 		// ##
-		// grab icons
-		// take the line corresponds to post_id
-		$data_ico = [];
-		$sql_array = [
-			'SELECT'    => '*',
-			'FROM'      => [$this->table_prefix . 'sebo_postreact_icon' => ''],
-			'ORDER_BY'  => 'icon_order ASC, icon_id ASC',
-		];
-		$sql_ico = $this->db->sql_build_query('SELECT', $sql_array);
-		$result_ico = $this->db->sql_query($sql_ico);
-		if ($result_ico)
-		{
-			while ($my_icons = $this->db->sql_fetchrow($result_ico))
-			{
-				// Decode to show emoji
-				$my_icons['icon_emoji'] = html_entity_decode($my_icons['icon_emoji']);
-				$data_ico[] = $my_icons;
-			}
-			$this->db->sql_freeresult($result_ico);
-		}
+		// grab icons (decoded for display), sourced from the shared icon_manager
+		// so this list always reflects the add/remove/reorder above
+		$data_ico = $this->icon_manager->get_icons(true);
 		// Build move URLs for each icon
 		$total_icons = count($data_ico);
 		foreach ($data_ico as $idx => &$ico)
@@ -351,7 +349,11 @@ class acp_controller
 
 				foreach ($update_data as $icon_id => $data)
 				{
-					$emoji_safe = mb_convert_encoding($data['icon_emoji'], 'HTML-ENTITIES', 'UTF-8');
+					// mb_convert_encoding(..., 'HTML-ENTITIES', ...) is
+					// deprecated as of PHP 8.2; mb_encode_numericentity()
+					// with a full-range convmap is the portable replacement
+					// for turning UTF-8 emoji into numeric HTML entities.
+					$emoji_safe = mb_encode_numericentity($data['icon_emoji'], [0x80, 0x10FFFF, 0, 0xFFFFFF], 'UTF-8');
 					$sql_array = [
 						'icon_url'    => $this->url_reactions_path . $data['url'],
 						'icon_alt'    => $data['icon_alt'],
@@ -434,13 +436,13 @@ class acp_controller
 				$total_missing = (int) $this->db->sql_fetchfield('total_missing');
 				$this->db->sql_freeresult($result);
 
-				// Delete
-				$sql_delete = 'DELETE s
-							   FROM ' . $this->table_prefix . 'sebo_postreact_table s
-							   LEFT JOIN ' . $this->table_prefix . 'posts p
-								   ON s.post_id = p.post_id
-							   WHERE p.post_id IS NULL';
+				// Delete (portable form: NOT IN subquery instead of a
+				// MySQL/MSSQL-only aliased multi-table DELETE ... JOIN,
+				// which PostgreSQL, Oracle and SQLite reject)
+				$sql_delete = 'DELETE FROM ' . $this->table_prefix . 'sebo_postreact_table
+							   WHERE post_id NOT IN (SELECT post_id FROM ' . $this->table_prefix . 'posts)';
 				$this->db->sql_query($sql_delete);
+				$this->reaction_count_cache->purge_all_topic_counts();
 
 				// Stop time
 				$execution_pr_sync_time = microtime(true) - $start_pr_sync_time;
@@ -470,9 +472,11 @@ class acp_controller
 				$total_deleted = (int) $this->db->sql_fetchfield('total_rows');
 				$this->db->sql_freeresult($result);
 
-				// do it
-				$sql_truncate = 'TRUNCATE TABLE ' . $this->table_prefix . 'sebo_postreact_table';
+				// do it (DELETE FROM instead of TRUNCATE TABLE: SQLite, a
+				// supported phpBB database, has no TRUNCATE statement)
+				$sql_truncate = 'DELETE FROM ' . $this->table_prefix . 'sebo_postreact_table';
 				$this->db->sql_query($sql_truncate);
+				$this->reaction_count_cache->purge_all_topic_counts();
 
 				// Stop time
 				$execution_pr_purge_time = microtime(true) - $start_pr_purge_time;
@@ -503,9 +507,11 @@ class acp_controller
 				$total_deleted = (int) $this->db->sql_fetchfield('total_rows');
 				$this->db->sql_freeresult($result);
 
-				// do it
-				$sql_truncate = 'TRUNCATE TABLE ' . $this->table_prefix . 'sebo_postreact_icon';
+				// do it (DELETE FROM instead of TRUNCATE TABLE: SQLite, a
+				// supported phpBB database, has no TRUNCATE statement)
+				$sql_truncate = 'DELETE FROM ' . $this->table_prefix . 'sebo_postreact_icon';
 				$this->db->sql_query($sql_truncate);
+				$this->icon_manager->reset_cache();
 
 				// Stop time
 				$execution_pr_purge_time = microtime(true) - $start_pr_purge_time;

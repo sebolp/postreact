@@ -7,7 +7,7 @@
 		{# no react button #}
 	{% else %}
 		<div class="post_react_button {{ postrow.POSTREACT_FLOAT_CLASS }}">
-			<a href="#" class="button button-icon-only react-toggle spaced" title="{{ lang('REACT_TO_POST') }}" data-target="popup-{{ postrow.MY_PID }}">
+			<a href="#" class="button button-icon-only react-toggle spaced{% for check in postrow.ICON_CHECK %}{% if check.post_id == postrow.MY_PID %} has-reacted{% endif %}{% endfor %}" title="{{ lang('REACT_TO_POST') }}" data-target="popup-{{ postrow.MY_PID }}">
 				<!-- SVG ICON -->
 				<svg
 				viewBox="0 0 512 512"
@@ -151,7 +151,7 @@
 			{# no react button #}
 		{% else %}
 		<div class="img_post_react_display">
-			<a href="#" class="react-toggle" title="{{ lang('REACT_TO_POST') }}" data-target="popup-{{ postrow.MY_PID }}">
+			<a href="#" class="react-toggle{% for check in postrow.ICON_CHECK %}{% if check.post_id == postrow.MY_PID %} has-reacted{% endif %}{% endfor %}" title="{{ lang('REACT_TO_POST') }}" data-target="popup-{{ postrow.MY_PID }}">
 				<svg
 					viewBox="0 0 512 512"
 					version="1.1"

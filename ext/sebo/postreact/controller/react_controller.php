@@ -11,6 +11,8 @@
 namespace sebo\postreact\controller;
 
 use Symfony\Component\HttpFoundation\JsonResponse;
+use sebo\postreact\service\notification_helper;
+use sebo\postreact\service\reaction_count_cache;
 
 class react_controller
 {
@@ -21,8 +23,13 @@ class react_controller
 	protected $table_prefix;
 	protected $php_ext;
 	protected $notification_manager;
-	protected $main_listener;
+	/** @var notification_helper */
+	protected $notification_helper;
 	protected $config;
+	/** @var reaction_count_cache */
+	protected $reaction_count_cache;
+	/** @var \phpbb\auth\auth */
+	protected $auth;
 
 	public function __construct(
 		\phpbb\db\driver\driver_interface $db,
@@ -32,8 +39,10 @@ class react_controller
 		$table_prefix,
 		$php_ext,
 		\phpbb\notification\manager $notification_manager,
-		\sebo\postreact\event\main_listener $main_listener,
-		\phpbb\config\config $config
+		notification_helper $notification_helper,
+		\phpbb\config\config $config,
+		reaction_count_cache $reaction_count_cache,
+		\phpbb\auth\auth $auth
 	)
 	{
 		$this->db = $db;
@@ -43,8 +52,10 @@ class react_controller
 		$this->table_prefix = $table_prefix;
 		$this->php_ext = $php_ext;
 		$this->notification_manager = $notification_manager;
-		$this->main_listener = $main_listener;
+		$this->notification_helper = $notification_helper;
 		$this->config = $config;
+		$this->reaction_count_cache = $reaction_count_cache;
+		$this->auth = $auth;
 	}
 
 	private function check_existing_reaction($user_id, $post_id)
@@ -65,7 +76,7 @@ class react_controller
 
 	private function remove_reaction($user_id, $post_id, $topic_id, $icon_id)
 	{
-		$sql = 'SELECT icon_id, react_time FROM ' . $this->table_prefix . 'sebo_postreact_table
+		$sql = 'SELECT postreact_id, icon_id, react_time FROM ' . $this->table_prefix . 'sebo_postreact_table
 				WHERE user_id = ' . (int) $user_id . '
 				AND post_id = ' . (int) $post_id;
 		$result = $this->db->sql_query($sql);
@@ -78,6 +89,7 @@ class react_controller
 		}
 
 		$removed_icon_id = $existing_reaction['icon_id'];
+		$removed_postreact_id = (int) $existing_reaction['postreact_id'];
 
 		$sql = 'DELETE FROM ' . $this->table_prefix . 'sebo_postreact_table
 				WHERE user_id = ' . (int) $user_id . '
@@ -86,7 +98,8 @@ class react_controller
 
 		if ($result)
 		{
-			$this->main_listener->handle_postreact_notification($post_id, $topic_id, $icon_id, 'remove');
+			$this->notification_helper->handle_postreact_notification($post_id, $topic_id, $icon_id, 'remove', $removed_postreact_id);
+			$this->reaction_count_cache->purge_topic_counts($topic_id);
 
 			$reaction_data = $this->get_reaction_data($post_id);
 			$new_count = isset($reaction_data['counts'][$removed_icon_id]) ? $reaction_data['counts'][$removed_icon_id] : 0;
@@ -111,6 +124,14 @@ class react_controller
 
 	private function add_reaction($user_id, $post_id, $topic_id, $icon_id)
 	{
+		// Reject icon_ids that don't exist or are disabled - previously
+		// any integer was accepted and stored as-is
+		$icon_data = $this->get_icon_data($icon_id);
+		if (!$icon_data || (int) $icon_data['status'] !== 1)
+		{
+			return $this->send_json_response(false, $this->language->lang('NOT_INSERTED_VALUE'));
+		}
+
 		$time = time();
 		$data = [
 			'postreact_id'	=> null,
@@ -127,10 +148,12 @@ class react_controller
 
 		if ($result)
 		{
-			$this->main_listener->handle_postreact_notification($post_id, $topic_id, $icon_id, 'add');
+			$postreact_id = (int) $this->db->sql_nextid();
+
+			$this->notification_helper->handle_postreact_notification($post_id, $topic_id, $icon_id, 'add', $postreact_id);
+			$this->reaction_count_cache->purge_topic_counts($topic_id);
 
 			$reaction_data = $this->get_reaction_data($post_id);
-			$icon_data = $this->get_icon_data($icon_id);
 			$new_count = isset($reaction_data['counts'][$icon_id]) ? $reaction_data['counts'][$icon_id] : 1;
 
 			return $this->send_json_response(true, $this->language->lang('INSERTED_VALUE'), [
@@ -249,7 +272,15 @@ class react_controller
 		// Deny anonymous users
 		if ($this->user->data['user_id'] == ANONYMOUS)
 		{
-			return $this->send_json_response(false, $this->language->lang('LOGIN_REQUIRED'));
+			return $this->send_json_response(false, $this->language->lang('LOGIN_TO_REACT'));
+		}
+
+		// Enforce the "can react" permission server-side: the template
+		// hides the button for users without it, but the AJAX route itself
+		// must not trust that
+		if (!$this->auth->acl_get('u_new_sebo_postreact'))
+		{
+			return $this->send_json_response(false, $this->language->lang('LOGIN_TO_REACT'));
 		}
 
 		$post_id	= $this->request->variable('post_id', 0);

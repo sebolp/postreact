@@ -52,5 +52,8 @@ $lang = array_merge($lang, [
 	'BUTT_POSITION_EMOJI_LEVEL' => 'Vicino le reazioni',
 	'PR_MEMBERLIST_NO_REACTIONS_SENT' => 'Nessuna reazione inviata da questo utente',
 	'PR_MEMBERLIST_NO_REACTIONS_RECEIVED' => 'Nessuna reazione ricevuta da questo utente',
+	/* > 2.6.0 */
+	'POSTREACT_NOTIFY_MODE' => 'Notificami una sola volta per post, non una volta per reazione',
+	'POSTREACT_NOTIFY_MODE_EXPLAIN' => 'Se attivo, più reazioni sullo stesso post generano una sola notifica invece di una per reazione.',
 
 ]);

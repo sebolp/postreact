@@ -26,8 +26,8 @@ class install_data extends \phpbb\db\migration\migration
 			['permission.add', ['u_new_sebo_postreact']],
 			['permission.add', ['u_new_sebo_postreact_view']],
 			// Set our new permissions
-			['permission.permission_set', ['ROLE_USER_FULL', 'u_new_sebo_postreact', 1]],
-			['permission.permission_set', ['ROLE_USER_STANDARD', 'u_new_sebo_postreact', 1]],
+			['permission.permission_set', ['ROLE_USER_FULL', 'u_new_sebo_postreact']],
+			['permission.permission_set', ['ROLE_USER_STANDARD', 'u_new_sebo_postreact']],
 			['permission.permission_set', ['REGISTERED', 'u_new_sebo_postreact', 'group', 1]],
 			['permission.permission_set', ['ADMINISTRATORS', 'u_new_sebo_postreact', 'group', 1]],
 			['permission.permission_set', ['GLOBAL_MODERATORS', 'u_new_sebo_postreact', 'group', 1]],
@@ -35,8 +35,8 @@ class install_data extends \phpbb\db\migration\migration
 			['permission.permission_set', ['BOTS', 'u_new_sebo_postreact', 'group', false]],
 			['permission.permission_set', ['REGISTERED_COPPA', 'u_new_sebo_postreact', 'group', false]],
 			// All view
-			['permission.permission_set', ['ROLE_USER_FULL', 'u_new_sebo_postreact_view', 1]],
-			['permission.permission_set', ['ROLE_USER_STANDARD', 'u_new_sebo_postreact_view', 1]],
+			['permission.permission_set', ['ROLE_USER_FULL', 'u_new_sebo_postreact_view']],
+			['permission.permission_set', ['ROLE_USER_STANDARD', 'u_new_sebo_postreact_view']],
 			['permission.permission_set', ['REGISTERED', 'u_new_sebo_postreact_view', 'group', 1]],
 			['permission.permission_set', ['ADMINISTRATORS', 'u_new_sebo_postreact_view', 'group', 1]],
 			['permission.permission_set', ['GLOBAL_MODERATORS', 'u_new_sebo_postreact_view', 'group', 1]],

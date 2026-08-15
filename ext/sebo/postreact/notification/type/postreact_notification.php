@@ -56,12 +56,17 @@ class postreact_notification extends \phpbb\notification\type\base
 	}
 
 	/**
-	 * ID Item
-	 * must be (INT), otherwise ajax error
+	 * Use the reaction table's auto-increment postreact_id (or, for users
+	 * with the "notify once per post" preference, post_id) as the
+	 * notification item_id. This MUST stay consistent with the value
+	 * stored by create_insert_array() below, since this is what phpBB
+	 * uses to detect an existing notification before deciding whether to
+	 * insert a new row or update one, and what delete_notifications()
+	 * matches against.
 	 */
 	public static function get_item_id($data)
 	{
-		return isset($data['item_id']) ? (int) $data['item_id'] : (isset($data['PR_N_item_id']) ? (int) $data['PR_N_item_id'] : 0);
+		return isset($data['postreact_id']) ? (int) $data['postreact_id'] : 0;
 	}
 
 	public static function get_item_parent_id($data)
@@ -157,7 +162,10 @@ class postreact_notification extends \phpbb\notification\type\base
 
 	public function get_url()
 	{
-		$post_id = $this->get_data('item_id');
+		// item_id is now the postreact_id (or post_id in "once per post"
+		// mode), not necessarily the post_id itself, so the actual post_id
+		// is kept separately in the 'real_post_id' data field.
+		$post_id = $this->get_data('real_post_id');
 		if (!$post_id)
 		{
 			$post_id = $this->get_data('PR_N_post_id');
@@ -205,7 +213,14 @@ class postreact_notification extends \phpbb\notification\type\base
 
 	public function create_insert_array($data, $pre_create_data = [])
 	{
-		$this->set_data('item_id', $data['PR_N_post_id']);
+		// Must match get_item_id() above: postreact_id when known (every-
+		// reaction mode, or the "once per post" post_id already resolved
+		// into it by notification_helper), falling back to post_id for
+		// any legacy caller that doesn't set it.
+		$this->set_data('item_id', isset($data['postreact_id']) ? (int) $data['postreact_id'] : (int) $data['PR_N_post_id']);
+		// item_id above is no longer guaranteed to equal the post_id (see
+		// get_url()), so keep the real post_id around separately.
+		$this->set_data('real_post_id', (int) $data['PR_N_post_id']);
 		$this->set_data('user_id', $data['PR_N_user_id']);
 		$this->set_data('item_parent_id', $data['PR_N_topic_id']);
 		$this->set_data('sender_id', $data['PR_N_sender_id']);
