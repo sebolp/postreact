@@ -22,4 +22,7 @@ $lang = array_merge($lang, [
 	'NOTIFICATION_TYPE_POSTREACT'	=> 'Qualcuno ha reagito a un tuo post',
 	'UCP_POSTREACT_TITLE'			=> 'PostReaction',
 	'UCP_POSTREACT_EXPLAIN'		=> 'Scegli come PostReaction ti avvisa quando qualcuno reagisce ai tuoi post.',
+	'POSTREACT_NOTIFY_MODE' => 'Raggruppa le notifiche per post, non notificare ogni reazione ricevuta.',
+	'POSTREACT_NOTIFY_MODE_EXPLAIN' => 'Se abilitata, reazioni multiple sullo stesso messaggio producono una singola notifica invece di una per ogni reazione.',
+	'POSTREACT_NOTIFY_MODE_EXPLAIN_BOTTOM' => 'In entrambi i casi, per poterle ricevere, le notifiche devono essere abilitate nella scheda "Modifica opzioni di notifica".',
 ]);
