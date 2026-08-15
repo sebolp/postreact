@@ -12,6 +12,17 @@
             "homepage": "https://www.fiatpandaclub.org",
             "role": "Lead Developer"
         }
+        ,
+        {
+            "name": "AI",
+            "role": "Co-dev, let's give it credit!"
+        }
+        ,
+        {
+            "name": "idontwantyourspamthanks",
+            "role": "Suggestions on GitHub, thanks!",
+            "homepage": "https://github.com/idontwantyourspamthanks/"
+        }
     ],
     "require": {
         "php": ">=8.1",
