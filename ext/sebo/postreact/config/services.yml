@@ -123,6 +123,14 @@ services:
         tags:
             - { name: event.listener }
 
+    sebo.postreact.listener.sort:
+        class: sebo\postreact\event\sort_listener
+        arguments:
+            - '%core.table_prefix%'
+            - '@language'
+        tags:
+            - { name: event.listener }
+
     sebo.postreact.notification.type.postreact_notification:
         class: sebo\postreact\notification\type\postreact_notification
         shared: false
