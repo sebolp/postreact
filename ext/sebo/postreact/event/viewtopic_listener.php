@@ -41,6 +41,8 @@ class viewtopic_listener implements EventSubscriberInterface
 	protected $icon_manager;
 	/** @var \phpbb\template\template */
 	protected $template;
+	/** @var \phpbb\phpbb\language\language */
+	protected $language;
 
 	/** @var array [post_id => bool] which post_ids have already been batch-loaded */
 	protected $loaded_post_ids = [];
@@ -57,6 +59,7 @@ class viewtopic_listener implements EventSubscriberInterface
 			'core.viewtopic_assign_template_vars_before' => 'preload_icons',
 			'core.viewtopic_get_post_data'                => 'preload_reactions',
 			'core.viewtopic_modify_post_row'              => 'assign_to_template',
+			'core.js_load_language'                       => 'load_js_language',
 		];
 	}
 
@@ -67,7 +70,8 @@ class viewtopic_listener implements EventSubscriberInterface
 		\phpbb\auth\auth $auth,
 		\phpbb\config\config $config,
 		icon_manager $icon_manager,
-		\phpbb\template\template $template
+		\phpbb\template\template $template,
+		\phpbb\language\language $language
 	)
 	{
 		$this->db = $db;
@@ -77,6 +81,7 @@ class viewtopic_listener implements EventSubscriberInterface
 		$this->config = $config;
 		$this->icon_manager = $icon_manager;
 		$this->template = $template;
+		$this->language = $language;
 	}
 
 	/**
@@ -87,6 +92,15 @@ class viewtopic_listener implements EventSubscriberInterface
 		$this->icon_manager->get_icons();
 		// Generate token
 		$this->template->assign_var('POSTREACT_CSRF_TOKEN', generate_link_hash('postreact_ajax'));
+	}
+
+	public function load_js_language($event)
+	{
+		$event['lang_array'] = array_merge($event['lang_array'], [
+			'POSTREACTION_AJAX_ERROR' => $this->language->lang('POSTREACTION_AJAX_ERROR'),
+			'POSTREACTION_JSON_ERROR' => $this->language->lang('POSTREACTION_JSON_ERROR'),
+			'POSTREACTION_CSRF_ERROR' => $this->language->lang('POSTREACTION_CSRF_ERROR'),
+		]);
 	}
 
 	/**

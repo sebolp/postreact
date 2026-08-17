@@ -332,16 +332,16 @@ $(document).ready(function() {
 					}
 
 				} catch(e) {
-					alert(phpbb.lang('POSTREACTION_JSON_ERROR'));
+					alert(phpbb.lang.POSTREACTION_JSON_ERROR);
 				}
 			},
 			error: function(xhr, status, error) {
 				if (xhr.status === 403) {
-				alert(phpbb.lang('POSTREACTION_CSRF_ERROR'));
+					alert(phpbb.lang.POSTREACTION_CSRF_ERROR);
 				}
 				else
 				{
-				alert(phpbb.lang('POSTREACTION_AJAX_ERROR'));
+					alert(phpbb.lang.POSTREACTION_AJAX_ERROR);
 				}
 			}
 		});

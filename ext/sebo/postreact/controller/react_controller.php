@@ -295,9 +295,9 @@ class react_controller
 		$icon_id	= $this->request->variable('icon_id', 0);
 		$user_id	= (int) $this->user->data['user_id'];
 
-		// check forum access per user
+		// Check forum access per user using standard phpBB syntax
 		$sql_array = [
-			'SELECT'	=> 'p.poster_id, p.forum_id, p.post_approved',
+			'SELECT'	=> 'p.poster_id, p.forum_id, p.post_visibility',
 			'FROM'		=> [$this->table_prefix . 'posts' => 'p'],
 			'WHERE'		=> 'p.post_id = ' . (int) $post_id,
 		];
@@ -307,25 +307,28 @@ class react_controller
 		$post_data = $this->db->sql_fetchrow($result);
 		$this->db->sql_freeresult($result);
 
-		// post must exist
+		// Post must exist
 		if (!$post_data)
 		{
 			return $this->send_json_response(false, 'NO_POST');
 		}
 
 		$forum_id = (int) $post_data['forum_id'];
-		$post_approved = (int) $post_data['post_approved'];
+		$post_visibility = (int) $post_data['post_visibility'];
 
-		// check f_read
+		// Check f_read permission
 		if (!$this->auth->acl_get('f_read', $forum_id))
 		{
 			return $this->send_json_response(false, 'NO_VIEW_FORUM');
 		}
 
-		// if not approved user must have m_approve
-		if ($post_approved === 0 && !$this->auth->acl_get('m_approve', $forum_id))
+		// If post is not approved, user must have m_approve permissions
+		if ($post_visibility !== ITEM_APPROVED)
 		{
-			return $this->send_json_response(false, 'NO_POST');
+			if (!$this->auth->acl_get('m_approve', $forum_id))
+			{
+				return $this->send_json_response(false, 'NO_POST');
+			}
 		}
 
 		$existing_reaction = $this->check_existing_reaction($user_id, $post_id);
