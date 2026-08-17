@@ -180,13 +180,14 @@ $(document).ready(function() {
 		var icon_width  = $(this).data('icon_width');
 		var icon_alt  = $(this).data('icon_alt');
 		var reacted_language = $(this).data('reacted_language');
+		var token       = $(this).data('token');
 
 		$.ajax({
 			/*url: root_path + 'postreact/ajax',*/
-			url: postreact_ajax_url, /*to be tested*/
+			url: postreact_ajax_url,
 			method: 'POST',
 			dataType: 'text',
-			data: { post_id, topic_id, icon_id, icon_alt, icon_height, icon_width, reacted_language},
+			data: { post_id, topic_id, icon_id, icon_alt, icon_height, icon_width, reacted_language, token},
 			success: function(response) {
 				try {
 					var res = JSON.parse(response);
@@ -335,7 +336,13 @@ $(document).ready(function() {
 				}
 			},
 			error: function(xhr, status, error) {
+				if (xhr.status === 403) {
+				alert(phpbb.lang('POSTREACTION_CSRF_ERROR'));
+				}
+				else
+				{
 				alert(phpbb.lang('POSTREACTION_AJAX_ERROR'));
+				}
 			}
 		});
 	});

@@ -84,6 +84,7 @@ services:
             - '@auth'
             - '@config'
             - '@sebo.postreact.service.icon_manager'
+            - '@template'
         tags:
             - { name: event.listener }
 

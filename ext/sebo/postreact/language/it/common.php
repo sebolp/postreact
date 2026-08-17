@@ -54,5 +54,6 @@ $lang = array_merge($lang, [
 	'PR_MEMBERLIST_NO_REACTIONS_RECEIVED' => 'Nessuna reazione ricevuta da questo utente',
 	/* > 2.6.0 */
 	'PR_SORT_BY_REACTION' => 'Reactions',
-
+	'POSTREACTION_CSRF_ERROR' => 'Sessione scaduta o non valida. Ricarica la pagina e riprova.',
+	'PR_INVALID_PATH'	=> 'Caratteri non validi rilevati per l\'icona ID %s.',
 ]);

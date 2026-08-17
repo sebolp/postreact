@@ -39,6 +39,8 @@ class viewtopic_listener implements EventSubscriberInterface
 	protected $config;
 	/** @var icon_manager */
 	protected $icon_manager;
+	/** @var \phpbb\template\template */
+	protected $template;
 
 	/** @var array [post_id => bool] which post_ids have already been batch-loaded */
 	protected $loaded_post_ids = [];
@@ -64,7 +66,8 @@ class viewtopic_listener implements EventSubscriberInterface
 		$table_prefix,
 		\phpbb\auth\auth $auth,
 		\phpbb\config\config $config,
-		icon_manager $icon_manager
+		icon_manager $icon_manager,
+		\phpbb\template\template $template
 	)
 	{
 		$this->db = $db;
@@ -73,6 +76,7 @@ class viewtopic_listener implements EventSubscriberInterface
 		$this->auth = $auth;
 		$this->config = $config;
 		$this->icon_manager = $icon_manager;
+		$this->template = $template;
 	}
 
 	/**
@@ -81,6 +85,8 @@ class viewtopic_listener implements EventSubscriberInterface
 	public function preload_icons($event)
 	{
 		$this->icon_manager->get_icons();
+		// Generate token
+        $this->template->assign_var('POSTREACT_CSRF_TOKEN', generate_link_hash('postreact_ajax'));
 	}
 
 	/**

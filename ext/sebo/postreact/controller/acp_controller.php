@@ -134,6 +134,11 @@ class acp_controller
 		$action = $this->request->variable('action', '');
 		if ($action === 'move_up' || $action === 'move_down')
 		{
+			// CSRF check
+			if (!check_link_hash($this->request->variable('link_hash', ''), 'move_pr'))
+			{
+				trigger_error($this->language->lang('FORM_INVALID') . adm_back_link($this->u_action), E_USER_WARNING);
+			}
 			$move_id = $this->request->variable('id', 0);
 
 			// Load all icons ordered by icon_order
@@ -212,9 +217,19 @@ class acp_controller
 		}
 		// ##
 		// check if adding icon
-		$add_pr = $this->request->variable('add_pr', 0, false);
-		if ($add_pr === 1)
+		if ($this->request->is_set('add_pr'))
 		{
+			$add_pr = $this->request->variable('add_pr', 0);
+			if ($add_pr !== 1)
+			{
+				redirect($this->u_action);
+			}	
+			// CSRF Check
+			if (!check_link_hash($this->request->variable('link_hash', ''), 'add_pr'))
+			{
+				trigger_error($this->language->lang('FORM_INVALID') . adm_back_link($this->u_action), E_USER_WARNING);
+			}
+
 			$sql_array = [
 				'SELECT'    => 'icon_id',
 				'FROM'      => [$this->table_prefix . 'sebo_postreact_icon' => ''],
@@ -224,7 +239,7 @@ class acp_controller
 			$result_last = $this->db->sql_query_limit($sql_last, 1);
 			$last_id = $this->db->sql_fetchrow($result_last);
 			$this->db->sql_freeresult($result_last);
-			$new_id = $last_id['icon_id'] + 1;
+			$new_id = ($last_id) ? ($last_id['icon_id'] + 1) : 1;
 			// Get max icon_order for new icon
 			// Build the query array to fetch the maximum icon_order value
 			$sql_array = [
@@ -259,9 +274,15 @@ class acp_controller
 		}
 		//##
 		// check if deleting icon
-		$remove_pr = $this->request->variable('remove_pr', 0, false);
-		if ($remove_pr != null)
+		if ($this->request->is_set('remove_pr'))
 		{
+			$remove_pr = $this->request->variable('remove_pr', 0);
+			// CSRF check
+			if (!check_link_hash($this->request->variable('link_hash', ''), 'remove_pr'))
+			{
+				trigger_error($this->language->lang('FORM_INVALID') . adm_back_link($this->u_action), E_USER_WARNING);
+			}
+
 			$sql_remove = 'DELETE FROM ' . $this->table_prefix . 'sebo_postreact_icon
 								WHERE icon_id = ' . (int) $remove_pr;
 			$result_remove = $this->db->sql_query($sql_remove);
@@ -284,8 +305,8 @@ class acp_controller
 		{
 			$ico['S_FIRST_ROW'] = ($idx === 0);
 			$ico['S_LAST_ROW']  = ($idx === $total_icons - 1);
-			$ico['U_MOVE_UP']   = $this->u_action . '&action=move_up&id=' . $ico['icon_id'];
-			$ico['U_MOVE_DOWN'] = $this->u_action . '&action=move_down&id=' . $ico['icon_id'];
+			$ico['U_MOVE_UP']   = append_sid($this->u_action, 'action=move_up&id=' . $ico['icon_id'] . '&link_hash=' . generate_link_hash('move_pr'));
+			$ico['U_MOVE_DOWN'] = append_sid($this->u_action, 'action=move_down&id=' . $ico['icon_id'] . '&link_hash=' . generate_link_hash('move_pr'));
 		}
 		unset($ico);
 		// ## main one
@@ -334,6 +355,18 @@ class acp_controller
 				}
 				foreach ($icon_ids as $icon_id)
 				{
+					// remove extremes
+					$raw_url = trim($this->request->variable('icon_url_' . (int) $icon_id, ''));
+					// only simple car, no double . to prevent upgoing in path
+					if ($raw_url !== '' && (
+						preg_match('#(^|/)\.\.(/|$)#', $raw_url) || 
+						$raw_url[0] === '/' || 
+						!preg_match('#^[a-z0-9_\-./]+$#i', $raw_url)
+					))
+					{
+						trigger_error($this->language->lang('PR_INVALID_PATH', (int) $icon_id) . adm_back_link($this->u_action), E_USER_WARNING);
+					}
+
 					// grab variables
 					$update_data[$icon_id] = [
 						'url' => $this->request->variable('icon_url_' . (int) $icon_id, ''),
@@ -390,8 +423,8 @@ class acp_controller
 			}
 		}
 		// Create urlS
-		$delete_url = $this->u_action . '&remove_pr=';
-		$create_url = $this->u_action . '&add_pr=1';
+		$delete_url = append_sid($this->u_action, 'link_hash=' . generate_link_hash('remove_pr')) . '&remove_pr=';
+		$create_url = append_sid($this->u_action, 'add_pr=1&link_hash=' . generate_link_hash('add_pr'));
 		$s_errors = !empty($errors);
 
 		$this->template->assign_vars([

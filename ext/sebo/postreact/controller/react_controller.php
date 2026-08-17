@@ -269,6 +269,13 @@ class react_controller
 			throw new \phpbb\exception\http_exception(403, 'NO_DIRECT_ACCESS');
 		}
 
+		/* Token check */
+		$token = $this->request->variable('token', '');
+		if (!check_link_hash($token, 'postreact_ajax'))
+		{
+			throw new \phpbb\exception\http_exception(403, 'FORM_INVALID');
+		}
+
 		// Deny anonymous users
 		if ($this->user->data['user_id'] == ANONYMOUS)
 		{
@@ -288,6 +295,39 @@ class react_controller
 		$icon_id	= $this->request->variable('icon_id', 0);
 		$user_id	= (int) $this->user->data['user_id'];
 
+		// check forum access per user
+		$sql_array = [
+			'SELECT'	=> 'p.poster_id, p.forum_id, p.post_approved',
+			'FROM'		=> [$this->table_prefix . 'posts' => 'p'],
+			'WHERE'		=> 'p.post_id = ' . (int) $post_id,
+		];
+
+		$sql = $this->db->sql_build_query('SELECT', $sql_array);
+		$result = $this->db->sql_query($sql);
+		$post_data = $this->db->sql_fetchrow($result);
+		$this->db->sql_freeresult($result);
+
+		// post must exist
+		if (!$post_data)
+		{
+			return $this->send_json_response(false, 'NO_POST');
+		}
+
+		$forum_id = (int) $post_data['forum_id'];
+		$post_approved = (int) $post_data['post_approved'];
+
+		// check f_read
+		if (!$this->auth->acl_get('f_read', $forum_id))
+		{
+			return $this->send_json_response(false, 'NO_VIEW_FORUM');
+		}
+
+		// if not approved user must have m_approve
+		if ($post_approved === 0 && !$this->auth->acl_get('m_approve', $forum_id))
+		{
+			return $this->send_json_response(false, 'NO_POST');
+		}
+
 		$existing_reaction = $this->check_existing_reaction($user_id, $post_id);
 
 		if ($existing_reaction > 0)
@@ -296,24 +336,10 @@ class react_controller
 		}
 		else
 		{
-			$sql_array = [
-				'SELECT'	=> 'poster_id',
-				'FROM'		=> [$this->table_prefix . 'posts' => ''],
-				'WHERE'		=> 'post_id = ' . (int) $post_id,
-			];
-
-			$sql_check_poster = $this->db->sql_build_query('SELECT', $sql_array);
-			$result_check_poster = $this->db->sql_query($sql_check_poster);
-			$row_check_poster = $this->db->sql_fetchrow($result_check_poster);
-			$this->db->sql_freeresult($result_check_poster);
-
-			if ($row_check_poster)
+			$config_self_react = isset($this->config['sebo_postreact_self_react']) ? (int) $this->config['sebo_postreact_self_react'] : 0;
+			if ($config_self_react === 1 && (int) $post_data['poster_id'] === $user_id)
 			{
-				$config_self_react = isset($this->config['sebo_postreact_self_react']) ? (int) $this->config['sebo_postreact_self_react'] : 0;
-				if ($config_self_react === 1 && (int) $row_check_poster['poster_id'] === $user_id)
-				{
-					return $this->send_json_response(false, $this->language->lang('CANNOT_SELF_REACT'));
-				}
+				return $this->send_json_response(false, $this->language->lang('CANNOT_SELF_REACT'));
 			}
 
 			return $this->add_reaction($user_id, $post_id, $topic_id, $icon_id);
