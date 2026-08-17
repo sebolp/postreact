@@ -223,7 +223,7 @@ class acp_controller
 			if ($add_pr !== 1)
 			{
 				redirect($this->u_action);
-			}	
+			}
 			// CSRF Check
 			if (!check_link_hash($this->request->variable('link_hash', ''), 'add_pr'))
 			{
@@ -359,8 +359,8 @@ class acp_controller
 					$raw_url = trim($this->request->variable('icon_url_' . (int) $icon_id, ''));
 					// only simple car, no double . to prevent upgoing in path
 					if ($raw_url !== '' && (
-						preg_match('#(^|/)\.\.(/|$)#', $raw_url) || 
-						$raw_url[0] === '/' || 
+						preg_match('#(^|/)\.\.(/|$)#', $raw_url) ||
+						$raw_url[0] === '/' ||
 						!preg_match('#^[a-z0-9_\-./]+$#i', $raw_url)
 					))
 					{

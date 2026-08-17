@@ -86,7 +86,7 @@ class viewtopic_listener implements EventSubscriberInterface
 	{
 		$this->icon_manager->get_icons();
 		// Generate token
-        $this->template->assign_var('POSTREACT_CSRF_TOKEN', generate_link_hash('postreact_ajax'));
+		$this->template->assign_var('POSTREACT_CSRF_TOKEN', generate_link_hash('postreact_ajax'));
 	}
 
 	/**
