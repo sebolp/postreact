@@ -1,5 +1,0 @@
-sebo_postreact_ajax:
-    path: /postreact/ajax
-    defaults:
-        _controller: sebo.postreact.controller.react_controller:handle
-    methods: [POST]
