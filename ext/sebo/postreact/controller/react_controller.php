@@ -336,8 +336,8 @@ class react_controller
 		{
 			$sql_access = 'SELECT forum_id
 				FROM ' . FORUMS_ACCESS_TABLE . '
-				WHERE forum_id = ' . (int)$forum_id . '
-					AND user_id = ' . (int)$user_id . "
+				WHERE forum_id = ' . (int) $forum_id . '
+					AND user_id = ' . (int) $user_id . "
 					AND session_id = '" . $this->db->sql_escape($this->user->session_id) . "'";
 			$result_access = $this->db->sql_query($sql_access);
 			$row_access = $this->db->sql_fetchrow($result_access);
