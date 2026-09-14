@@ -94,6 +94,12 @@ class notification_helper
 			return;
 		}
 
+		// Don't notify users about their own reactions
+		if ($user_id_logged === (int) $row_post['poster_id_clean'])
+		{
+			return;
+		}
+
 		// get icon infos
 		$sql_array = [
 			'SELECT' => '*',

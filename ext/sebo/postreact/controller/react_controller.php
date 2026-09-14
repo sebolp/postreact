@@ -85,7 +85,7 @@ class react_controller
 
 		if (!$existing_reaction)
 		{
-			return $this->send_json_response(false, 'PR_NO_REACTION_TO_REMOVE');
+		return $this->send_json_response(false, $this->language->lang('PR_NO_REACTION_TO_REMOVE'));
 		}
 
 		$removed_icon_id = $existing_reaction['icon_id'];
@@ -118,7 +118,7 @@ class react_controller
 		}
 		else
 		{
-			return $this->send_json_response(false, 'PR_ERROR_REMOVING_REACTION');
+		return $this->send_json_response(false, $this->language->lang('PR_ERROR_REMOVING_REACTION'));
 		}
 	}
 
@@ -295,10 +295,16 @@ class react_controller
 		$icon_id	= $this->request->variable('icon_id', 0);
 		$user_id	= (int) $this->user->data['user_id'];
 
-		// Check forum access per user using standard phpBB syntax
+		// Check forum access and topic id per user using standard phpBB syntax
 		$sql_array = [
-			'SELECT'	=> 'p.poster_id, p.forum_id, p.post_visibility',
+			'SELECT'	=> 'p.poster_id, p.forum_id, p.post_visibility, p.topic_id, f.forum_password',
 			'FROM'		=> [$this->table_prefix . 'posts' => 'p'],
+			'LEFT_JOIN'	=> [
+				[
+					'FROM'	=> [$this->table_prefix . 'forums' => 'f'],
+					'ON'	=> 'p.forum_id = f.forum_id',
+				],
+			],
 			'WHERE'		=> 'p.post_id = ' . (int) $post_id,
 		];
 
@@ -310,16 +316,37 @@ class react_controller
 		// Post must exist
 		if (!$post_data)
 		{
-			return $this->send_json_response(false, 'NO_POST');
+			return $this->send_json_response(false, $this->language->lang('PR_NO_POST'));
 		}
 
+		// Never trust topic_id from the client: always derive it from the post row
+		$topic_id = (int) $post_data['topic_id'];
 		$forum_id = (int) $post_data['forum_id'];
 		$post_visibility = (int) $post_data['post_visibility'];
 
 		// Check f_read permission
 		if (!$this->auth->acl_get('f_read', $forum_id))
 		{
-			return $this->send_json_response(false, 'NO_VIEW_FORUM');
+			return $this->send_json_response(false, $this->language->lang('PR_NO_VIEW_FORUM'));
+		}
+
+		// If the forum is password protected, the user's session must already
+		// be authorised for it (same check phpBB core performs in login_forum_box())
+		if ($post_data['forum_password'])
+		{
+			$sql_access = 'SELECT forum_id
+				FROM ' . FORUMS_ACCESS_TABLE . '
+				WHERE forum_id = ' . $forum_id . '
+					AND user_id = ' . $user_id . "
+					AND session_id = '" . $this->db->sql_escape($this->user->session_id) . "'";
+			$result_access = $this->db->sql_query($sql_access);
+			$row_access = $this->db->sql_fetchrow($result_access);
+			$this->db->sql_freeresult($result_access);
+
+			if (!$row_access)
+			{
+				return $this->send_json_response(false, $this->language->lang('PR_NO_VIEW_FORUM'));
+			}
 		}
 
 		// If post is not approved, user must have m_approve permissions
@@ -327,7 +354,7 @@ class react_controller
 		{
 			if (!$this->auth->acl_get('m_approve', $forum_id))
 			{
-				return $this->send_json_response(false, 'NO_POST');
+				return $this->send_json_response(false, $this->language->lang('PR_NO_POST'));
 			}
 		}
 

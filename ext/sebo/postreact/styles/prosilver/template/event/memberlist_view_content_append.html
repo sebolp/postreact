@@ -1,4 +1,4 @@
-<!-- INCLUDECSS @sebo_postreact/main.css -->
+{% INCLUDECSS '@sebo_postreact/main.css' %}
 <div class="panel bg2">
 	<div class="inner">
 		<div class="column1">
@@ -8,7 +8,7 @@
 				<div class="bubble_post_react_display">
 					{{ user_reactions_received.ICON_COUNT }}
 				</div>
-				<a href="{{ U_SEARCH }}?search_id=sebo_user_reactions&amp;u={{ user_reactions_received.USER_ID }}&amp;icon_id={{ user_reactions_received.ICON_ID }}&amp;mode=received">
+				<a href="{{ user_reactions_received.U_SEARCH }}">
 					<img src="{{ user_reactions_received.ICON_URL }}" title="{{ user_reactions_received.ICON_ALT }}" alt="{{ user_reactions_received.ICON_ALT }}" width="{{ user_reactions_received.ICON_WIDTH }}" height="{{ user_reactions_received.ICON_HEIGHT }}">
 				</a>
 			</div>
@@ -23,7 +23,7 @@
 				<div class="bubble_post_react_display">
 					{{ user_reactions.ICON_COUNT }}
 				</div>
-				<a href="{{ U_SEARCH }}?search_id=sebo_user_reactions&amp;u={{ user_reactions.USER_ID }}&amp;icon_id={{ user_reactions.ICON_ID }}&amp;mode=sent">
+				<a href="{{ user_reactions.U_SEARCH }}">
 					<img src="{{ user_reactions.ICON_URL }}" title="{{ user_reactions.ICON_ALT }}" alt="{{ user_reactions.ICON_ALT }}" width="{{ user_reactions.ICON_WIDTH }}" height="{{ user_reactions.ICON_HEIGHT }}">
 				</a>
 			</div>

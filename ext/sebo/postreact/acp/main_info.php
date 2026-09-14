@@ -26,11 +26,6 @@ class main_info
 					'auth'	=> 'ext_sebo/postreact && acl_a_board',
 					'cat'	=> ['ACP_POSTREACT_TITLE'],
 				],
-				'purge'	=> [
-					'title'	=> 'ACP_POSTREACT_PURGE',
-					'auth'	=> 'ext_sebo/postreact && acl_a_board',
-					'cat'	=> ['ACP_POSTREACT_TITLE'],
-				],
 			],
 		];
 	}

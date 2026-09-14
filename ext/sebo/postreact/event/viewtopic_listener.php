@@ -59,7 +59,6 @@ class viewtopic_listener implements EventSubscriberInterface
 			'core.viewtopic_assign_template_vars_before' => 'preload_icons',
 			'core.viewtopic_get_post_data'                => 'preload_reactions',
 			'core.viewtopic_modify_post_row'              => 'assign_to_template',
-			'core.js_load_language'                       => 'load_js_language',
 		];
 	}
 
@@ -92,15 +91,6 @@ class viewtopic_listener implements EventSubscriberInterface
 		$this->icon_manager->get_icons();
 		// Generate token
 		$this->template->assign_var('POSTREACT_CSRF_TOKEN', generate_link_hash('postreact_ajax'));
-	}
-
-	public function load_js_language($event)
-	{
-		$event['lang_array'] = array_merge($event['lang_array'], [
-			'POSTREACTION_AJAX_ERROR' => $this->language->lang('POSTREACTION_AJAX_ERROR'),
-			'POSTREACTION_JSON_ERROR' => $this->language->lang('POSTREACTION_JSON_ERROR'),
-			'POSTREACTION_CSRF_ERROR' => $this->language->lang('POSTREACTION_CSRF_ERROR'),
-		]);
 	}
 
 	/**

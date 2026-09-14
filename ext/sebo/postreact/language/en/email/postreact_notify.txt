@@ -1,8 +1,8 @@
 Subject: New reaction to your post: {POST_SUBJECT}
 
-Hi {AUTHOR_NAME},
+Hi {USERNAME},
 
-Someone reacted to your post "{POST_SUBJECT}" on "{SITENAME}".
+{AUTHOR_NAME} reacted to your post "{POST_SUBJECT}" on "{SITENAME}".
 
 You can see the reaction here:
 {U_TOPIC}

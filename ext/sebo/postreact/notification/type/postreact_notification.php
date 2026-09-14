@@ -35,6 +35,11 @@ class postreact_notification extends \phpbb\notification\type\base
 		$this->table_prefix = $table_prefix;
 	}
 
+	public function set_config(\phpbb\config\config $config)
+	{
+		$this->config = $config;
+	}
+
 	public function set_user_loader(\phpbb\user_loader $user_loader)
 	{
 		$this->user_loader = $user_loader;
@@ -123,7 +128,7 @@ class postreact_notification extends \phpbb\notification\type\base
 
 		$username = $this->user_loader->get_username($sender_id, 'no_profile');
 
-		// --- NEW LOGIC: Retrieve Emoji from DB ---
+		// Retrieve Emoji from DB
 		$emoji = '';
 
 		$filename = basename($icon);
@@ -146,7 +151,7 @@ class postreact_notification extends \phpbb\notification\type\base
 
 			if ($row)
 			{
-				$emoji = html_entity_decode($row['icon_emoji']);
+				$emoji = $row['icon_emoji'];
 			}
 		}
 
@@ -156,7 +161,7 @@ class postreact_notification extends \phpbb\notification\type\base
 			$hidden_emoji = '<span style="display:none;">' . $emoji . ' </span>';
 		}
 
-		return $hidden_emoji . '<img src="' . $icon . '" style="width:32px !important;height:32px !important;"> '
+		return $hidden_emoji . '<img src="' . $this->phpbb_root_path . $icon . '" style="width:32px !important;height:32px !important;"> '
 			. $this->language->lang('SEBO_POSTREACT_NOTIFICATION', $username, $post_title);
 	}
 
@@ -196,7 +201,7 @@ class postreact_notification extends \phpbb\notification\type\base
 		}
 
 		$username = htmlspecialchars_decode($this->user_loader->get_username($this->get_data('sender_id'), 'username'));
-		$url = generate_board_url() . $this->get_url();
+		$url = generate_board_url() . '/viewtopic.' . $this->php_ext . '?p=' . $post_id . '#p' . $post_id;
 		$sitename = isset($this->config['sitename']) ? $this->config['sitename'] : 'Forum';
 
 		return [
@@ -218,8 +223,6 @@ class postreact_notification extends \phpbb\notification\type\base
 		// into it by notification_helper), falling back to post_id for
 		// any legacy caller that doesn't set it.
 		$this->set_data('item_id', isset($data['postreact_id']) ? (int) $data['postreact_id'] : (int) $data['PR_N_post_id']);
-		// item_id above is no longer guaranteed to equal the post_id (see
-		// get_url()), so keep the real post_id around separately.
 		$this->set_data('real_post_id', (int) $data['PR_N_post_id']);
 		$this->set_data('user_id', $data['PR_N_user_id']);
 		$this->set_data('item_parent_id', $data['PR_N_topic_id']);

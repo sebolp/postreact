@@ -39,8 +39,6 @@ $lang = array_merge($lang, [
 	'ACP_POSTREACT_SETTING_SAVED'		=> 'Settings saved.',
 	'ACP_POSTREACT_SETTING_NOT_SAVED'	=> 'OOPSSS! something wrong.',
 	'POSTREACT_FAILED_ICONS'			=> 'Icons that failed to save',
-	'LOG_ACP_POSTREACT_SETTINGS'		=> '<strong>PostReaction settings updated</strong>',
-	'NOT_AVAILABLE'						=> 'Still not available',
 	'DELETE_WARNING'					=> 'Are you sure you want to delete this icon? This cannot be undone.',
 	'DELETE_DELETE'						=> 'Confirm',
 	'DELETE_UNDONE'						=> 'Cancel',
@@ -59,8 +57,8 @@ $lang = array_merge($lang, [
 	'PURGE_IT'				=> 'Delete data',
 	'SYNC_IT'				=> 'Synchronize data',
 	'PR_SYNCSYSTEM_UPDATED'	=> 'Database synchronization successful!<br>Removed <strong>%d</strong> reactions.<br><em>The query took %s seconds.</em>',
-	'PR_PURGESYSTEM_UPDATED' => 'Database was succefully purged.<br>Removed <strong>%d</strong> reactions.<br><em>The query took %s seconds.</em>',
-	'PR_PURGEICOSYSTEM_UPDATED' => 'Database was succefully purged.<br>Removed <strong>%d</strong> icons.<br><em>The query took %s seconds.</em>',
+	'PR_PURGESYSTEM_UPDATED' => 'Database was successfully purged.<br>Removed <strong>%d</strong> reactions.<br><em>The query took %s seconds.</em>',
+	'PR_PURGEICOSYSTEM_UPDATED' => 'Database was successfully purged.<br>Removed <strong>%d</strong> icons.<br><em>The query took %s seconds.</em>',
 	/* > 2.1 */
 	'CONFIG_SETTINGS'		=> 'General Settings',
 	'ICON_SETTINGS'			=> 'Icon settings',
@@ -85,9 +83,9 @@ $lang = array_merge($lang, [
 	'RETURN_ACP'			=> '<a href="%s">Back to the ACP module</a>',
 	/* >2.5 */
 	/* for translators: edited in 2.5.0 'HOW_TO' lang key line 74, added "and search pages" for emojis use */
-	'MOVE'			=> 'Order',
-	'MOVE_UP'		=> 'Move Up',
-	'MOVE_DOWN'		=> 'Move Down',
+	'PR_MOVE'		=> 'Order',
+	'PR_MOVE_UP'	=> 'Move Up',
+	'PR_MOVE_DOWN'	=> 'Move Down',
 	/* >2.5.1 */
 	'PR_PURGE_CONFIRM_OPERATION' => 'Are you sure? This action cannot be undone!',
 	'PR_IF_NOT_PURGE_BEFORE' => 'If you don\'t use the "PR Purge System", the data in the database will not be deleted to prevent unwanted uninstallations.',

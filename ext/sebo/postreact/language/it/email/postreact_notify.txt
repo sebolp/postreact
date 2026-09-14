@@ -1,8 +1,8 @@
 Subject: Nuova reazione al tuo messaggio: {POST_SUBJECT}
 
-Ciao {AUTHOR_NAME},
+Ciao {USERNAME},
 
-Qualcuno ha reagito al tuo messaggio "{POST_SUBJECT}" su "{SITENAME}".
+{AUTHOR_NAME} ha reagito al tuo messaggio "{POST_SUBJECT}" su "{SITENAME}".
 
 Puoi vedere la reazione cliccando qui:
 {U_TOPIC}

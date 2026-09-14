@@ -58,7 +58,7 @@ class ucp_controller
 		{
 			if (!check_form_key('sebo_postreact_ucp'))
 			{
-				trigger_error($this->language->lang('FORM_INVALID') . adm_back_link($this->u_action));
+				trigger_error($this->language->lang('FORM_INVALID') . '<br /><br />' . $this->language->lang('RETURN_UCP', '<a href="' . $this->u_action . '">', '</a>'));
 			}
 
 			$notify_mode = $this->request->variable('postreact_notify_mode', 0) ? 1 : 0;

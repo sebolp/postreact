@@ -1,8 +1,9 @@
 {% include 'overall_header.html' %}
 
-<!-- INCLUDECSS @sebo_postreact/acp_css.css -->
-<!-- INCLUDEJS @sebo_postreact/acp_js.js -->
-<script type="module" src="{EMOJI_JS_PATH}"></script>
+{% INCLUDECSS '@sebo_postreact/acp_css.css' %}
+{% INCLUDEJS '@sebo_postreact/js/acp_js.js' %}
+<script src="{{ EMOJI_MART_PICK_JS_LOCAL_PATH }}"></script>
+<script type="module" src="{{ EMOJI_JS_PATH }}"></script>
 
 <div id="confirm-delete-reaction" class="popup-confirm-delete">
 	<div class="popup-content-delete">
@@ -115,7 +116,7 @@
 		<legend>{{ lang('ICON_SETTINGS') }}</legend>
 		<dl>
 			<dt>
-				<a class="btn btn-danger" href="{CREATE_PR_URL}">
+				<a class="btn btn-danger" href="{{ CREATE_PR_URL }}">
 				<i class="fa fa-plus-circle fa-lg"></i> {{ lang('ADD_PR') }}</a>
 			</dt>
 			<dd>
@@ -145,7 +146,7 @@
 					<th style="text-align: center; width: 50px;">{{ lang('PREVIEW') }}</th>
 					<th>{{ lang('ICON_URL') }}</th>
 					<th>{{ lang('ICON_ALT') }}</th>
-					<th style="text-align: center; width: 60px;">{{ lang('MOVE') }}</th>
+					<th style="text-align: center; width: 60px;">{{ lang('PR_MOVE') }}</th>
 					<th style="text-align: center;">{{ lang('ICON_WIDTH') }} x {{ lang('ICON_HEIGHT') }}</th>
 					<th style="text-align: center;">{{ lang('ICON_EMOJI') }}</th>
 					<th style="text-align: center;">{{ lang('ENABLE_DISABLE') }}</th>
@@ -170,20 +171,20 @@
 
 					<td class="actions" style="text-align: center; white-space: nowrap;">
 						<span class="up-disabled">
-							<i class="icon acp-icon acp-icon-disabled fa-arrow-circle-up fa-fw" title="{{ lang('MOVE_UP') }}"></i>
+							<i class="icon acp-icon acp-icon-disabled fa-arrow-circle-up fa-fw" title="{{ lang('PR_MOVE_UP') }}"></i>
 						</span>
 						<span class="up">
 							<a href="{{ icon.U_MOVE_UP }}" data-ajax="row_up">
-								<i class="icon acp-icon acp-icon-move-up fa-arrow-circle-up fa-fw" title="{{ lang('MOVE_UP') }}"></i>
+								<i class="icon acp-icon acp-icon-move-up fa-arrow-circle-up fa-fw" title="{{ lang('PR_MOVE_UP') }}"></i>
 							</a>
 						</span>
 
 						<span class="down-disabled">
-							<i class="icon acp-icon acp-icon-disabled fa-arrow-circle-down fa-fw" title="{{ lang('MOVE_DOWN') }}"></i>
+							<i class="icon acp-icon acp-icon-disabled fa-arrow-circle-down fa-fw" title="{{ lang('PR_MOVE_DOWN') }}"></i>
 						</span>
 						<span class="down">
 							<a href="{{ icon.U_MOVE_DOWN }}" data-ajax="row_down">
-								<i class="icon acp-icon acp-icon-move-down fa-arrow-circle-down fa-fw" title="{{ lang('MOVE_DOWN') }}"></i>
+								<i class="icon acp-icon acp-icon-move-down fa-arrow-circle-down fa-fw" title="{{ lang('PR_MOVE_DOWN') }}"></i>
 							</a>
 						</span>
 					</td>
@@ -206,7 +207,7 @@
 					</td>
 
 					<td style="text-align: center;">
-						<a href="#" class="delete-reaction" data-url="{DELETE_PR_URL}{{ icon.icon_id }}">
+						<a href="#" class="delete-reaction" data-url="{{ DELETE_PR_URL }}{{ icon.icon_id }}">
 							<i class="fa fa-trash fa-lg pr-delete-icon" alt="{{ lang('DELETE') }}"></i>
 						</a>
 						<input type="hidden" name="icon_ids[]" value="{{ icon.icon_id }}">
@@ -226,6 +227,10 @@
 </form>
 
 <!-- Emoji Picker Container -->
-<div id="emoji-picker-container" data-lang="{{ S_USER_LANG }}" style="display: none; position: fixed; z-index: 9999; margin: 0; padding: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.15);"></div>
+<div id="emoji-picker-container"
+     data-lang="{{ S_USER_LANG }}"
+     data-emoji-data-url="{{ EMOJI_MART_DATA_PATH }}"
+     data-emoji-i18n-base-url="{{ EMOJI_MART_I18N_BASE_PATH }}"
+     style="display: none; position: fixed; z-index: 9999; margin: 0; padding: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.15);"></div>
 
 {% include 'overall_footer.html' %}

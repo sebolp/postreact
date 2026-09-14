@@ -42,7 +42,7 @@ class icon_manager
 	 *                           (needed for display, not needed for raw comparisons)
 	 * @return array
 	 */
-	public function get_icons($decode_emoji = false)
+	public function get_icons()
 	{
 		if ($this->icons_cache === null)
 		{
@@ -65,15 +65,6 @@ class icon_manager
 			}
 
 			$this->icons_cache = $data_ico;
-		}
-
-		if ($decode_emoji)
-		{
-			return array_map(function ($icon)
-			{
-				$icon['icon_emoji'] = html_entity_decode($icon['icon_emoji']);
-				return $icon;
-			}, $this->icons_cache);
 		}
 
 		return $this->icons_cache;

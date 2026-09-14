@@ -19,9 +19,6 @@ class install_data extends \phpbb\db\migration\migration
 	public function update_data()
 	{
 		return [
-			// Add new config table settings
-			['config.add', ['sebo_postreact', 0]],
-			//['config.add', ['sebo_postreact_self_react', 0],
 			// Add new permissions
 			['permission.add', ['u_new_sebo_postreact']],
 			['permission.add', ['u_new_sebo_postreact_view']],
@@ -51,7 +48,6 @@ class install_data extends \phpbb\db\migration\migration
 	public function revert_data()
 	{
 		return [
-			['config.remove', ['sebo_postreact', 0]],
 			['permission.remove', ['u_new_sebo_postreact']],
 			['permission.remove', ['u_new_sebo_postreact_view']],
 		];
@@ -61,7 +57,6 @@ class install_data extends \phpbb\db\migration\migration
 	{
 		$data = [
 				[
-					'id'            => 1,
 					'icon_id'       => 1,
 					'icon_url'      => 'ext/sebo/postreact/styles/all/img/like.png',
 					'icon_width'    => 32,
@@ -71,7 +66,6 @@ class install_data extends \phpbb\db\migration\migration
 					'active'        => '0',
 				],
 				[
-					'id'            => 2,
 					'icon_id'       => 2,
 					'icon_url'      => 'ext/sebo/postreact/styles/all/img/heart.png',
 					'icon_width'    => 32,
@@ -81,7 +75,6 @@ class install_data extends \phpbb\db\migration\migration
 					'active'        => '0',
 				],
 				[
-					'id'            => 3,
 					'icon_id'       => 3,
 					'icon_url'      => 'ext/sebo/postreact/styles/all/img/laugh.png',
 					'icon_width'    => 32,
@@ -91,7 +84,6 @@ class install_data extends \phpbb\db\migration\migration
 					'active'        => '0',
 				],
 				[
-					'id'            => 4,
 					'icon_id'       => 4,
 					'icon_url'      => 'ext/sebo/postreact/styles/all/img/sad.png',
 					'icon_width'    => 32,
@@ -101,7 +93,6 @@ class install_data extends \phpbb\db\migration\migration
 					'active'        => '0',
 				],
 				[
-					'id'            => 5,
 					'icon_id'       => 5,
 					'icon_url'      => 'ext/sebo/postreact/styles/all/img/angry.png',
 					'icon_width'    => 32,
@@ -111,7 +102,6 @@ class install_data extends \phpbb\db\migration\migration
 					'active'        => '0',
 				],
 				[
-					'id'            => 6,
 					'icon_id'       => 6,
 					'icon_url'      => 'ext/sebo/postreact/styles/all/img/surprise.png',
 					'icon_width'    => 32,
@@ -121,7 +111,6 @@ class install_data extends \phpbb\db\migration\migration
 					'active'        => '0',
 				],
 				[
-					'id'            => 7,
 					'icon_id'       => 7,
 					'icon_url'      => 'ext/sebo/postreact/styles/all/img/sunglasses.png',
 					'icon_width'    => 32,
@@ -131,7 +120,6 @@ class install_data extends \phpbb\db\migration\migration
 					'active'        => '0',
 				],
 				[
-					'id'            => 8,
 					'icon_id'       => 8,
 					'icon_url'      => 'ext/sebo/postreact/styles/all/img/love.png',
 					'icon_width'    => 32,
@@ -141,7 +129,6 @@ class install_data extends \phpbb\db\migration\migration
 					'active'        => '0',
 				],
 				[
-					'id'            => 9,
 					'icon_id'       => 9,
 					'icon_url'      => 'ext/sebo/postreact/styles/all/img/skype/worker.png',
 					'icon_width'    => 32,
@@ -151,7 +138,6 @@ class install_data extends \phpbb\db\migration\migration
 					'active'        => '0',
 				],
 				[
-					'id'            => 10,
 					'icon_id'       => 10,
 					'icon_url'      => 'ext/sebo/postreact/styles/all/img/skype/lol.png',
 					'icon_width'    => 32,
@@ -161,7 +147,6 @@ class install_data extends \phpbb\db\migration\migration
 					'active'        => '0',
 				],
 				[
-					'id'            => 11,
 					'icon_id'       => 11,
 					'icon_url'      => 'ext/sebo/postreact/styles/all/img/skype/party.png',
 					'icon_width'    => 32,
@@ -171,7 +156,6 @@ class install_data extends \phpbb\db\migration\migration
 					'active'        => '0',
 				],
 				[
-					'id'            => 12,
 					'icon_id'       => 12,
 					'icon_url'      => 'ext/sebo/postreact/styles/all/img/skype/mechanic.png',
 					'icon_width'    => 32,
@@ -181,7 +165,6 @@ class install_data extends \phpbb\db\migration\migration
 					'active'        => '0',
 				],
 				[
-					'id'            => 13,
 					'icon_id'       => 13,
 					'icon_url'      => 'ext/sebo/postreact/styles/all/img/skype/cry.png',
 					'icon_width'    => 32,
@@ -191,7 +174,6 @@ class install_data extends \phpbb\db\migration\migration
 					'active'        => '0',
 				],
 				[
-					'id'            => 14,
 					'icon_id'       => 14,
 					'icon_url'      => 'ext/sebo/postreact/styles/all/img/skype/censored.png',
 					'icon_width'    => 32,
@@ -201,7 +183,6 @@ class install_data extends \phpbb\db\migration\migration
 					'active'        => '0',
 				],
 				[
-					'id'            => 15,
 					'icon_id'       => 15,
 					'icon_url'      => 'ext/sebo/postreact/styles/all/img/telegram/waving.webp',
 					'icon_width'    => 32,

@@ -2,8 +2,8 @@
     "name": "sebo/postreact",
     "type": "phpbb-extension",
     "description": "Post reaction",
-    "version": "2.6.1",
-    "time": "2026-08-17",
+    "version": "2.6.2",
+    "time": "2026-09-10",
     "license": "GPL-2.0-only",
     "authors": [
         {

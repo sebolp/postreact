@@ -24,6 +24,10 @@ class profile_listener implements EventSubscriberInterface
 	protected $table_prefix;
 	/** @var \phpbb\template\template */
 	protected $template;
+	/** @var string phpBB root path */
+	protected $phpbb_root_path;
+	/** @var string */
+	protected $php_ext;
 
 	/**
 	 * Data collected in edit_view_profile(), consumed in assign_edit_view_profile().
@@ -44,12 +48,16 @@ class profile_listener implements EventSubscriberInterface
 	public function __construct(
 		\phpbb\db\driver\driver_interface $db,
 		$table_prefix,
-		\phpbb\template\template $template
+		\phpbb\template\template $template,
+		$phpbb_root_path,
+		$php_ext
 	)
 	{
 		$this->db = $db;
 		$this->table_prefix = $table_prefix;
 		$this->template = $template;
+		$this->phpbb_root_path = $phpbb_root_path;
+		$this->php_ext = $php_ext;
 	}
 
 	/**
@@ -170,6 +178,8 @@ class profile_listener implements EventSubscriberInterface
 	{
 		if (!empty($this->profile_data))
 		{
+			$search_path = $this->phpbb_root_path . 'search.' . $this->php_ext;
+
 			// Assign reaction sent
 			if (!empty($this->profile_data['icons']))
 			{
@@ -183,6 +193,7 @@ class profile_listener implements EventSubscriberInterface
 						'ICON_HEIGHT' => $icon['ICON_HEIGHT'],
 						'ICON_ALT'	=> $icon['ICON_ALT'],
 						'USER_ID'     => $this->profile_data['user_id'],
+						'U_SEARCH'    => append_sid($search_path, 'search_id=sebo_user_reactions&u=' . $this->profile_data['user_id'] . '&icon_id=' . $icon['ICON_ID'] . '&mode=sent'),
 					]);
 				}
 			}
@@ -199,6 +210,7 @@ class profile_listener implements EventSubscriberInterface
 						'ICON_HEIGHT' => $icon['ICON_HEIGHT'],
 						'ICON_ALT'	=> $icon['ICON_ALT'],
 						'USER_ID'     => $this->profile_data['user_id'],
+						'U_SEARCH'    => append_sid($search_path, 'search_id=sebo_user_reactions&u=' . $this->profile_data['user_id'] . '&icon_id=' . $icon['ICON_ID'] . '&mode=received'),
 					]);
 				}
 			}

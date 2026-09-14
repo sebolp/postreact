@@ -56,4 +56,6 @@ $lang = array_merge($lang, [
 	'PR_SORT_BY_REACTION' => 'Reactions',
 	'POSTREACTION_CSRF_ERROR' => 'Invalid or expired session. Reload the page and try again.',
 	'PR_INVALID_PATH'	=> 'Invalid name for icon ID %s. Please remove points before or after slashes.',
+	'PR_NO_VIEW_FORUM'	=> 'You are not allowed to see this forum.',
+	'PR_NO_POST'	=> 'You are not allowed to see this post.',
 ]);

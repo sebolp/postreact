@@ -214,22 +214,28 @@ a.react-toggle:hover .pr_smile_svg {
 }
 
 /* Prepare the text for a smooth transition */
-.postreact-button-hover-text
+.postreact-button-hover-text 
 {
-	display: inline-block;
-	max-width: 0;
+	display: grid;
+	grid-template-columns: 0fr;
+	overflow: hidden;
+	transition: grid-template-columns 0.3s ease-in-out, opacity 0.3s ease-in-out, margin-left 0.3s ease-in-out;
 	opacity: 0;
+	margin-left: 0;
+	vertical-align: middle;
+}
+
+.postreact-button-hover-text > span 
+{
 	overflow: hidden;
 	white-space: nowrap;
-	vertical-align: middle;
-	margin-left: 0;
-	transition: max-width 0.3s ease-in-out, opacity 0.3s ease-in-out, margin-left 0.3s ease-in-out;
+	min-width: 0;
 }
 
 /* Expand and fade in the text when the user hovers over the button */
-.react-toggle:hover .postreact-button-hover-text
+.react-toggle:hover .postreact-button-hover-text 
 {
-	max-width: 50px;
+	grid-template-columns: 1fr;
 	opacity: 1;
 	margin-left: 5px;
 }

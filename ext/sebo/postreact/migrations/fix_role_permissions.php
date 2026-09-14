@@ -11,15 +11,6 @@
 
 namespace sebo\postreact\migrations;
 
-/**
- * install_data.php's permission_set() calls for ROLE_USER_FULL and
- * ROLE_USER_STANDARD passed 1 as the 3rd positional argument, which is
- * $type (expects 'role'/'group'), not $has_permission (4th argument,
- * defaults to true). Those roles were therefore left with
- * u_new_sebo_postreact(_view) denied instead of granted on every install
- * that ran the original migration. This re-applies the correct calls;
- * permission_set() is safe to call again with the intended values.
- */
 class fix_role_permissions extends \phpbb\db\migration\migration
 {
 	public static function depends_on()

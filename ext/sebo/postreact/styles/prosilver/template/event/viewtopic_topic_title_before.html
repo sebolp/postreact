@@ -5,5 +5,13 @@
 {% INCLUDEJS '@sebo_postreact/bubble.js' %}
 <script>
 	var postreact_ajax_url = '{{ path("sebo_postreact_ajax") }}';
+	var postreact_lang = {
+		POSTREACTION_AJAX_ERROR: '{{ lang('POSTREACTION_AJAX_ERROR')|e('js') }}',
+		POSTREACTION_JSON_ERROR: '{{ lang('POSTREACTION_JSON_ERROR')|e('js') }}',
+		POSTREACTION_CSRF_ERROR: '{{ lang('POSTREACTION_CSRF_ERROR')|e('js') }}'
+	};
 </script>
 {% INCLUDEJS '@sebo_postreact/ajax_call.js' %}
+
+{# DARKEN OVERLAY #}
+<div id="darken"></div>

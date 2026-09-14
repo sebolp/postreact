@@ -29,7 +29,6 @@ $lang = array_merge($lang, [
 	'DELETE'				=> 'Cancella',
 	'FREE_IP_EX'			=> '<strong>Icon pack gratuito di esempio:</strong> (link esterno)',
 	'ADD_PR'				=> 'Aggiungi PostReaction',
-	'ICON_URL'				=> 'Collegamento',
 	'ICON_ALT'				=> 'Testo alternativo',
 	'ICON_HEIGHT'			=> 'Alt. (px)',
 	'ICON_WIDTH'			=> 'Largh. (px)',
@@ -40,8 +39,6 @@ $lang = array_merge($lang, [
 	'ACP_POSTREACT_SETTING_SAVED'		=> 'Impostazioni salvate con successo.',
 	'ACP_POSTREACT_SETTING_NOT_SAVED'	=> 'OOPSSS! Qualcosa è andato storto.',
 	'POSTREACT_FAILED_ICONS'			=> 'Icone non salvate correttamente',
-	'LOG_ACP_POSTREACT_SETTINGS'		=> '<strong>PostReaction settings updated</strong>',
-	'NOT_AVAILABLE'						=> 'Non disponibile',
 	'DELETE_WARNING'					=> 'Sicuro che vuoi cancellare questa icona? Questa azione non può essere annullata.',
 	'DELETE_DELETE'						=> 'Conferma',
 	'DELETE_UNDONE'						=> 'Annulla',
@@ -85,9 +82,9 @@ $lang = array_merge($lang, [
 	/* >2.4 */
 	'RETURN_ACP'			=> '<a href="%s">Torna al modulo PCA</a>',
 	/* >2.5 */
-	'MOVE'			=> 'Posizione',
-	'MOVE_UP'		=> 'Sposta Su',
-	'MOVE_DOWN'		=> 'Sposta Giù',
+	'PR_MOVE'			=> 'Posizione',
+	'PR_MOVE_UP'		=> 'Sposta Su',
+	'PR_MOVE_DOWN'		=> 'Sposta Giù',
 	/* >2.5.1 */
 	'PR_PURGE_CONFIRM_OPERATION' => 'Sicuro? Questa azione non puo essere cancellata!',
 	'PR_IF_NOT_PURGE_BEFORE' => 'Se non utilizzi il modulo di pulizia dell\'estensione, i dati non verranno cancellati dal database.',

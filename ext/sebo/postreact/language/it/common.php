@@ -56,4 +56,6 @@ $lang = array_merge($lang, [
 	'PR_SORT_BY_REACTION' => 'Reactions',
 	'POSTREACTION_CSRF_ERROR' => 'Sessione scaduta o non valida. Ricarica la pagina e riprova.',
 	'PR_INVALID_PATH'	=> 'Caratteri non validi rilevati per l\'icona ID %s.',
+	'PR_NO_VIEW_FORUM'	=> 'Non sei autorizzato a vedere questo forum.',
+	'PR_NO_POST'	=> 'Non sei autorizzato a vedere questo messaggio.',
 ]);

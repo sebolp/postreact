@@ -95,6 +95,11 @@ class search_listener implements EventSubscriberInterface
 			return;
 		}
 
+		if (!$this->auth->acl_get('u_new_sebo_postreact_view'))
+		{
+			return;
+		}
+
 		$user_id = $this->request->variable('u', 0);
 		$icon_id = $this->request->variable('icon_id', 0);
 		$mode    = $this->request->variable('mode', 'sent');
@@ -145,9 +150,8 @@ class search_listener implements EventSubscriberInterface
 
 		if (!empty($id_ary))
 		{
-			// Inject IDs into the event data
-			$event['id_ary'] = $id_ary;
 			$event['total_match_count'] = count($id_ary);
+			$event['id_ary'] = array_slice($id_ary, (int) $event['start'], (int) $event['per_page']);
 			$event['show_results'] = 'posts';
 		}
 	}
@@ -208,7 +212,7 @@ class search_listener implements EventSubscriberInterface
 
 			if ($row)
 			{
-				$icon_emoji = html_entity_decode($row['icon_emoji']);
+				$icon_emoji = $row['icon_emoji'];
 			}
 		}
 
@@ -296,9 +300,20 @@ class search_listener implements EventSubscriberInterface
 			}
 		}
 
+		// Merge counts into each icon, same shape viewforum_listener.php builds
+		$icons_with_counts = [];
+		foreach ($this->icon_manager->get_icons() as $icon)
+		{
+			$icon_id = $icon['icon_id'];
+			if (isset($icon_counts[$icon_id]))
+			{
+				$icons_with_counts[] = array_merge($icon, ['count' => $icon_counts[$icon_id]]);
+			}
+		}
+
 		// template
 		$event['tpl_ary'] = array_merge($event['tpl_ary'], [
-			'ICONS'					=> $this->icon_manager->get_icons(),
+			'ICONS'					=> $icons_with_counts,
 			'ICON_COUNTS'			=> $icon_counts,
 			'REACTORS'				=> $reactors_with_details,
 			'POST_ID'				=> $post_id,

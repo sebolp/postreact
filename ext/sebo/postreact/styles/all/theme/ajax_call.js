@@ -1,33 +1,3 @@
-function getRootPath() {
-	var scripts = document.getElementsByTagName('script');
-	var scriptPath = '';
-
-	for (var i = 0; i < scripts.length; i++) {
-		if (scripts[i].src.includes('ajax_call.js')) {
-			scriptPath = scripts[i].src;
-			break;
-		}
-	}
-
-	if (!scriptPath) {
-		return '/';
-	}
-
-	var parts = scriptPath.split('/');
-	var rootPathParts = [];
-
-	var extIndex = parts.indexOf('ext');
-	if (extIndex !== -1) {
-		rootPathParts = parts.slice(0, extIndex);
-	} else {
-		return '/';
-	}
-
-	return rootPathParts.join('/') + '/';
-}
-
-var root_path = getRootPath();
-
 // Escapes a value for safe insertion into HTML text/attributes.
 function escapeHtml(value) {
 	if (value === null || value === undefined) {
@@ -183,7 +153,6 @@ $(document).ready(function() {
 		var token       = $(this).data('token');
 
 		$.ajax({
-			/*url: root_path + 'postreact/ajax',*/
 			url: postreact_ajax_url,
 			method: 'POST',
 			dataType: 'text',
@@ -332,16 +301,16 @@ $(document).ready(function() {
 					}
 
 				} catch(e) {
-					alert(phpbb.lang.POSTREACTION_JSON_ERROR);
+					alert(postreact_lang.POSTREACTION_JSON_ERROR);
 				}
 			},
 			error: function(xhr, status, error) {
 				if (xhr.status === 403) {
-					alert(phpbb.lang.POSTREACTION_CSRF_ERROR);
+					alert(postreact_lang.POSTREACTION_CSRF_ERROR);
 				}
 				else
 				{
-					alert(phpbb.lang.POSTREACTION_AJAX_ERROR);
+					alert(postreact_lang.POSTREACTION_AJAX_ERROR);
 				}
 			}
 		});

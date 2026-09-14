@@ -42,6 +42,8 @@ class acp_controller
 	protected $icon_manager;
 	/** @var reaction_count_cache */
 	protected $reaction_count_cache;
+	/** @var \phpbb\filesystem\filesystem */
+	protected $filesystem;
 	/** @var string Path to reaction images */
 	protected $url_reactions_path = 'images/sebo_postreact/reactions/';
 	/**
@@ -64,7 +66,8 @@ class acp_controller
 		\phpbb\config\config $config,
 		$phpbb_root_path,
 		icon_manager $icon_manager,
-		reaction_count_cache $reaction_count_cache
+		reaction_count_cache $reaction_count_cache,
+		\phpbb\filesystem\filesystem $filesystem
 	)
 	{
 		$this->language	= $language;
@@ -78,6 +81,7 @@ class acp_controller
 		$this->phpbb_root_path = $phpbb_root_path;
 		$this->icon_manager = $icon_manager;
 		$this->reaction_count_cache = $reaction_count_cache;
+		$this->filesystem = $filesystem;
 	}
 
 	/**
@@ -93,24 +97,16 @@ class acp_controller
 			return;
 		}
 
-		$files = array_diff(scandir($path), ['.', '..']);
-
-		foreach ($files as $file)
+		try
 		{
-			$current_path = $path . DIRECTORY_SEPARATOR . $file;
-
-			if (is_dir($current_path))
-			{
-				$this->remove_directory($current_path);
-			}
-			else
-			{
-				unlink($current_path);
-			}
+			$this->filesystem->remove($path);
 		}
-
-		rmdir($path);
+		catch (\phpbb\filesystem\exception\filesystem_exception $e)
+		{
+			$this->template->assign_var('PR_DIR_REMOVE_FAILED', true);
+		}
 	}
+
 	/**
 	 * 	Check if directory exists to display error
 	 */
@@ -128,7 +124,6 @@ class acp_controller
 		// Add our common language file
 		$this->language->add_lang('common', 'sebo/postreact');
 		$this->language->add_lang('permissions_postreact', 'sebo/postreact');
-		$sid_pr = $this->request->variable('user_sid', \phpbb\request\request_interface::COOKIE);
 		// ##
 		// handle move_up / move_down
 		$action = $this->request->variable('action', '');
@@ -271,6 +266,7 @@ class acp_controller
 			$this->db->sql_query($sql_insert);
 
 			$this->icon_manager->reset_cache();
+			redirect($this->u_action);
 		}
 		//##
 		// check if deleting icon
@@ -286,6 +282,11 @@ class acp_controller
 			$sql_remove = 'DELETE FROM ' . $this->table_prefix . 'sebo_postreact_icon
 								WHERE icon_id = ' . (int) $remove_pr;
 			$result_remove = $this->db->sql_query($sql_remove);
+
+			// Also remove any reaction rows still pointing to the deleted icon
+			$sql_remove_reactions = 'DELETE FROM ' . $this->table_prefix . 'sebo_postreact_table
+								WHERE icon_id = ' . (int) $remove_pr;
+			$this->db->sql_query($sql_remove_reactions);
 
 			$this->icon_manager->reset_cache();
 		}
@@ -344,7 +345,10 @@ class acp_controller
 
 				// save button_position config
 				$button_position_status = $this->request->variable('config_button_position', '');
-				$this->config->set('sebo_postreact_butt_position', $button_position_status);
+				if (in_array($button_position_status, ['up', 'low', 'emoji-level'], true))
+				{
+					$this->config->set('sebo_postreact_butt_position', $button_position_status);
+				}
 				// end
 
 				$update_data = [];
@@ -433,7 +437,6 @@ class acp_controller
 			'SELF_REACT_VAL' => (int) $this->config['sebo_postreact_self_react'],
 			'BUTT_POSITION' => $this->config['sebo_postreact_butt_position'],
 			'ICONS' 		=> $data_ico,
-			'SID'			=> $sid_pr,
 			'ARROW' 		=> '<i class="fa icon fa-chevron-right fa-fw" aria-hidden="true"></i>',
 			'S_ERROR'		=> $s_errors,
 			'ERROR_MSG'		=> $s_errors ? implode('<br />', $errors) : '',
@@ -442,7 +445,10 @@ class acp_controller
 			'U_ACTION'		=> $this->u_action,
 			'LINK_DONATE'	=> 'https://www.paypal.com/donate/?hosted_button_id=GS3T9MFDJJGT4',
 			'PR_FOLDER_PATH' => $this->url_reactions_path,
-			'EMOJI_JS_PATH' => $this->phpbb_root_path . 'ext/sebo/postreact/adm/style/emoji_picker.js'
+			'EMOJI_MART_PICK_JS_LOCAL_PATH' => $this->phpbb_root_path . 'ext/sebo/postreact/adm/style/js/emoji-picker-5-6-0.js',
+			'EMOJI_JS_PATH' => $this->phpbb_root_path . 'ext/sebo/postreact/adm/style/js/emoji_picker.js',
+			'EMOJI_MART_DATA_PATH' => $this->phpbb_root_path . 'ext/sebo/postreact/adm/style/js/emoji-mart-data/native.json',
+			'EMOJI_MART_I18N_BASE_PATH' => $this->phpbb_root_path . 'ext/sebo/postreact/adm/style/js/emoji-mart-data/i18n/',
 		]);
 
 		// purge module
@@ -481,7 +487,7 @@ class acp_controller
 				$execution_pr_sync_time = microtime(true) - $start_pr_sync_time;
 
 				meta_refresh(5, $this->u_action);
-				$message = $this->language->lang('PR_SYNCSYSTEM_UPDATED', $total_missing, $execution_pr_sync_time) . '<br /><br />' . $this->language->lang('RETURN_ACP', $this->u_action);
+							$message = $this->language->lang('PR_SYNCSYSTEM_UPDATED', $total_missing, round($execution_pr_sync_time, 3)) . '<br /><br />' . $this->language->lang('RETURN_ACP', $this->u_action);
 				trigger_error($message);
 			}
 		}
@@ -515,7 +521,7 @@ class acp_controller
 				$execution_pr_purge_time = microtime(true) - $start_pr_purge_time;
 
 				meta_refresh(5, $this->u_action);
-				$message = $this->language->lang('PR_PURGESYSTEM_UPDATED', $total_deleted, $execution_pr_purge_time) . '<br /><br />' . $this->language->lang('RETURN_ACP', $this->u_action);
+				$message = $this->language->lang('PR_PURGESYSTEM_UPDATED', $total_deleted, round($execution_pr_purge_time, 3)) . '<br /><br />' . $this->language->lang('RETURN_ACP', $this->u_action);
 
 				trigger_error($message);
 			}
@@ -550,7 +556,7 @@ class acp_controller
 				$execution_pr_purge_time = microtime(true) - $start_pr_purge_time;
 
 				meta_refresh(5, $this->u_action);
-				$message = $this->language->lang('PR_PURGEICOSYSTEM_UPDATED', $total_deleted, $execution_pr_purge_time) . '<br /><br />' . $this->language->lang('RETURN_ACP', $this->u_action);
+				$message = $this->language->lang('PR_PURGEICOSYSTEM_UPDATED', $total_deleted, round($execution_pr_purge_time, 3)) . '<br /><br />' . $this->language->lang('RETURN_ACP', $this->u_action);
 
 				trigger_error($message);
 			}
