@@ -123,6 +123,7 @@ services:
             - '@dbal.conn'
             - '%core.table_prefix%'
             - '@template'
+            - '@auth'
             - '%core.root_path%'
             - '%core.php_ext%'
         tags:

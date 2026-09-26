@@ -1,4 +1,5 @@
 {% INCLUDECSS '@sebo_postreact/main.css' %}
+{% if PERM_R == '1' %}
 <div class="panel bg2">
 	<div class="inner">
 		<div class="column1">
@@ -33,3 +34,4 @@
 		</div>
 	</div>
 </div>
+{% endif %}

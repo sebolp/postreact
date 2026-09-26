@@ -24,6 +24,8 @@ class profile_listener implements EventSubscriberInterface
 	protected $table_prefix;
 	/** @var \phpbb\template\template */
 	protected $template;
+	/** @var \phpbb\auth\auth */
+	protected $auth;
 	/** @var string phpBB root path */
 	protected $phpbb_root_path;
 	/** @var string */
@@ -49,6 +51,7 @@ class profile_listener implements EventSubscriberInterface
 		\phpbb\db\driver\driver_interface $db,
 		$table_prefix,
 		\phpbb\template\template $template,
+		\phpbb\auth\auth $auth,
 		$phpbb_root_path,
 		$php_ext
 	)
@@ -56,6 +59,7 @@ class profile_listener implements EventSubscriberInterface
 		$this->db = $db;
 		$this->table_prefix = $table_prefix;
 		$this->template = $template;
+		$this->auth = $auth;
 		$this->phpbb_root_path = $phpbb_root_path;
 		$this->php_ext = $php_ext;
 	}
@@ -65,6 +69,15 @@ class profile_listener implements EventSubscriberInterface
 	 */
 	public function edit_view_profile($event)
 	{
+		// The "view reactions" permission is enforced on viewtopic,
+		// viewforum and search. It was not enforced here, so revoking it
+		// had no effect on the memberlist profile page. Bail out before
+		// running either query so nothing is collected for display.
+		if (!$this->auth->acl_get('u_new_sebo_postreact_view'))
+		{
+			return;
+		}
+
 		$user_id = (int) $event['member']['user_id'];
 		$this->profile_data['user_id'] = $user_id;
 		// *
@@ -176,6 +189,10 @@ class profile_listener implements EventSubscriberInterface
 
 	public function assign_edit_view_profile($event)
 	{
+		// Exposed so the template can gate the panel as well, rather than
+		// relying solely on $profile_data being empty.
+		$this->template->assign_var('PERM_R', $this->auth->acl_get('u_new_sebo_postreact_view'));
+
 		if (!empty($this->profile_data))
 		{
 			$search_path = $this->phpbb_root_path . 'search.' . $this->php_ext;
