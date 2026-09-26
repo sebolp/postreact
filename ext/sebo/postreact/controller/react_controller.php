@@ -144,7 +144,14 @@ class react_controller
 
 		$sql = 'INSERT INTO ' . $this->table_prefix . 'sebo_postreact_table ' .
 			   $this->db->sql_build_array('INSERT', $data);
+
+		// The unique (user_id, post_id) index turns a lost race against a
+		// concurrent request into a duplicate key error. Ask the DBAL to
+		// report the failure instead of calling phpbb_die(), which would
+		// otherwise render a fatal SQL error page mid-AJAX.
+		$this->db->sql_return_on_error(true);
 		$result = $this->db->sql_query($sql);
+		$this->db->sql_return_on_error(false);
 
 		if ($result)
 		{
@@ -175,6 +182,14 @@ class react_controller
 		}
 		else
 		{
+			// Distinguish "lost the race, the reaction does exist" from a
+			// genuine insert failure, so the user is not told a reaction
+			// was lost when it is already there.
+			if ($this->check_existing_reaction($user_id, $post_id) > 0)
+			{
+				return $this->send_json_response(false, $this->language->lang('ALREADY_REACTED'));
+			}
+
 			return $this->send_json_response(false, $this->language->lang('NOT_INSERTED_VALUE'));
 		}
 	}
