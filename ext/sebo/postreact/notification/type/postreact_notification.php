@@ -200,6 +200,17 @@ class postreact_notification extends \phpbb\notification\type\base
 			$post_title = $this->get_data('PR_N_post_title');
 		}
 
+		// Resolve the post id the same way get_url() does: item_id is
+		// postreact_id (or post_id in "once per post" mode), so the real
+		// post id lives in its own data field. $post_id was previously
+		// never assigned here, which produced a link with an empty post id
+		// (?p=#p) plus two undefined-variable warnings per notification.
+		$post_id = $this->get_data('real_post_id');
+		if (!$post_id)
+		{
+			$post_id = $this->get_data('PR_N_post_id');
+		}
+
 		$username = htmlspecialchars_decode($this->user_loader->get_username($this->get_data('sender_id'), 'username'));
 		$url = generate_board_url() . '/viewtopic.' . $this->php_ext . '?p=' . $post_id . '#p' . $post_id;
 		$sitename = isset($this->config['sitename']) ? $this->config['sitename'] : 'Forum';
