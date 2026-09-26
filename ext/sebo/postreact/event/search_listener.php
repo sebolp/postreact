@@ -138,6 +138,20 @@ class search_listener implements EventSubscriberInterface
 			$sql_array['WHERE'] .= ' AND pr.icon_id = ' . (int) $icon_id;
 		}
 
+		// Scope the query to the forums this user may actually search.
+		// search.php re-applies its own ex_fid_ary filter to the post ids we
+		// inject, so the individual results were never readable - but
+		// $id_ary was sliced here *before* that filter ran, and
+		// $total_match_count was counted here from the unrestricted set.
+		// Both therefore reflected forums the user cannot read: the count
+		// leaked, and pages came back short because the slice counted rows
+		// that were then filtered away.
+		$ex_fid_ary = $this->get_excluded_forum_ids();
+		if (!empty($ex_fid_ary))
+		{
+			$sql_array['WHERE'] .= ' AND ' . $this->db->sql_in_set('p.forum_id', $ex_fid_ary, true);
+		}
+
 		$sql = $this->db->sql_build_query('SELECT', $sql_array);
 		$result = $this->db->sql_query($sql);
 
@@ -154,6 +168,51 @@ class search_listener implements EventSubscriberInterface
 			$event['id_ary'] = array_slice($id_ary, (int) $event['start'], (int) $event['per_page']);
 			$event['show_results'] = 'posts';
 		}
+	}
+
+	/**
+	 * Forum ids the current user may not search, mirroring how search.php
+	 * builds $ex_fid_ary: forums without f_read or f_search, plus
+	 * password-protected forums the user has not authorised for this
+	 * session.
+	 *
+	 * @return array
+	 */
+	protected function get_excluded_forum_ids()
+	{
+		$ex_fid_ary = array_unique(array_merge(
+			array_keys($this->auth->acl_getf('!f_read', true)),
+			array_keys($this->auth->acl_getf('!f_search', true))
+		));
+
+		$user_id = (int) $this->user->data['user_id'];
+
+		$not_in_fid = (count($ex_fid_ary))
+			? 'WHERE ' . $this->db->sql_in_set('f.forum_id', $ex_fid_ary, true)
+				. " OR (f.forum_password <> '' AND fa.user_id <> " . $user_id . ')'
+			: '';
+
+		$sql = 'SELECT f.forum_id, f.forum_password, fa.user_id
+			FROM ' . $this->table_prefix . 'forums f
+			LEFT JOIN ' . $this->table_prefix . 'forums_access fa
+				ON (fa.forum_id = f.forum_id
+					AND fa.session_id = \'' . $this->db->sql_escape($this->user->session_id) . '\')
+			' . $not_in_fid . '
+			ORDER BY f.left_id';
+		$result = $this->db->sql_query($sql);
+
+		while ($row = $this->db->sql_fetchrow($result))
+		{
+			// A password-protected forum the user has not unlocked for this
+			// session. fa.user_id is NULL when no access row matched.
+			if ($row['forum_password'] && $row['user_id'] != $user_id)
+			{
+				$ex_fid_ary[] = (int) $row['forum_id'];
+			}
+		}
+		$this->db->sql_freeresult($result);
+
+		return array_values(array_unique($ex_fid_ary));
 	}
 
 	/**
