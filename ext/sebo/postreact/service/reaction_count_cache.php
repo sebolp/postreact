@@ -36,8 +36,14 @@ class reaction_count_cache
 	protected $post_reactions_cache = [];
 
 	const CACHE_PREFIX = '_sebo_postreact_topic_counts_';
-	const CACHE_REGISTRY_KEY = '_sebo_postreact_cached_topics';
+	const CACHE_GENERATION_KEY = '_sebo_postreact_counts_generation';
 	const CACHE_TTL = 300;
+	/**
+	 * The generation counter must outlive every per-topic entry it
+	 * versions, otherwise it lapsing would resurrect invalidated keys.
+	 * Each purge_all_topic_counts() call renews it. Renewed annually.
+	 */
+	const CACHE_GENERATION_TTL = 31536000;
 
 	public function __construct(
 		\phpbb\db\driver\driver_interface $db,
@@ -71,7 +77,7 @@ class reaction_count_cache
 				continue;
 			}
 
-			$cached = $this->cache->get(self::CACHE_PREFIX . $topic_id);
+			$cached = $this->cache->get($this->topic_counts_cache_key($topic_id));
 			if ($cached !== false)
 			{
 				$this->topic_counts_cache[$topic_id] = $cached;
@@ -138,7 +144,7 @@ class reaction_count_cache
 			}
 
 			$this->topic_counts_cache[$topic_id] = $icon_counts;
-			$this->cache->put(self::CACHE_PREFIX . $topic_id, $icon_counts, self::CACHE_TTL);
+			$this->cache->put($this->topic_counts_cache_key($topic_id), $icon_counts, self::CACHE_TTL);
 			$this->remember_cached_topic($topic_id);
 		}
 
@@ -149,7 +155,7 @@ class reaction_count_cache
 			if (!isset($this->topic_counts_cache[$topic_id]))
 			{
 				$this->topic_counts_cache[$topic_id] = [];
-				$this->cache->put(self::CACHE_PREFIX . $topic_id, [], self::CACHE_TTL);
+				$this->cache->put($this->topic_counts_cache_key($topic_id), [], self::CACHE_TTL);
 				$this->remember_cached_topic($topic_id);
 			}
 		}
@@ -270,48 +276,62 @@ class reaction_count_cache
 	{
 		$topic_id = (int) $topic_id;
 
-		$this->cache->destroy(self::CACHE_PREFIX . $topic_id);
+		$this->cache->destroy($this->topic_counts_cache_key($topic_id));
 		unset($this->topic_counts_cache[$topic_id]);
-
-		$registry = $this->cache->get(self::CACHE_REGISTRY_KEY);
-		if (is_array($registry))
-		{
-			$registry = array_values(array_diff($registry, [$topic_id]));
-			$this->cache->put(self::CACHE_REGISTRY_KEY, $registry, 0);
-		}
 	}
 
 	/**
 	 * Invalidate every cached topic count (called by the ACP sync/purge
 	 * actions, which delete reaction rows wholesale).
+	 *
+	 * Implemented by bumping a generation counter that is part of every
+	 * topic cache key, rather than by walking a registry of cached topic
+	 * ids. The previous registry was written with a TTL of 0, which
+	 * phpbb\cache\driver\file stores as an expiry of "now" and reaps on
+	 * the next garbage collection, so by the time a purge ran the registry
+	 * was usually already gone and the bulk invalidation silently did
+	 * nothing. Bumping the generation invalidates every entry in O(1) and
+	 * leaves no unbounded list of topic ids behind.
 	 */
 	public function purge_all_topic_counts()
 	{
-		$registry = $this->cache->get(self::CACHE_REGISTRY_KEY);
-		if (is_array($registry))
-		{
-			foreach ($registry as $topic_id)
-			{
-				$this->cache->destroy(self::CACHE_PREFIX . (int) $topic_id);
-			}
-		}
-
-		$this->cache->destroy(self::CACHE_REGISTRY_KEY);
+		$this->cache->put(
+			self::CACHE_GENERATION_KEY,
+			$this->get_generation() + 1,
+			self::CACHE_GENERATION_TTL
+		);
 		$this->topic_counts_cache = [];
+	}
+
+	/**
+	 * Current cache generation, used as a version component of the
+	 * per-topic cache key.
+	 *
+	 * @return int
+	 */
+	protected function get_generation()
+	{
+		$generation = $this->cache->get(self::CACHE_GENERATION_KEY);
+
+		return ($generation === false || !is_numeric($generation)) ? 0 : (int) $generation;
+	}
+
+	/**
+	 * Cache key for one topic's counts, namespaced by the current
+	 * generation so purge_all_topic_counts() retires every key at once.
+	 *
+	 * @param int $topic_id
+	 * @return string
+	 */
+	protected function topic_counts_cache_key($topic_id)
+	{
+		return self::CACHE_PREFIX . $this->get_generation() . '_' . (int) $topic_id;
 	}
 
 	protected function remember_cached_topic($topic_id)
 	{
-		$registry = $this->cache->get(self::CACHE_REGISTRY_KEY);
-		if (!is_array($registry))
-		{
-			$registry = [];
-		}
-
-		if (!in_array($topic_id, $registry, true))
-		{
-			$registry[] = $topic_id;
-			$this->cache->put(self::CACHE_REGISTRY_KEY, $registry, 0);
-		}
+		// Retained as a no-op for backwards compatibility with any
+		// subclass overriding the old registry bookkeeping. Topic ids no
+		// longer need registering: see purge_all_topic_counts().
 	}
 }
