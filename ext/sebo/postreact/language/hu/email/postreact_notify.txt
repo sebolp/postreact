@@ -1,0 +1,10 @@
+Tárgy: Új reakció a hozzászólásodra: {POST_SUBJECT}
+
+Szia, {USERNAME}!
+
+{AUTHOR_NAME} reagált a „{POST_SUBJECT}” című hozzászólásodra a „{SITENAME}” oldalon.
+
+A reakciót itt tekintheted meg:
+{U_TOPIC}
+
+{EMAIL_SIG}
