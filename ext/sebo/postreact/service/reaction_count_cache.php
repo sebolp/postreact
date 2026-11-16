@@ -261,6 +261,18 @@ class reaction_count_cache
 	}
 
 	/**
+	 * Drop the per-request cache for one post. Callers that mutate a post's
+	 * reactions and then read them back in the same request must use this,
+	 * otherwise get_post_reactions() would serve the pre-mutation snapshot.
+	 *
+	 * @param int $post_id
+	 */
+	public function purge_post_reactions($post_id)
+	{
+		unset($this->post_reactions_cache[(int) $post_id]);
+	}
+
+	/**
 	 * Invalidate the cached counts for one topic (called when a reaction is
 	 * added or removed).
 	 *

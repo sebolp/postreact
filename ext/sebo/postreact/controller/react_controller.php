@@ -101,6 +101,8 @@ class react_controller
 			$this->notification_helper->handle_postreact_notification($post_id, $topic_id, $icon_id, 'remove', $removed_postreact_id);
 			$this->reaction_count_cache->purge_topic_counts($topic_id);
 
+			// The row is gone; drop any pre-delete snapshot before reading back.
+			$this->reaction_count_cache->purge_post_reactions($post_id);
 			$reaction_data = $this->get_reaction_data($post_id);
 			$new_count = isset($reaction_data['counts'][$removed_icon_id]) ? $reaction_data['counts'][$removed_icon_id] : 0;
 
@@ -153,6 +155,8 @@ class react_controller
 			$this->notification_helper->handle_postreact_notification($post_id, $topic_id, $icon_id, 'add', $postreact_id);
 			$this->reaction_count_cache->purge_topic_counts($topic_id);
 
+			// The new row must be visible in the counts we return below.
+			$this->reaction_count_cache->purge_post_reactions($post_id);
 			$reaction_data = $this->get_reaction_data($post_id);
 			$new_count = isset($reaction_data['counts'][$icon_id]) ? $reaction_data['counts'][$icon_id] : 1;
 
@@ -181,57 +185,29 @@ class react_controller
 
 	private function get_reaction_data($post_id)
 	{
-		$sql_array = [
-			'SELECT'	=> 'r.icon_id, COUNT(*) as count',
-			'FROM'		=> [$this->table_prefix . 'sebo_postreact_table' => 'r'],
-			'WHERE'		=> 'r.post_id = ' . (int) $post_id,
-			'GROUP_BY'	=> 'r.icon_id',
-		];
-
-		$sql = $this->db->sql_build_query('SELECT', $sql_array);
-		$result = $this->db->sql_query($sql);
-
-		$counts = [];
-		while ($row = $this->db->sql_fetchrow($result))
-		{
-			$counts[$row['icon_id']] = (int) $row['count'];
-		}
-		$this->db->sql_freeresult($result);
+		// reaction_count_cache already answers this in a single query via
+		// load_post_reactions(). The previous implementation ran one extra
+		// query per distinct icon on the post - 1 + N queries for N icons -
+		// on every single reaction click. Reuse the shared loader and
+		// reshape to the legacy key names.
+		$data = $this->reaction_count_cache->get_post_reactions($post_id);
 
 		$user_details = [];
-		foreach ($counts as $icon_id => $count)
+		foreach ($data['reactors'] as $icon_id => $reactors)
 		{
-			$sql_array = [
-				'SELECT'	=> 'u.username, u.user_colour',
-				'FROM'		=> [$this->table_prefix . 'sebo_postreact_table' => 'r'],
-				'LEFT_JOIN'	=> [
-					[
-						'FROM'	=> [$this->table_prefix . 'users' => 'u'],
-						'ON'	=> 'r.user_id = u.user_id',
-					],
-				],
-				'WHERE'		=> 'r.post_id = ' . (int) $post_id . ' AND r.icon_id = ' . (int) $icon_id,
-				'ORDER_BY'	=> 'r.react_time ASC',
-			];
-
-			$sql = $this->db->sql_build_query('SELECT', $sql_array);
-			$result = $this->db->sql_query($sql);
-
 			$users = [];
-			while ($row = $this->db->sql_fetchrow($result))
+			foreach ($reactors as $reactor)
 			{
 				$users[] = [
-					'username'		=> $row['username'],
-					'user_colour'	=> $row['user_colour'],
+					'username'		=> $reactor['username'],
+					'user_colour'	=> $reactor['user_colour'],
 				];
 			}
-			$this->db->sql_freeresult($result);
-
 			$user_details[$icon_id] = $users;
 		}
 
 		return [
-			'counts'		=> $counts,
+			'counts'		=> $data['counts'],
 			'user_details'	=> $user_details,
 		];
 	}
