@@ -82,9 +82,9 @@ $lang = array_merge($lang, [
 	/* >2.4 */
 	'RETURN_ACP'			=> '<a href="%s">Torna al modulo PCA</a>',
 	/* >2.5 */
-	'PR_MOVE'			=> 'Posizione',
-	'PR_MOVE_UP'		=> 'Sposta Su',
-	'PR_MOVE_DOWN'		=> 'Sposta Giù',
+	'ACP_POSTREACT_ORDER'			=> 'Posizione',
+	'ACP_POSTREACT_MOVE_UP'		=> 'Sposta Su',
+	'ACP_POSTREACT_MOVE_DOWN'		=> 'Sposta Giù',
 	/* >2.5.1 */
 	'PR_PURGE_CONFIRM_OPERATION' => 'Sicuro? Questa azione non puo essere cancellata!',
 	'PR_IF_NOT_PURGE_BEFORE' => 'Se non utilizzi il modulo di pulizia dell\'estensione, i dati non verranno cancellati dal database.',

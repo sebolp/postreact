@@ -43,6 +43,22 @@ class notification_helper
 		$this->notification_manager = $notification_manager;
 	}
 
+	const NOTIFICATION_TYPE = 'sebo.postreact.notification.type.postreact_notification';
+
+	/**
+	 * Per-reaction notifications use even item ids and "once per post"
+	 * notifications use odd ones, so the two id spaces can never overlap.
+	 */
+	public static function get_reaction_item_id($postreact_id)
+	{
+		return ((int) $postreact_id) * 2;
+	}
+
+	public static function get_post_item_id($post_id)
+	{
+		return ((int) $post_id) * 2 + 1;
+	}
+
 	/**
 	 * @param int    $post_id
 	 * @param int    $topic_id
@@ -120,10 +136,9 @@ class notification_helper
 		// 0 = every reaction (default), 1 = single notification per post
 		$notify_mode = isset($row_post['user_postreact_notify_mode']) ? (int) $row_post['user_postreact_notify_mode'] : 0;
 
-		// In single mode, use post_id as the item_id so phpBB deduplicates
-		// per post. In "every reaction" mode, use the actual postreact_id
-		// so each reaction gets (and can later remove) its own notification.
-		$notification_item_id = ($notify_mode === 1) ? (int) $post_id : (int) $postreact_id;
+		$notification_item_id = ($notify_mode === 1)
+			? self::get_post_item_id($post_id)
+			: self::get_reaction_item_id($postreact_id);
 
 		// make array
 		$pr_notification_data = [
@@ -143,51 +158,117 @@ class notification_helper
 
 	public function remove_postreact_notification($post_id, $postreact_id = 0)
 	{
-		// Look up the post author's notification preference: the controller
-		// only knows the reactor's identity, not the post owner whose
-		// notification is being managed.
-		$sql_array = [
-			'SELECT'    => 'u.user_postreact_notify_mode',
-			'FROM'      => [$this->table_prefix . 'posts' => 'p'],
-			'LEFT_JOIN' => [
-				[
-					'FROM' => [USERS_TABLE => 'u'],
-					'ON'   => 'p.poster_id = u.user_id',
-				],
-			],
-			'WHERE'     => 'p.post_id = ' . (int) $post_id,
-		];
-		$sql = $this->db->sql_build_query('SELECT', $sql_array);
-		$result = $this->db->sql_query($sql);
-		$row = $this->db->sql_fetchrow($result);
-		$this->db->sql_freeresult($result);
-
-		$notify_mode = ($row && isset($row['user_postreact_notify_mode'])) ? (int) $row['user_postreact_notify_mode'] : 0;
-
-		if ($notify_mode === 1)
+		// Per-reaction notification (no-op if the author uses "once per post")
+		if ($postreact_id > 0)
 		{
-			// Single mode: the notification is keyed by post_id and other
-			// reactions on the same post may still exist, so it is not
-			// deleted here (it will simply go unread/expire naturally).
-			return;
+			$this->notification_manager->delete_notifications(
+				self::NOTIFICATION_TYPE,
+				self::get_reaction_item_id($postreact_id)
+			);
 		}
 
-		if ($postreact_id <= 0)
+		// "Once per post" notification: drop it only when no reaction is left
+		if (!$this->post_has_reactions($post_id))
 		{
-			// No specific reaction id available (e.g. an older caller);
-			// nothing safe to delete.
-			return;
+			$this->notification_manager->delete_notifications(
+				self::NOTIFICATION_TYPE,
+				self::get_post_item_id($post_id)
+			);
 		}
-
-		// Every mode: delete the specific notification by postreact_id
-		$this->notification_manager->delete_notifications(
-			'sebo.postreact.notification.type.postreact_notification',
-			(int) $postreact_id
-		);
 	}
 
 	public function add_notification($notification_data, $notification_type_name = 'sebo.postreact.notification.type.postreact_notification')
 	{
 		$this->notification_manager->add_notifications($notification_type_name, $notification_data);
+	}
+
+	/**
+	 * Whether at least one reaction row still exists for the post.
+	 */
+	protected function post_has_reactions($post_id)
+	{
+		$sql = 'SELECT COUNT(*) AS total
+			FROM ' . $this->table_prefix . 'sebo_postreact_table
+			WHERE post_id = ' . (int) $post_id;
+		$result = $this->db->sql_query($sql);
+		$total = (int) $this->db->sql_fetchfield('total');
+		$this->db->sql_freeresult($result);
+
+		return $total > 0;
+	}
+
+	/**
+	 * Delete every notification (per-reaction and once-per-post) related
+	 * to the given posts. Must run BEFORE the reaction rows are deleted,
+	 * because the reaction ids are read from the table.
+	 *
+	 * @param array $post_ids
+	 */
+	public function delete_for_posts(array $post_ids)
+	{
+		$post_ids = array_map('intval', $post_ids);
+		if (empty($post_ids))
+		{
+			return;
+		}
+
+		$item_ids = [];
+		foreach ($post_ids as $post_id)
+		{
+			$item_ids[] = self::get_post_item_id($post_id);
+		}
+
+		$sql = 'SELECT postreact_id
+			FROM ' . $this->table_prefix . 'sebo_postreact_table
+			WHERE ' . $this->db->sql_in_set('post_id', $post_ids);
+		$result = $this->db->sql_query($sql);
+		while ($row = $this->db->sql_fetchrow($result))
+		{
+			$item_ids[] = self::get_reaction_item_id($row['postreact_id']);
+		}
+		$this->db->sql_freeresult($result);
+
+		foreach (array_chunk($item_ids, 500) as $chunk)
+		{
+			$this->notification_manager->delete_notifications(self::NOTIFICATION_TYPE, $chunk);
+		}
+	}
+
+	/**
+	 * Delete the notifications of reactions whose post no longer exists
+	 * (used by the ACP "synchronize" action, before the orphan rows are removed).
+	 */
+	public function delete_orphans()
+	{
+		$sql = 'SELECT DISTINCT r.post_id
+			FROM ' . $this->table_prefix . 'sebo_postreact_table r
+			LEFT JOIN ' . POSTS_TABLE . ' p
+				ON r.post_id = p.post_id
+			WHERE p.post_id IS NULL';
+		$result = $this->db->sql_query($sql);
+		$post_ids = [];
+		while ($row = $this->db->sql_fetchrow($result))
+		{
+			$post_ids[] = (int) $row['post_id'];
+		}
+		$this->db->sql_freeresult($result);
+
+		$this->delete_for_posts($post_ids);
+	}
+
+	/**
+	 * Delete every notification of this type (used by the ACP purge).
+	 * Direct SQL on purpose: the manager's purge_notifications() would also
+	 * drop the users' subscription settings for this type.
+	 */
+	public function delete_all()
+	{
+		$sql = 'DELETE FROM ' . NOTIFICATIONS_TABLE . '
+			WHERE notification_type_id IN (
+				SELECT notification_type_id
+				FROM ' . NOTIFICATION_TYPES_TABLE . "
+				WHERE notification_type_name = '" . $this->db->sql_escape(self::NOTIFICATION_TYPE) . "'
+			)";
+		$this->db->sql_query($sql);
 	}
 }

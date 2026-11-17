@@ -1,7 +1,5 @@
 {% if (searchresults.PERM_R == '1') %}
 
-<div id="darken"></div>
-
 {% set has_reactions = false %}
 {% for icon in searchresults.ICONS %}
 	{% if (searchresults.ICON_COUNTS[icon.icon_id]|default(0)) > 0 %}

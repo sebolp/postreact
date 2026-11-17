@@ -1,0 +1,10 @@
+Tárgy: Új reakció a hozzászólására: {POST_SUBJECT}
+
+Tisztelt {USERNAME}!
+
+{AUTHOR_NAME} reagált a „{POST_SUBJECT}” című hozzászólására a „{SITENAME}” oldalon.
+
+A reakciót itt tekintheti meg:
+{U_TOPIC}
+
+{EMAIL_SIG}

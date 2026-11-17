@@ -45,6 +45,11 @@ class postreact_notification extends \phpbb\notification\type\base
 		$this->user_loader = $user_loader;
 	}
 
+	public function set_path_helper(\phpbb\path_helper $path_helper)
+	{
+		$this->path_helper = $path_helper;
+	}
+
 	public function get_type()
 	{
 		return 'sebo.postreact.notification.type.postreact_notification';
@@ -161,7 +166,14 @@ class postreact_notification extends \phpbb\notification\type\base
 			$hidden_emoji = '<span style="display:none;">' . $emoji . ' </span>';
 		}
 
-		return $hidden_emoji . '<img src="' . $this->phpbb_root_path . $icon . '" style="width:32px !important;height:32px !important;"> '
+		// Build the image URL as an absolute URL so it resolves correctly
+		// on every page (index.php, viewtopic.php, and controller routes
+		// like /app.php/help/faq where a relative "images/..." path would
+		// be wrongly resolved against the controller's virtual path).
+		// generate_board_url() returns the board's scheme + host, e.g. https://example.org
+		$icon_url = generate_board_url() . '/' . ltrim($icon, '/');
+
+		return $hidden_emoji . '<img src="' . $icon_url . '" style="width:32px !important;height:32px !important;"> '
 			. $this->language->lang('SEBO_POSTREACT_NOTIFICATION', $username, $post_title);
 	}
 
@@ -200,7 +212,13 @@ class postreact_notification extends \phpbb\notification\type\base
 			$post_title = $this->get_data('PR_N_post_title');
 		}
 
-		$username = htmlspecialchars_decode($this->user_loader->get_username($this->get_data('sender_id'), 'username'));
+		$post_id = (int) $this->get_data('real_post_id');
+		if (!$post_id)
+		{
+			$post_id = (int) $this->get_data('PR_N_post_id');
+		}
+
+		$username = htmlspecialchars_decode($this->user_loader->get_username($sender_id, 'username'));
 		$url = generate_board_url() . '/viewtopic.' . $this->php_ext . '?p=' . $post_id . '#p' . $post_id;
 		$sitename = isset($this->config['sitename']) ? $this->config['sitename'] : 'Forum';
 

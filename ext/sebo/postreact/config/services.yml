@@ -14,6 +14,7 @@ services:
             - '@sebo.postreact.service.icon_manager'
             - '@sebo.postreact.service.reaction_count_cache'
             - '@filesystem'
+            - '@sebo.postreact.service.notification_helper'
 
     sebo.postreact.controller.ucp:
         class: sebo\postreact\controller\ucp_controller
@@ -123,8 +124,16 @@ services:
             - '@dbal.conn'
             - '%core.table_prefix%'
             - '@template'
+            - '@auth'
             - '%core.root_path%'
             - '%core.php_ext%'
+        tags:
+            - { name: event.listener }
+
+    sebo.postreact.listener.cleanup:
+        class: sebo\postreact\event\cleanup_listener
+        arguments:
+            - '@sebo.postreact.service.notification_helper'
         tags:
             - { name: event.listener }
 
@@ -145,5 +154,6 @@ services:
             - [set_user_loader, ['@user_loader']]
             - [set_table_prefix, ['%core.table_prefix%']]
             - [set_config, ['@config']]
+            - [set_path_helper, ['@path_helper']]
         tags:
             - { name: notification.type }

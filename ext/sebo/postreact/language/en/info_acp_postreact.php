@@ -83,9 +83,9 @@ $lang = array_merge($lang, [
 	'RETURN_ACP'			=> '<a href="%s">Back to the ACP module</a>',
 	/* >2.5 */
 	/* for translators: edited in 2.5.0 'HOW_TO' lang key line 74, added "and search pages" for emojis use */
-	'PR_MOVE'		=> 'Order',
-	'PR_MOVE_UP'	=> 'Move Up',
-	'PR_MOVE_DOWN'	=> 'Move Down',
+	'ACP_POSTREACT_ORDER'		=> 'Order',
+	'ACP_POSTREACT_MOVE_UP'	=> 'Move Up',
+	'ACP_POSTREACT_MOVE_DOWN'	=> 'Move Down',
 	/* >2.5.1 */
 	'PR_PURGE_CONFIRM_OPERATION' => 'Are you sure? This action cannot be undone!',
 	'PR_IF_NOT_PURGE_BEFORE' => 'If you don\'t use the "PR Purge System", the data in the database will not be deleted to prevent unwanted uninstallations.',

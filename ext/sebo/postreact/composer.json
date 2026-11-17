@@ -2,8 +2,8 @@
     "name": "sebo/postreact",
     "type": "phpbb-extension",
     "description": "Post reaction",
-    "version": "2.6.2",
-    "time": "2026-09-10",
+    "version": "2.6.3",
+    "time": "2026-11-17",
     "license": "GPL-2.0-only",
     "authors": [
         {
@@ -22,6 +22,24 @@
             "name": "idontwantyourspamthanks",
             "role": "Suggestions on GitHub, thanks!",
             "homepage": "https://github.com/idontwantyourspamthanks/"
+        }
+        ,
+        {
+            "name": "auto-charlie",
+            "role": "Suggestions on GitHub, thanks!",
+            "homepage": "https://github.com/auto-charlie/"
+        }
+        ,
+        {
+            "name": "jumbab",
+            "role": "Suggestions on GitHub, thanks!",
+            "homepage": "https://github.com/jumbab/"
+        }
+        ,
+        {
+            "name": "rkrisztian",
+            "role": "Hungarian translations!",
+            "homepage": "https://github.com/rkrisztian/"
         }
     ],
     "require": {

@@ -13,6 +13,7 @@ namespace sebo\postreact\controller;
 
 use sebo\postreact\service\icon_manager;
 use sebo\postreact\service\reaction_count_cache;
+use sebo\postreact\service\notification_helper;
 
 /**
  * PostReaction ACP controller.
@@ -46,6 +47,8 @@ class acp_controller
 	protected $filesystem;
 	/** @var string Path to reaction images */
 	protected $url_reactions_path = 'images/sebo_postreact/reactions/';
+	/** @var notification_helper */
+	protected $notification_helper;
 	/**
 	 * Constructor.
 	 *
@@ -67,7 +70,8 @@ class acp_controller
 		$phpbb_root_path,
 		icon_manager $icon_manager,
 		reaction_count_cache $reaction_count_cache,
-		\phpbb\filesystem\filesystem $filesystem
+		\phpbb\filesystem\filesystem $filesystem,
+		notification_helper $notification_helper
 	)
 	{
 		$this->language	= $language;
@@ -82,6 +86,7 @@ class acp_controller
 		$this->icon_manager = $icon_manager;
 		$this->reaction_count_cache = $reaction_count_cache;
 		$this->filesystem = $filesystem;
+		$this->notification_helper = $notification_helper;
 	}
 
 	/**
@@ -289,6 +294,7 @@ class acp_controller
 			$this->db->sql_query($sql_remove_reactions);
 
 			$this->icon_manager->reset_cache();
+			$this->reaction_count_cache->purge_all_topic_counts();
 		}
 		// ##
 		// display error if directory not exists
@@ -475,6 +481,9 @@ class acp_controller
 				$total_missing = (int) $this->db->sql_fetchfield('total_missing');
 				$this->db->sql_freeresult($result);
 
+				// Remove the notifications of orphan reactions first
+				$this->notification_helper->delete_orphans();
+
 				// Delete (portable form: NOT IN subquery instead of a
 				// MySQL/MSSQL-only aliased multi-table DELETE ... JOIN,
 				// which PostgreSQL, Oracle and SQLite reject)
@@ -511,6 +520,7 @@ class acp_controller
 				$total_deleted = (int) $this->db->sql_fetchfield('total_rows');
 				$this->db->sql_freeresult($result);
 
+				$this->notification_helper->delete_all();
 				// do it (DELETE FROM instead of TRUNCATE TABLE: SQLite, a
 				// supported phpBB database, has no TRUNCATE statement)
 				$sql_truncate = 'DELETE FROM ' . $this->table_prefix . 'sebo_postreact_table';
